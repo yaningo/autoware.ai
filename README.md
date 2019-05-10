@@ -1,3 +1,16 @@
+>* Modified 5/10/2019: Added notice section describing fork status and providing instructions for developers
+>  - Kyle Rush
+
+## Notice
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository will contain changes to the Autoware source code and configuration which may not be supported by the Autoware Foundation and may not be consistent the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+
+### For developers working in this repository:
+For any modified file please follow these steps to ensure proper documentation of this modification in compliance with the terms of the Apache License 2.0:
+
+1. Add a comment at the top of any modified file with a high-level description of the modification and date the modification was made.
+2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
+
+## Autoware
 [![Autoware](https://www.autoware.ai/static/img/autoware_web_img.png)](https://www.autoware.ai)
 
 | *master* | *develop* |
