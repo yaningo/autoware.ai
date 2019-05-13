@@ -1,5 +1,3 @@
->* Modified 5/13/2019: Added the deadreckoner node from the AutonomouStuff fork of Autoware
->  - Michael McConnell
 >* Modified 5/10/2019: Added notice section describing fork status and providing instructions for developers
 >  - Kyle Rush
 
