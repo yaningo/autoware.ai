@@ -1,0 +1,6 @@
+<launch>
+  <arg name="area" default="1x1" />
+  <rosparam command="load" file="$(find map_file)/config/params.yaml"/>
+  <node name="points_map_loader" pkg="map_file" type="points_map_loader" args="$(arg area) download" />
+
+</launch>
