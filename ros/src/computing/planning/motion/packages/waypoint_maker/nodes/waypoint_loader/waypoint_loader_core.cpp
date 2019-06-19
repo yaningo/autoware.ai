@@ -285,7 +285,6 @@ bool WaypointLoaderNode::verifyFileConsistency(const char* filename)
 void WaypointLoaderNode::routeSelectionCb(const std_msgs::String::ConstPtr& msg)
 {
   multi_lane_csv_ = msg->data.c_str();
-  std::cout << multi_lane_csv_ << std::endl;
   multi_file_path_.clear();
   parseColumns(multi_lane_csv_, &multi_file_path_);
   autoware_msgs::LaneArray lane_array;
