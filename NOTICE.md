@@ -13,3 +13,6 @@ For any modified file please follow these steps to ensure proper documentation o
 - Addition of notice about fork status to the README.md and creation of this NOTICE.md file
   - 5/10/2019
   - Kyle Rush
+- Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
+  - 5/7/2019
+  - Shuwei Qiang
