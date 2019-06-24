@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/*
+ * Modifications:
+ *  - Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
+ *    - 5/7/2019
+ *    - Shuwei Qiang
+ */
+
+
 #include <condition_variable>
 #include <queue>
 #include <thread>
