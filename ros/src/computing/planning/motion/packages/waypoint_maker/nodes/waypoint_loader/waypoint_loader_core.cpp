@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/*
+ * Modifications:
+ *  - Modified waypoint_loader node to allow reloading a new route csv file using the file path provided by the rostopic
+ *    - 6/24/2019
+ *    - Shuwei Qiang
+ */
+
 #include "waypoint_loader_core.h"
 
 namespace waypoint_maker
