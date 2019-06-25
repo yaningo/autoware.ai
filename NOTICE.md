@@ -16,6 +16,9 @@ For any modified file please follow these steps to ensure proper documentation o
 - Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
   - 6/7/2019
   - Shuwei Qiang
+- Modified waypoint_loader node to allow reloading a new route csv file using the file path provided by the rostopic
+  - 6/24/2019
+  - Shuwei Qiang
 - Modified points_map_loader package to have option for loading map cells from arealist.txt file directly instead of using redundant file paths as well as improved launch file
   - 6/25/2019
   - Michael McConnell
