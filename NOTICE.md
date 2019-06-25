@@ -16,5 +16,8 @@ For any modified file please follow these steps to ensure proper documentation o
   - 5/10/2019
   - Kyle Rush
 - Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
-  - 5/7/2019
+  - 6/7/2019
+  - Shuwei Qiang
+- Modified waypoint_loader node to allow reloading a new route csv file using the file path provided by the rostopic
+  - 6/24/2019
   - Shuwei Qiang
