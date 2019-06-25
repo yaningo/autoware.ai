@@ -1,1 +1,3 @@
+# Double List: Transform describing the map frame in the ECEF frame as a translation and quaternion rotation
+# Units: [m, m, m, rad, rad, rad, rad]
 map_1_origin: [1104880.0, -4842200.0, 3988270.0, 0.848612, -0.0638497, 0.525148, 0.863712]
