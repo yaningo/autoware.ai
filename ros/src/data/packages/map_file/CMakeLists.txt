@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
+#
+#- Modified to install new config folder at install time
+#    - 6/25/2019
+#    - Michael McConnell
+#
 project(map_file)
 
 include(FindPkgConfig)
@@ -91,4 +96,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+        PATTERN ".svn" EXCLUDE)
+install(DIRECTORY config/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
         PATTERN ".svn" EXCLUDE)

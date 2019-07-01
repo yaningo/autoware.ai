@@ -17,8 +17,11 @@
 /*
  * Modifications:
  *  - Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
- *    - 5/7/2019
+ *    - 6/7/2019
  *    - Shuwei Qiang
+ *  - Modified points_map_loader package to have option for loading map cells from arealist.txt file directly instead of using redundant file paths
+ *    - 6/25/2019
+ *    - Michael McConnell
  */
 
 
@@ -533,15 +536,15 @@ int main(int argc, char **argv)
 		}
 	}
 
-        // Load origin of the map
-        std::vector<double> ecef_map_tf_params;
-        n.getParam("map_1_origin", ecef_map_tf_params);
-        if(ecef_map_tf_params.size() != 7) {
-            ROS_ERROR_STREAM("Could not load the origin of the point cloud. TF between earth and map will not be published.");
-            ROS_ERROR_STREAM(ecef_map_tf_params.size());
-        } else {
-            update_map_ecef_tf(ecef_map_tf_params);
-        }
+	// Load origin of the map
+	std::vector<double> ecef_map_tf_params;
+	n.getParam("points_map_loader/map_1_origin", ecef_map_tf_params);
+	if(ecef_map_tf_params.size() != 7) {
+			ROS_ERROR_STREAM("Could not load the origin of the point cloud. TF between earth and map will not be published.");
+			ROS_ERROR_STREAM(ecef_map_tf_params.size());
+	} else {
+			update_map_ecef_tf(ecef_map_tf_params);
+	}
 
 	pcd_pub = n.advertise<sensor_msgs::PointCloud2>("points_map", 1, true);
 	stat_pub = n.advertise<std_msgs::Bool>("pmap_stat", 1, true);
@@ -575,9 +578,16 @@ int main(int argc, char **argv)
 		} else {
 			AreaList areas = read_arealist(arealist_path);
 			for (const Area& area : areas) {
-				for (const std::string& path : pcd_paths) {
-					if (path == area.path)
-						cache_arealist(area, downloaded_areas);
+				// Check if the user entered pcd paths in addition to the arealist.txt file
+				if (pcd_paths.size() > 0) {
+					// Only load cells which the user specified
+					for (const std::string& path : pcd_paths) {
+						if (path == area.path)
+							cache_arealist(area, downloaded_areas);
+					}
+				} else {
+					// The user did not specify any cells to load all the cells contained in the arealist.txt file
+					cache_arealist(area, downloaded_areas);
 				}
 			}
 		}
