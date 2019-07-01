@@ -538,7 +538,7 @@ int main(int argc, char **argv)
 
 	// Load origin of the map
 	std::vector<double> ecef_map_tf_params;
-	n.getParam("map_1_origin", ecef_map_tf_params);
+	n.getParam("points_map_loader/map_1_origin", ecef_map_tf_params);
 	if(ecef_map_tf_params.size() != 7) {
 			ROS_ERROR_STREAM("Could not load the origin of the point cloud. TF between earth and map will not be published.");
 			ROS_ERROR_STREAM(ecef_map_tf_params.size());
