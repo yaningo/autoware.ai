@@ -116,7 +116,7 @@ typedef std::vector<Area> AreaList;
 typedef std::vector<std::vector<std::string>> Tbl;
 
 constexpr int DEFAULT_UPDATE_RATE = 1000; // ms
-constexpr double MARGIN_UNIT = 100; // meter
+constexpr double MARGIN_UNIT = 50; // meter
 constexpr int ROUNDING_UNIT = 1000; // meter
 const std::string AREALIST_FILENAME = "arealist.txt";
 const std::string TEMPORARY_DIRNAME = "/tmp/";
@@ -125,6 +125,7 @@ int update_rate;
 int fallback_rate;
 double margin;
 bool can_download;
+geometry_msgs::Pose previousPose;
 
 ros::Time gnss_time;
 ros::Time current_time;
@@ -376,6 +377,25 @@ void publish_gnss_pcd(const geometry_msgs::PoseStamped& msg)
 		return;
 	if (((now - gnss_time).toSec() * 1000) < update_rate)
 		return;
+	
+	static bool firstCall = true;
+
+	double minX = previousPose.position.x - MARGIN_UNIT;
+	double minY = previousPose.position.y - MARGIN_UNIT;
+	double maxX = previousPose.position.x + MARGIN_UNIT;
+	double maxY = previousPose.position.y + MARGIN_UNIT;
+
+	double msgX = msg.pose.position.x;
+	double msgY = msg.pose.position.y;
+
+	// Update previous pose
+	previousPose = msg.pose;
+
+	if (firstCall != true minX < msgX && msgX < maxX && minY < msgY && msgY < maxY) // Only update the map if we have changed current cell
+		return;
+
+	firstCall = false;
+
 	gnss_time = now;
 
 	if (can_download)
