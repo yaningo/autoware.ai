@@ -391,7 +391,7 @@ void publish_gnss_pcd(const geometry_msgs::PoseStamped& msg)
 	// Update previous pose
 	previousPose = msg.pose;
 
-	if (firstCall != true minX < msgX && msgX < maxX && minY < msgY && msgY < maxY) // Only update the map if we have changed current cell
+	if (firstCall != true && minX < msgX && msgX < maxX && minY < msgY && msgY < maxY) // Only update the map if we have changed current cell
 		return;
 
 	firstCall = false;
