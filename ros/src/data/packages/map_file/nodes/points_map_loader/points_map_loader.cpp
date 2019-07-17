@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+/*
+ * Modifications:
+ *  - Modified points_map_loader package to publish the tf from map to ECEF frame using tf2 library
+ *    - 6/7/2019
+ *    - Shuwei Qiang
+ *  - Modified points_map_loader package to have option for loading map cells from arealist.txt file directly instead of using redundant file paths
+ *    - 6/25/2019
+ *    - Michael McConnell
+ */
+
+
 #include <condition_variable>
 #include <queue>
 #include <thread>
@@ -22,6 +33,9 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <std_msgs/Bool.h>
 #include <tf/transform_listener.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_ros/static_transform_broadcaster.h>
+#include <geometry_msgs/TransformStamped.h>
 
 #include "autoware_msgs/LaneArray.h"
 
@@ -435,6 +449,23 @@ void request_lookahead_download(const autoware_msgs::LaneArray& msg)
 	}
 }
 
+void update_map_ecef_tf(const std::vector<double>& transform)
+{
+	static tf2_ros::StaticTransformBroadcaster br;
+	geometry_msgs::TransformStamped transformStamped;
+	transformStamped.header.stamp = ros::Time::now();
+	transformStamped.header.frame_id = "earth";
+	transformStamped.child_frame_id = "map";
+	transformStamped.transform.translation.x = transform[0];
+	transformStamped.transform.translation.y = transform[1];
+	transformStamped.transform.translation.z = transform[2];
+	transformStamped.transform.rotation.x = transform[3];
+	transformStamped.transform.rotation.y = transform[4];
+	transformStamped.transform.rotation.z = transform[5];
+	transformStamped.transform.rotation.w = transform[6];
+	br.sendTransform(transformStamped);
+}
+
 void print_usage()
 {
 	ROS_ERROR_STREAM("Usage:");
@@ -505,6 +536,16 @@ int main(int argc, char **argv)
 		}
 	}
 
+	// Load origin of the map
+	std::vector<double> ecef_map_tf_params;
+	n.getParam("points_map_loader/map_1_origin", ecef_map_tf_params);
+	if(ecef_map_tf_params.size() != 7) {
+			ROS_ERROR_STREAM("Could not load the origin of the point cloud. TF between earth and map will not be published.");
+			ROS_ERROR_STREAM(ecef_map_tf_params.size());
+	} else {
+			update_map_ecef_tf(ecef_map_tf_params);
+	}
+
 	pcd_pub = n.advertise<sensor_msgs::PointCloud2>("points_map", 1, true);
 	stat_pub = n.advertise<std_msgs::Bool>("pmap_stat", 1, true);
 
@@ -537,9 +578,16 @@ int main(int argc, char **argv)
 		} else {
 			AreaList areas = read_arealist(arealist_path);
 			for (const Area& area : areas) {
-				for (const std::string& path : pcd_paths) {
-					if (path == area.path)
-						cache_arealist(area, downloaded_areas);
+				// Check if the user entered pcd paths in addition to the arealist.txt file
+				if (pcd_paths.size() > 0) {
+					// Only load cells which the user specified
+					for (const std::string& path : pcd_paths) {
+						if (path == area.path)
+							cache_arealist(area, downloaded_areas);
+					}
+				} else {
+					// The user did not specify any cells to load all the cells contained in the arealist.txt file
+					cache_arealist(area, downloaded_areas);
 				}
 			}
 		}
