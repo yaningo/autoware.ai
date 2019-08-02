@@ -22,3 +22,7 @@ For any modified file please follow these steps to ensure proper documentation o
 - Modified points_map_loader package to have option for loading map cells from arealist.txt file directly instead of using redundant file paths as well as improved launch file
   - 6/25/2019
   - Michael McConnell
+- Removed exisitng Docker configuration files for replacement with the new CARMA3 docker config files.
+  - 8/1/2019
+  - Kyle Rush
+
