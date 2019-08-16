@@ -36,14 +36,12 @@
 
 
 
-
-
 	<group ns="$(arg ns)">
 
 		<node pkg="waypoint_follower" type="mpc_waypoints_converter" name="mpc_waypoints_converter" output="screen">
 			<remap from="/base_waypoints" to="/guidance/base_waypoints"/>
 			<remap from="/closest_waypoint" to="/guidance/closest_waypoint"/>
-			<remap from="/final_waypoints" to="/guidance/final_waypoints"/>
+			<remap from="/final_waypoints" to="/guidance/carma_final_waypoints"/>
 		</node>
 
 		<node pkg="waypoint_follower" type="mpc_follower" name="mpc_follower" output="screen">
