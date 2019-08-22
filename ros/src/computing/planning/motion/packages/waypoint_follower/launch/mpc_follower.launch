@@ -45,7 +45,8 @@
 		</node>
 
 		<node pkg="waypoint_follower" type="mpc_follower" name="mpc_follower" output="screen">
-
+			
+			<remap from="/ctrl_cmd" to="/guidance/ctrl_cmd"/>
 			<remap from="/vehicle_status" to="/hardware_interface/vehicle_status"/>
 			<remap from="/current_pose" to="/localization/ndt_pose"/>
 			<!-- system -->
