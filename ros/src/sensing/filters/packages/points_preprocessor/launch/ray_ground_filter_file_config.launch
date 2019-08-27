@@ -1,7 +1,7 @@
 <!-- Launch file for Ray Ground Filter -->
 <launch>
 
-        <arg name="vehicle_clibration_params_file" default="$(find points_preprocessor)/config/calibration.yaml"/> /><!--  File containing vehicle specific calibration parameters -->
+        <arg name="vehicle_calibration_params_file" default="$(find points_preprocessor)/config/calibration.yaml"/> /><!--  File containing vehicle specific calibration parameters -->
         <arg name="input_point_topic" default="/points_raw" /> <!-- input_point_topic, ground filtering will be performed over the pointcloud in this topic. -->
         <arg name="clipping_height" default="0.2" /><!-- Remove Points above this height value (default 0.2 meters) -->
         <arg name="min_point_distance" default="1.85" /><!-- Removes Points closer than this distance from the sensor origin (default 1.85 meters) -->
@@ -16,7 +16,7 @@
 
         <!-- rosrun points_preprocessor ray_ground_filter -->
         <node pkg="points_preprocessor" type="ray_ground_filter" name="ray_ground_filter" output="screen">
-                <rosparam command="load" file="$(arg vehicle_clibration_params_file)" />
+                <rosparam command="load" file="$(arg vehicle_calibration_params_file)" />
                 <param name="input_point_topic" value="$(arg input_point_topic)" />
                 <param name="clipping_height" value="$(arg clipping_height)" />
                 <param name="min_point_distance" value="$(arg min_point_distance)" />
