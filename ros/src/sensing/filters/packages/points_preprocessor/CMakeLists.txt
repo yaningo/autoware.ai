@@ -207,6 +207,6 @@ install(DIRECTORY include/
         DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
         PATTERN ".svn" EXCLUDE
         )
-install(DIRECTORY launch/
+install(DIRECTORY launch/ config/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
         PATTERN ".svn" EXCLUDE)
