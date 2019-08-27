@@ -31,4 +31,6 @@ For any modified file please follow these steps to ensure proper documentation o
 - Add carma_autoware_build bash script which builds the portions of autoware needed by carma
   - 8/13/2019
   - Michael McConnell
-
+- Add add new launch file and params yaml file to the ray_ground_filter node
+  - 8/20/2019
+  - Michael McConnell
