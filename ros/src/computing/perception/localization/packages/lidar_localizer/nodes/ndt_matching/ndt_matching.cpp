@@ -1364,6 +1364,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
     //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+    /* Removed to allow CARMA localization node to publish this TF
     if (_use_local_transform == true)
     {
       br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
@@ -1372,6 +1373,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
     }
+    */
 
     matching_end = std::chrono::system_clock::now();
     exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
