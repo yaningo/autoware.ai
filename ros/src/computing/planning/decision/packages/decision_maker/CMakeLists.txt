@@ -3,6 +3,8 @@ project(decision_maker)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-lpthread -pg -Wall)
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
 SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
