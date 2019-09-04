@@ -21,7 +21,8 @@ usage() {
   carma_autoware_build will build the Autoware.ai components used by the CARMA Platform
   
   -a Path to Autoware.ai workspace. If this is not specified it is assumed the current workspace will work
-  -b Additional build arguments to pass to Autoware.ai's colcon build
+  -b Replace CMake build arguments for Autoware.ai's build
+  -k Use catkin_make_isolated instead of colcon. Note: This will limit job count to 1
   -h Print help
   ";
 }
@@ -30,6 +31,7 @@ usage() {
 # Default environment variables
 autoware_src="$(realpath .)"
 autoware_build_args=""
+use_catkin=false
 # The list of packages which are required by carma from autoware
 AUTOWARE_PACKAGE_SELECTION="map_tools lidar_localizer map_file deadreckoner points_downsampler points_preprocessor lane_planner waypoint_maker autoware_msgs autoware_config_msgs as waypoint_planner"
 
@@ -38,12 +40,13 @@ AUTOWARE_PACKAGE_SELECTION="map_tools lidar_localizer map_file deadreckoner poin
 MSGS_TO_GENERATE="jsk_footstep_msgs jsk_recognition_msgs autoware_msgs radar_msgs derived_object_msgs autoware_config_msgs"
 
 # Read Options
-while getopts a:c:xrhm:b: option
+while getopts a:kthb: option
 do
 	case "${option}"
 	in
 		a) autoware_src="$(realpath ${OPTARG})";;
     b) autoware_build_args=${OPTARG};;
+    k) use_catkin=true;;
     h) usage; exit 0;;
 		\?) echo "Unknown option: -$OPTARG" >&2; exit 1;;
 		:) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
@@ -62,7 +65,26 @@ echo "Building Autoware required packages ${AUTOWARE_PACKAGE_SELECTION}"
 
 cd ${autoware_src}/ros
 
-./colcon_release "${autoware_build_args}" --executor sequential --packages-up-to "${AUTOWARE_PACKAGE_SELECTION}"
+if [[ -z ${autoware_build_args} ]]; then
+  if [[ "${use_catkin}" = true ]]; then
+    echo "Building release with catkin_make_isolated. NOTE: Formal releases should use colcon"
+    catkin_make_isolated --install --install-space ./install -j1 --only-pkg-with-deps "${AUTOWARE_PACKAGE_SELECTION}"
+  else
+    # Default Build Behavior
+    ./colcon_release --executor sequential --packages-up-to ${AUTOWARE_PACKAGE_SELECTION}
+  fi
+else
+  if [[ "${use_catkin}" = true ]]; then
+    echo "Building with CMake args: ${autoware_build_args} and with catkin_make_isolated. NOTE: Formal releases should use colcon"
+    catkin_make_isolated --install --install-space ./install -j1 --only-pkg-with-deps "${AUTOWARE_PACKAGE_SELECTION}" --cmake-args "${autoware_build_args}"
+  else
+    echo "Building with CMake args: ${autoware_build_args}"
+    colcon build --cmake-args "${autoware_build_args}" --executor sequential --packages-up-to ${AUTOWARE_PACKAGE_SELECTION}
+  fi
+fi
+
+
+
 source ./install/setup.bash
 echo "Autoware built successfuly. Binaries sourced from $(realpath ./install/setup.bash)"
 

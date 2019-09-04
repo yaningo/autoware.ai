@@ -34,3 +34,6 @@ For any modified file please follow these steps to ensure proper documentation o
 - Add add new launch file and params yaml file to the ray_ground_filter node
   - 8/20/2019
   - Michael McConnell
+- Add a .circleci folder to setup CI for CARMA
+  - 9/5/2019
+  - Michael McConnell
