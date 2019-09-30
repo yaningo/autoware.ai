@@ -14,7 +14,7 @@
 	<arg name="curvature_smoothing_num" default="35" doc="point-to-point index distance used in curvature calculation : curvature is calculated from three points p(i-num), p(i), p(i+num)"/>
 	<arg name="steering_lpf_cutoff_hz" default="3.0" doc="cutoff frequency of lowpass filter for steering command [Hz]"/>
 	<arg name="qp_solver_type" default="unconstraint_fast" doc="optimization solver type. option is unconstraint_fast, unconstraint, and qpoases_hotstart"/>
-	<arg name="vehicle_model_type" default="kinematics" doc="vehicle model type for mpc prediction. option is kinematics, kinematics_no_delay, and dynamics"/>
+	<arg name="vehicle_model_type" default="dynamics" doc="vehicle model type for mpc prediction. option is kinematics, kinematics_no_delay, and dynamics"/>
 
 	<!-- MPC design parameters -->
 	<arg name="mpc_prediction_horizon" default="70" doc="prediction horizon step"/>
