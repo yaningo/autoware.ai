@@ -1,4 +1,4 @@
-FROM usdotfhwastol/carma-base:3.1.0 as build
+FROM usdotfhwastol/carma-base:release-demo as build
 
 COPY --chown=carma . /home/carma/autoware.ai
 RUN /home/carma/autoware.ai/docker/checkout.sh
