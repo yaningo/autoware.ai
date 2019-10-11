@@ -10,11 +10,11 @@ For any modified file please follow these steps to ensure proper documentation o
 2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
 
 ### Local CARMA mods to this readme file:
-- Added notice section describing fork status and providing instructions for developers 
+- Added notice section describing fork status and providing instructions for developers
   - 5/10/2019
   - Kyle Rush
--Added several intro sections to provide consistency in appearance among all CARMA repos 
-  -10/11/2019
+-Added several intro sections to provide consistency in appearance among all CARMA repos
+  - 10/11/2019
   - John Stark
 
 # CARMAPlatform
