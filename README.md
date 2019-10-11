@@ -13,7 +13,7 @@ For any modified file please follow these steps to ensure proper documentation o
 - Added notice section describing fork status and providing instructions for developers
   - 5/10/2019
   - Kyle Rush
--Added several intro sections to provide consistency in appearance among all CARMA repos
+- Added several intro sections to provide consistency in appearance among all CARMA repos
   - 10/11/2019
   - John Stark
 
