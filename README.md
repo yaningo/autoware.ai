@@ -1,5 +1,5 @@
 # Autoware.ai
-This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository will contain changes to the Autoware source code and configuration which may not be supported by the Autoware Foundation and may not be consistent the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
 
 The next several sections of this readme provide standard information on how this repo relates to the rest of the CARMA project. Below that is the full content of the readme from the master Autoware repo.
 
@@ -10,10 +10,12 @@ For any modified file please follow these steps to ensure proper documentation o
 2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
 
 ### Local CARMA mods to this readme file:
->* Modified 5/10/2019: Added notice section describing fork status and providing instructions for developers
->  - Kyle Rush
->* Modified 10/10/2019: Added several intro sections to provide consistency in appearance among all CARMA repos.
->  - John Stark
+- Added notice section describing fork status and providing instructions for developers 
+  - 5/10/2019
+  - Kyle Rush
+-Added several intro sections to provide consistency in appearance among all CARMA repos 
+  -10/11/2019
+  - John Stark
 
 # CARMAPlatform
 The primary CARMAPlatform repository can be found [here](https://github.com/usdot-fhwa-stol/CARMAPlatform) and is part of the [USDOT FHWA STOL](https://github.com/usdot-fhwa-stol/)
