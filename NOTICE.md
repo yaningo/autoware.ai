@@ -1,5 +1,5 @@
 ## Note
-This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository will contain changes to the Autoware source code and configuration which may not be supported by the Autoware Foundation and may not be consistent the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
 
 ### For developers working in this repository:
 For any modified file please follow these steps to ensure proper documentation of this modification in compliance with the terms of the Apache License 2.0:
@@ -37,3 +37,6 @@ For any modified file please follow these steps to ensure proper documentation o
 - Add a .circleci folder to setup CI for CARMA
   - 9/5/2019
   - Michael McConnell
+- Added standard CARMA header to the README.md, while retaining all of the original Autoware content.
+  - 10/11/2019
+  - John Stark
