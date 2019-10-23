@@ -1,44 +1,14 @@
-# Autoware.ai
-This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+>* Modified 5/10/2019: Added notice section describing fork status and providing instructions for developers
+>  - Kyle Rush
 
-The next several sections of this readme provide standard information on how this repo relates to the rest of the CARMA project. Below that is the full content of the readme from the master Autoware repo.
+## Notice
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository will contain changes to the Autoware source code and configuration which may not be supported by the Autoware Foundation and may not be consistent the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
 
 ### For developers working in this repository:
 For any modified file please follow these steps to ensure proper documentation of this modification in compliance with the terms of the Apache License 2.0:
 
 1. Add a comment at the top of any modified file with a high-level description of the modification and date the modification was made.
 2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
-
-### Local CARMA mods to this readme file:
-- Added notice section describing fork status and providing instructions for developers
-  - 5/10/2019
-  - Kyle Rush
-- Added several intro sections to provide consistency in appearance among all CARMA repos
-  - 10/11/2019
-  - John Stark
-
-# CARMAPlatform
-The primary CARMAPlatform repository can be found [here](https://github.com/usdot-fhwa-stol/CARMAPlatform) and is part of the [USDOT FHWA STOL](https://github.com/usdot-fhwa-stol/)
-github organization. Documentation on how the CARMAPlatform functions, how it will evolve over time, and how you can contribute can be found at the above links as well
-
-## Contribution
-Welcome to the CARMA contributing guide. Please read this guide to learn about our development process, how to propose pull requests and improvements, and how to build and test your changes to this project. [CARMA Contributing Guide](https://github.com/usdot-fhwa-stol/CARMAPlatform/blob/develop/Contributing.md) 
-
-## Code of Conduct 
-Please read our [CARMA Code of Conduct](https://github.com/usdot-fhwa-stol/CARMAPlatform/blob/develop/Code_of_Conduct.md) which outlines our expectations for participants within the CARMA community, as well as steps to reporting unacceptable behavior. We are committed to providing a welcoming and inspiring community for all and expect our code of conduct to be honored. Anyone who violates this code of conduct may be banned from the community.
-
-## Attribution
-The development team would like to acknowledge the people who have made direct contributions to the design and code in this repository. [CARMA Attribution](https://github.com/usdot-fhwa-stol/CARMAPlatform/blob/develop/ATTRIBUTION.txt) 
-
-## License
-By contributing to the Federal Highway Administration (FHWA) Connected Automated Research Mobility Applications (CARMA), you agree that your contributions will be licensed under its Apache License 2.0 license. [CARMA License](https://github.com/usdot-fhwa-stol/CARMAPlatform/blob/develop/docs/License.md) 
-
-## Contact
-Please click on the CARMA logo below to visit the Federal Highway Adminstration(FHWA) CARMA website.
-
-[![CARMA Image](https://raw.githubusercontent.com/usdot-fhwa-stol/CARMAPlatform/develop/docs/image/CARMA_icon.png)](https://highways.dot.gov/research/research-programs/operations/CARMA)
-
-
 
 ## Autoware
 [![Autoware](https://www.autoware.ai/static/img/autoware_web_img.png)](https://www.autoware.ai)
