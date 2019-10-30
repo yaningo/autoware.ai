@@ -10,7 +10,7 @@ For any modified file please follow these steps to ensure proper documentation o
 2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
 
 # Repository Structure
-This repository consists of multiple git subtrees to combine the multi-repo structure used by Autoware into a single structure for CARMA. These subtrees are created via the `git subtree` command cloning the 1.12 version of each of the Autoware.ai repositories on [GitLab](https://gitlab.com/autowarefoundation/autoware.ai) as well as three additional repos identified as dependencies in the `autoware.ai.repos` file in the `autoware` repository. To update these subtrees from the mainline TierIV repositories it is recommended to configure new git remotes on your local repository for each of the remote repositories:
+This repository consists of multiple git subtrees to combine the multi-repo structure used by Autoware into a single structure for CARMA. These subtrees are created via the `git subtree` command cloning the 1.12 version of each of the Autoware.ai repositories on [GitLab](https://gitlab.com/autowarefoundation/autoware.ai) as well as three additional repos identified as dependencies in the `autoware.ai.repos` file in the `autoware` repository. To update these subtrees from the mainline Autoware Foundation repositories it is recommended to configure new git remotes on your local repository for each of the remote repositories:
 
 ```
 autoware	git@gitlab.com:autowarefoundation/autoware.ai/autoware.git (fetch)
