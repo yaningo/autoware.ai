@@ -40,6 +40,3 @@ For any modified file please follow these steps to ensure proper documentation o
 - Added standard CARMA header to the README.md, while retaining all of the original Autoware content.
   - 10/11/2019
   - John Stark
-- Changed entire repo structure to be a collection of subtrees after TierIV's repository refactor and move to Gitlab.
-  - 10/30/2019
-  - Kyle Rush
