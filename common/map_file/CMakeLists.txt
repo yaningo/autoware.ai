@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
+#
+#- Modified to install new config folder at install time
+#    - 6/25/2019
+#    - Michael McConnell
+#
 project(map_file)
 
 include(FindPkgConfig)
@@ -65,10 +70,7 @@ target_link_libraries(get_file ${CURL_LIBRARIES})
 
 add_executable(points_map_loader nodes/points_map_loader/points_map_loader.cpp)
 target_link_libraries(points_map_loader ${catkin_LIBRARIES} get_file ${CURL_LIBRARIES} ${PCL_IO_LIBRARIES})
-add_dependencies(points_map_loader 
-        ${catkin_EXPORTED_TARGETS}
-        autoware_msgs_generate_messages_cpp
-        )
+add_dependencies(points_map_loader ${catkin_EXPORTED_TARGETS})
 
 add_executable(vector_map_loader nodes/vector_map_loader/vector_map_loader.cpp)
 target_link_libraries(vector_map_loader ${catkin_LIBRARIES} ${vector_map_LIBRARIES} get_file ${CURL_LIBRARIES})
@@ -94,4 +96,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 install(DIRECTORY launch/
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+        PATTERN ".svn" EXCLUDE)
+install(DIRECTORY config/
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
         PATTERN ".svn" EXCLUDE)
