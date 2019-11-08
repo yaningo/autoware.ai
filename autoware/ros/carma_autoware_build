@@ -63,7 +63,7 @@ Autoware Source Dir: ${autoware_src}
 
 echo "Building Autoware required packages ${AUTOWARE_PACKAGE_SELECTION}"
 
-cd ${autoware_src}/ros
+cd ${autoware_src}
 
 if [[ -z ${autoware_build_args} ]]; then
   if [[ "${use_catkin}" = true ]]; then
@@ -71,7 +71,7 @@ if [[ -z ${autoware_build_args} ]]; then
     catkin_make_isolated --install --install-space ./install -j1 --only-pkg-with-deps "${AUTOWARE_PACKAGE_SELECTION}"
   else
     # Default Build Behavior
-    ./colcon_release --executor sequential --packages-up-to ${AUTOWARE_PACKAGE_SELECTION}
+    ./autoware/ros/colcon_release --executor sequential --packages-up-to ${AUTOWARE_PACKAGE_SELECTION}
   fi
 else
   if [[ "${use_catkin}" = true ]]; then
