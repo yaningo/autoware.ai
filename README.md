@@ -9,6 +9,43 @@ For any modified file please follow these steps to ensure proper documentation o
 1. Add a comment at the top of any modified file with a high-level description of the modification and date the modification was made.
 2. Add a high-level description and date of the overall modification to the [NOTICE.md](NOTICE.md) file.
 
+# Repository Structure
+This repository consists of multiple git subtrees to combine the multi-repo structure used by Autoware into a single structure for CARMA. These subtrees are created via the `git subtree` command cloning the 1.12 version of each of the Autoware.ai repositories on [GitLab](https://gitlab.com/autowarefoundation/autoware.ai) as well as three additional repos identified as dependencies in the `autoware.ai.repos` file in the `autoware` repository. To update these subtrees from the mainline Autoware Foundation repositories it is recommended to configure new git remotes on your local repository for each of the remote repositories:
+
+```
+autoware	git@gitlab.com:autowarefoundation/autoware.ai/autoware.git (fetch)
+autoware	git@gitlab.com:autowarefoundation/autoware.ai/autoware.git (push)
+car_demo	git@github.com:CPFL/car_demo.git (fetch)
+car_demo	git@github.com:CPFL/car_demo.git (push)
+common	git@gitlab.com:autowarefoundation/autoware.ai/common.git (fetch)
+common	git@gitlab.com:autowarefoundation/autoware.ai/common.git (push)
+core_perception	git@gitlab.com:autowarefoundation/autoware.ai/core_perception.git (fetch)
+core_perception	git@gitlab.com:autowarefoundation/autoware.ai/core_perception.git (push)
+core_planning	git@gitlab.com:autowarefoundation/autoware.ai/core_planning.git (fetch)
+core_planning	git@gitlab.com:autowarefoundation/autoware.ai/core_planning.git (push)
+documentation	git@gitlab.com:autowarefoundation/autoware.ai/documentation.git (fetch)
+documentation	git@gitlab.com:autowarefoundation/autoware.ai/documentation.git (push)
+drivers	git@gitlab.com:autowarefoundation/autoware.ai/drivers.git (fetch)
+drivers	git@gitlab.com:autowarefoundation/autoware.ai/drivers.git (push)
+ds4	git@github.com:tier4/ds4.git (fetch)
+ds4	git@github.com:tier4/ds4.git (push)
+messages	git@gitlab.com:autowarefoundation/autoware.ai/messages.git (fetch)
+messages	git@gitlab.com:autowarefoundation/autoware.ai/messages.git (push)
+osrf_citysim	git@github.com:CPFL/osrf_citysim.git (fetch)
+osrf_citysim	git@github.com:CPFL/osrf_citysim.git (push)
+simulation	git@gitlab.com:autowarefoundation/autoware.ai/simulation.git (fetch)
+simulation	git@gitlab.com:autowarefoundation/autoware.ai/simulation.git (push)
+utilities	git@gitlab.com:autowarefoundation/autoware.ai/utilities.git (fetch)
+utilities	git@gitlab.com:autowarefoundation/autoware.ai/utilities.git (push)
+visualization	git@gitlab.com:autowarefoundation/autoware.ai/visualization.git (fetch)
+visualization	git@gitlab.com:autowarefoundation/autoware.ai/visualization.git (push)
+```
+then the `git subtree ...` subcommands can be used with these remotes and their matching prefix folders. Please reference the documentation for `git subtree`, a brief overview can be found [here](https://blog.developer.atlassian.com/the-power-of-git-subtree/).
+
+# NOTICE: When working with subtrees please ensure that individual commits only change files in *ONE-AND-ONLY-ONE* subtree.
+If your branch must change multiple subtrees please make those changes in separate commits. Do not squash commits that change multiple subtrees, even when merging via Github.
+
+
 ### Local CARMA mods to this readme file:
 - Added notice section describing fork status and providing instructions for developers
   - 5/10/2019
@@ -16,6 +53,9 @@ For any modified file please follow these steps to ensure proper documentation o
 - Added several intro sections to provide consistency in appearance among all CARMA repos
   - 10/11/2019
   - John Stark
+- Added section describing new fork structure via `git subtree`
+  - 10/30/2019
+  - Kyle Rush
 
 # CARMAPlatform
 The primary CARMAPlatform repository can be found [here](https://github.com/usdot-fhwa-stol/CARMAPlatform) and is part of the [USDOT FHWA STOL](https://github.com/usdot-fhwa-stol/)
