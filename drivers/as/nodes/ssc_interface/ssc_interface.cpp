@@ -15,6 +15,7 @@
  */
 
 #include "ssc_interface.h"
+#include <ros_observer/lib_ros_observer.h>
 
 SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_initialized_(false)
 {
@@ -49,7 +50,7 @@ SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_
   gear_feedback_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::GearFeedback>(nh_, "as/gear_feedback", 10);
   velocity_accel_sub_ =
-      new message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>(nh_, "as/velocity_accel_cov", 10); 
+      new message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>(nh_, "as/velocity_accel_cov", 10);
   steering_wheel_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>(nh_, "as/steering_feedback", 10);
   ssc_feedbacks_sync_ = new message_filters::Synchronizer<SSCFeedbacksSyncPolicy>(
@@ -75,10 +76,23 @@ SSCInterface::~SSCInterface()
 
 void SSCInterface::run()
 {
+  ShmVitalMonitor shm_ASvmon("AS_VehicleDriver", loop_rate_);
+  ShmVitalMonitor shm_ROvmon("RosObserver", loop_rate_);
+  ShmVitalMonitor shm_HAvmon("HealthAggregator", loop_rate_);
+
   while (ros::ok())
   {
     ros::spinOnce();
+
+    shm_ASvmon.run();
+
+    if (shm_ROvmon.is_error_detected() || shm_HAvmon.is_error_detected()){
+      ROS_ERROR("Emergency stop by error detection of emergency module");
+      vehicle_cmd_.emergency = 1;
+    }
+
     publishCommand();
+
     rate_->sleep();
   }
 }
@@ -111,7 +125,6 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
                                             const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel)
 {
   ros::Time stamp = msg_velocity->header.stamp;
-  
   // update adaptive gear ratio (avoiding zero divizion)
   adaptive_gear_ratio_ =
     std::max(1e-5, agr_coef_a_ + agr_coef_b_ * msg_velocity->velocity * msg_velocity->velocity - agr_coef_c_ * msg_steering_wheel->steering_wheel_angle);
