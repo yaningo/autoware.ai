@@ -53,3 +53,6 @@ ENV/
 build/
 install/
 log/
+
+# VCS-populated Folders
+src/
