@@ -29,11 +29,6 @@ catkin_package(
 
 include_directories(
         ${catkin_INCLUDE_DIRS}
-        ${autoware_msgs_INCLUDE_DIRS}
-        ${OpenCV_INCLUDE_DIRS}
-)
-
-add_executable(calibration_publisher
         src/calibration_publisher.cpp
         )
 
