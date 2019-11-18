@@ -7,18 +7,7 @@ find_package(autoware_build_flags REQUIRED)
 find_package(autoware_config_msgs REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
         roscpp
-        std_msgs
-        sensor_msgs
-        pcl_ros
-        pcl_conversions
-        cv_bridge
-        velodyne_pointcloud
-        tf
-        autoware_health_checker
-        )
-
-catkin_package(CATKIN_DEPENDS
-        roscpp
+        roslint
         std_msgs
         sensor_msgs
         pcl_ros
@@ -27,8 +16,33 @@ catkin_package(CATKIN_DEPENDS
         velodyne_pointcloud
         autoware_config_msgs
         tf
+        tf2
+        tf2_ros
+        tf2_eigen
         autoware_health_checker
         )
+
+catkin_package(CATKIN_DEPENDS
+        std_msgs
+        sensor_msgs
+        pcl_ros
+        pcl_conversions
+        cv_bridge
+        velodyne_pointcloud
+        autoware_config_msgs
+        tf
+        tf2
+        tf2_ros
+        tf2_eigen
+        autoware_health_checker
+        )
+
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
+roslint_cpp(
+  nodes/ray_ground_filter/ray_ground_filter.cpp
+  nodes/ray_ground_filter/ray_ground_filter_main.cpp
+  include/points_preprocessor/ray_ground_filter/ray_ground_filter.h
+)
 
 find_package(Qt5Core REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -49,7 +63,6 @@ link_directories(${YAML_CPP_LIBRARY_DIRS})
 
 include_directories(
         ${catkin_INCLUDE_DIRS}
-        ${autoware_config_msgs_INCLUDE_DIRS}
         include
 )
 
@@ -101,7 +114,6 @@ endif ()
 target_include_directories(ray_ground_filter_lib PRIVATE
         ${OpenCV_INCLUDE_DIRS}
         ${PCL_INCLUDE_DIRS}
-        nodes/ray_ground_filter/include
         )
 
 target_link_libraries(ray_ground_filter_lib
@@ -114,9 +126,6 @@ target_link_libraries(ray_ground_filter_lib
 add_executable(ray_ground_filter
         nodes/ray_ground_filter/ray_ground_filter_main.cpp
         )
-
-target_include_directories(ray_ground_filter PRIVATE
-        nodes/ray_ground_filter/include)
 
 target_link_libraries(ray_ground_filter
         ray_ground_filter_lib)
@@ -189,6 +198,9 @@ add_dependencies(compare_map_filter ${catkin_EXPORTED_TARGETS})
 #            ${catkin_LIBRARIES})
 #endif ()
 
+if (CATKIN_ENABLE_TESTING)
+  roslint_add_test()
+endif()
 
 install(TARGETS
             cloud_transformer
