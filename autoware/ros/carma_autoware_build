@@ -85,8 +85,8 @@ fi
 
 
 
-source ./install/setup.bash
-echo "Autoware built successfuly. Binaries sourced from $(realpath ./install/setup.bash)"
+source ./ros/install/setup.bash
+echo "Autoware built successfuly. Binaries sourced from $(realpath ./ros/install/setup.bash)"
 
 ###
 # Generate rosjava message artifacts for autoware
