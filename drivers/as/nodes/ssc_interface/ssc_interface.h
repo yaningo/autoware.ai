@@ -91,7 +91,6 @@ private:
   double deceleration_limit_;  // [m/s^2]
   double max_curvature_rate_;  // [rad/m/s]
 
-  //bool use_rear_wheel_speed_;     // instead of 'as/velocity_accel'
   bool use_adaptive_gear_ratio_;  // for more accurate steering angle (gr = theta_sw / theta_s)
   double tire_radius_;            // [m] (NOTE: used by 'use_rear_wheel_speed' mode)
   double ssc_gear_ratio_;         // gr = const (NOTE: used by 'use_adaptive_gear_ratio' mode)
