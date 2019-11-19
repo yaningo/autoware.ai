@@ -7,7 +7,6 @@ project(synchronization)
 
 find_package(autoware_build_flags REQUIRED)
 
-find_package(autoware_msgs REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
@@ -35,7 +34,6 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${autoware_msgs_INCLUDE_DIRS}
 )
 
 add_executable(sync_drivers sync_drivers.cpp)

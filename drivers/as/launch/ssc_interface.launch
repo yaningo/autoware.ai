@@ -7,7 +7,7 @@
 	<arg name="wheel_base" default="2.79"/>
 	<arg name="tire_radius" default="0.39"/>
 	<arg name="acceleration_limit" default="3.0"/>
-	<arg name="deceleration_limit" default="6.0"/>
+	<arg name="deceleration_limit" default="3.0"/>
 	<arg name="max_curvature_rate" default="0.75"/>
 
 	<node pkg="as" type="ssc_interface" name="ssc_interface" output="screen">

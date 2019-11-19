@@ -53,7 +53,6 @@ link_directories(${YAML_CPP_LIBRARY_DIRS})
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
-        ${autoware_msgs_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
 )
 link_directories(${OpenCV_LIBRARY_DIRS})
@@ -124,6 +123,6 @@ install(TARGETS
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY launch/
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+install(DIRECTORY launch config
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         PATTERN ".svn" EXCLUDE)
