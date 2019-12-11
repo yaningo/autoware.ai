@@ -33,8 +33,6 @@ BasicPoint3d LocalFrameProjector::forward(const GPSPoint& p) const
 {
   PJ_COORD c{{p.lat, p.lon, p.ele, 0}};
   PJ_COORD c_out = proj_trans(P, PJ_FWD, c);
-  std::cout << c_out.xy.x << '\n';
-  std::cout << c_out.xy.y << '\n';
   return BasicPoint3d{c_out.xy.x, c_out.xy.y, 0};
 }
 
@@ -42,8 +40,6 @@ GPSPoint LocalFrameProjector::reverse(const BasicPoint3d& p) const
 {
   PJ_COORD c{{p[0], p[1], p[2], 0}};
   PJ_COORD c_out = proj_trans(P, PJ_INV, c);
-  std::cout << c_out.lp.lam << '\n';
-  std::cout << c_out.lp.phi << '\n';
   return GPSPoint{c_out.lp.lam, c_out.lp.phi};
 }
 
