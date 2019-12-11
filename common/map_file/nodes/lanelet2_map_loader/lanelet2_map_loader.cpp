@@ -25,6 +25,7 @@
 
 #include <lanelet2_extension/utility/message_conversion.h>
 #include <lanelet2_extension/projection/mgrs_projector.h>
+#include <lanelet2_extension/projection/local_frame_projector.h>
 #include <lanelet2_extension/io/autoware_osm_parser.h>
 #include <lanelet2_extension/utility/utilities.h>
 
@@ -43,6 +44,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "lanelet_map_loader");
   ros::NodeHandle rosnode;
+  ros::NodeHandle private_nh("~");
 
   if (argc < 2)
   {
@@ -60,9 +62,22 @@ int main(int argc, char** argv)
   std::string lanelet2_filename(argv[1]);
 
   lanelet::ErrorMessages errors;
+  lanelet::LaneletMapPtr map;
 
-  lanelet::projection::MGRSProjector projector;
-  lanelet::LaneletMapPtr map = lanelet::load(lanelet2_filename, projector, &errors);
+  int projector_type = 0;
+  private_nh.param<int>("projector_type", projector_type, 1);
+  if(projector_type == 0)
+  {
+    lanelet::projection::MGRSProjector projector;
+    map = lanelet::load(lanelet2_filename, projector, &errors);
+  } else if(projector_type == 1)
+  {
+    std::string base_frame , target_frame;
+    private_nh.param<std::string>("base_frame", base_frame, "EPSG:4326");
+    private_nh.param<std::string>("target_frame", target_frame, "");
+    lanelet::projection::LocalFrameProjector local_projector(base_frame.c_str(), target_frame.c_str());
+    map = lanelet::load(lanelet2_filename, local_projector, &errors);
+  }
 
   for(const auto &error: errors)
   {
