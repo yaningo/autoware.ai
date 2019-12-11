@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 2.8.11)
 project(lanelet2_extension)
 
 find_package(PkgConfig)
@@ -21,6 +21,8 @@ find_path(PUGIXML_INCLUDE_DIRS
 )
 
 find_package(autoware_build_flags REQUIRED)
+
+find_package(PROJ4 REQUIRED)
 
 find_package(catkin REQUIRED COMPONENTS
   amathutils_lib
@@ -53,6 +55,7 @@ include_directories(
   ${GeographicLib_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   ${PUGIXML_INCLUDE_DIRS}
+  ${PROJ4_INCLUDE_DIRS}
 )
 
 add_definitions (${GeographicLib_DEFINITIONS})
@@ -60,6 +63,7 @@ add_definitions (${GeographicLib_DEFINITIONS})
 add_library( lanelet2_extension_lib
   lib/autoware_osm_parser.cpp
   lib/autoware_traffic_light.cpp
+  lib/local_frame_projector.cpp
   lib/message_conversion.cpp
   lib/mgrs_projector.cpp
   lib/query.cpp
@@ -75,6 +79,7 @@ add_dependencies(lanelet2_extension_lib
 target_link_libraries(lanelet2_extension_lib
   ${catkin_LIBRARIES}
   ${GeographicLib_LIBRARIES}
+  ${PROJ4_LIBRARIES}
 )
 
 add_executable(lanelet2_extension_sample src/sample_code.cpp)
