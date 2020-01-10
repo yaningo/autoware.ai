@@ -17,8 +17,20 @@
 #include "ssc_interface.h"
 #include <ros_observer/lib_ros_observer.h>
 
-SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_initialized_(false)
+SSCInterface::SSCInterface() : 
+                              nh_(),
+                              private_nh_("~"), 
+                              engage_(false), 
+                              command_initialized_(false),
+                              current_gear_(automotive_platform_msgs::Gear::NONE),
+                              desired_gear_(automotive_platform_msgs::Gear::NONE),
+                              previous_desired_gear_(automotive_platform_msgs::Gear::NONE),
+                              gear_change_stamp_(ros::Time::now())
 {
+
+  private_nh_.param<double>("delay_time", delay_time_, 1.0);
+  delay_duration_ = ros::Duration(delay_time_);
+
   // setup parameters
   private_nh_.param<bool>("use_adaptive_gear_ratio", use_adaptive_gear_ratio_, true);
   private_nh_.param<int>("command_timeout", command_timeout_, 1000);
@@ -214,6 +226,33 @@ void SSCInterface::publishCommand()
 
   // Gear (TODO: Use vehicle_cmd.gear)
   unsigned char desired_gear = engage_ ? automotive_platform_msgs::Gear::DRIVE : automotive_platform_msgs::Gear::NONE;
+
+
+  // Check the if gear change happens
+  if(desired_gear_ != previous_desired_gear_)
+    {
+      gear_change_stamp_ = ros::Time::now();
+    }
+  previous_desired_gear_ = desired_gear_;
+
+
+
+  bool wait_for_brake = ros::Time::now() - gear_change_stamp_ < delay_duration_;
+  bool is_stopping_gear = (current_gear_ == automotive_platform_msgs::Gear::NONE
+                           || current_gear_ == automotive_platform_msgs::Gear::PARK
+                           || current_gear_ == automotive_platform_msgs::Gear::NEUTRAL);
+  bool is_gear_desired_value = (current_gear_ == desired_gear_);
+  
+  if(is_stopping_gear || wait_for_brake || !is_gear_desired_value)
+  {
+    desired_speed = 0;
+  }
+
+  if( wait_for_brake )
+  {
+     // gear command
+     desired_gear_ = current_gear_;
+  }
 
   // Turn signal
   unsigned char desired_turn_signal = automotive_platform_msgs::TurnSignalCommand::NONE;

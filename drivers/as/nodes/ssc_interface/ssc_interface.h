@@ -112,6 +112,14 @@ private:
   automotive_navigation_msgs::ModuleState module_states_;
   ros::Rate* rate_;
 
+  double delay_time_; 
+  ros::Duration delay_duration_;
+  ros::Time gear_change_stamp_;
+  int current_gear_;
+  int desired_gear_;
+  int previous_desired_gear_;
+
+
   // callbacks
   void callbackFromVehicleCmd(const autoware_msgs::VehicleCmdConstPtr& msg);
   void callbackFromEngage(const std_msgs::BoolConstPtr& msg);
