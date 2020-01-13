@@ -41,19 +41,37 @@ endif()
 # Select arch flag
 if(MRT_ARCH)
   if(NOT MRT_ARCH STREQUAL "None" AND NOT MRT_ARCH STREQUAL "none")
-    set(_arch "-march=${MRT_ARCH}")
+    set(_arch "${MRT_ARCH}")
   endif()
 else()
-  # sandybridge is the lowest common cpu arch for us
-  set(_arch "-march=sandybridge")
-endif()
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_arch}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_arch}")
+  # On X86, sandybridge is the lowest common cpu arch for us
+  set(_x86_arch_list "i386" "amd64" "AMD64" "x86_64" "i686" "x86" "x64" "EM64T")
 
-#add OpenMP
-find_package(OpenMP REQUIRED)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  list(FIND _x86_arch_list ${CMAKE_SYSTEM_PROCESSOR} _index)
+
+  if(${_index} GREATER -1)
+    message(STATUS "MRT_ARCH not set and X86 target detected (${CMAKE_SYSTEM_PROCESSOR})")
+    set(_arch "sandybridge")
+  endif()
+
+  unset(_x86_arch_list)
+  unset(_index)
+endif()
+
+if(_arch)
+  message(STATUS "Setting -march to " ${_arch})
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=${_arch}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${_arch}")
+  unset(_arch)
+endif()
+
+# add OpenMP if present
+# it would be great to have this in package.xmls instead, but catkin cannot handle setting the required cmake flags for dependencies
+find_package(OpenMP)
+if (OpenMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
 
 # add gcov flags
 if(MRT_ENABLE_COVERAGE)
@@ -84,7 +102,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter")
 if(MRT_USE_DEFAULT_WERROR_FLAGS)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=address -Werror=comment -Werror=enum-compare -Werror=format -Werror=nonnull -Werror=return-type -Werror=sequence-point -Werror=strict-aliasing -Werror=switch -Werror=trigraphs -Werror=volatile-register-var")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=address -Werror=enum-compare -Werror=format -Werror=nonnull -Werror=return-type -Werror=sequence-point -Werror=strict-aliasing -Werror=switch -Werror=trigraphs -Werror=volatile-register-var")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -129,6 +147,7 @@ endif()
 # - strict-overflow: False positives, optimization level dependent
 # - unknown-pragmas: Pragmas might be for a different compiler
 # - unused-*: Sometimes unused declarations are desired
+# - comment: Report errors in vtkMath.h for VTK6.
 
 #add compiler flags
 CHECK_CXX_COMPILER_FLAG("-fdiagnostics-color=auto" FLAG_AVAILABLE)
