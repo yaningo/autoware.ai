@@ -17,7 +17,7 @@ before_script:
   # Environment variablen setzen
   - export SHELL="/bin/bash"
   # Prepare workspace (in folder catkin_ws)
-  - sudo apt-get update
+  - sudo apt-get update && sudo apt-get upgrade -y
   - mrt ci prepare $CI_PROJECT_NAME -c $CI_COMMIT_SHA
   - cd catkin_ws
   # add current branch name to branch management
@@ -57,6 +57,7 @@ general_code_quality:
     - chmod a+rw gl-code-quality-report.json
   artifacts:
     paths: [gl-code-quality-report.json]
+    expire_in: 6 mos
 
 code_quality:
   dependencies:
@@ -100,7 +101,7 @@ test:
   stage: test
   needs: [build]
   only: [branches, tags, merge_requests] # means "always"
-  coverage: '/lines: \d+.\d+\%/'
+  coverage: '/lines......: \d+.\d+\%/'
   variables:
     MRT_MIN_COVERAGE: $MRT_REQUIRED_COVERAGE
   script:
