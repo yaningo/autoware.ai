@@ -133,6 +133,9 @@ ros::Publisher pcd_pub;
 ros::Publisher stat_pub;
 std_msgs::Bool stat_msg;
 
+ros::Publisher pcd_pub2;
+std::vector<double> correction_map_tf_params;
+
 AreaList all_areas;
 AreaList downloaded_areas;
 std::mutex downloaded_areas_mtx;
@@ -367,6 +370,38 @@ void publish_pcd(sensor_msgs::PointCloud2 pcd, const int* errp = NULL)
 			stat_pub.publish(stat_msg);
 		}
 	}
+
+	if (pcd.width != 0) {
+		static tf2_ros::StaticTransformBroadcaster br1;
+		geometry_msgs::TransformStamped transformStamped1;
+		
+		transformStamped1.header.stamp = ros::Time::now();
+		transformStamped1.header.frame_id = "new_map";
+		transformStamped1.child_frame_id = "map";
+		transformStamped1.transform.translation.x = correction_map_tf_params[0];
+		transformStamped1.transform.translation.y = correction_map_tf_params[1];
+		transformStamped1.transform.translation.z = correction_map_tf_params[2];
+		tf2::Quaternion q;
+		q.setRPY(0, 0, 0);
+		transformStamped1.transform.rotation.x = correction_map_tf_params[3];
+		transformStamped1.transform.rotation.y = correction_map_tf_params[4];
+		transformStamped1.transform.rotation.z = correction_map_tf_params[5];
+		transformStamped1.transform.rotation.w = correction_map_tf_params[6];
+
+		std::cout << "asdfasdfdkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" << std::endl;
+
+		br1.sendTransform(transformStamped1);
+
+		pcd.header.frame_id = "new_map";
+
+		pcd_pub2.publish(pcd);
+
+		if (errp == NULL || *errp == 0) {
+			stat_msg.data = true;
+			stat_pub.publish(stat_msg);
+		}
+	}
+
 }
 
 void publish_gnss_pcd(const geometry_msgs::PoseStamped& msg)
@@ -547,6 +582,10 @@ int main(int argc, char **argv)
 	}
 
 	pcd_pub = n.advertise<sensor_msgs::PointCloud2>("points_map", 1, true);
+
+	n.getParam("points_map_loader/map_1_correction", correction_map_tf_params);
+	pcd_pub2 = n.advertise<sensor_msgs::PointCloud2>("new_points_map", 1, true);
+
 	stat_pub = n.advertise<std_msgs::Bool>("pmap_stat", 1, true);
 
 	stat_msg.data = false;

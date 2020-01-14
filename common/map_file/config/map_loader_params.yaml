@@ -18,3 +18,11 @@ map_1_origin: [1104738.0865346656647,
 # Integer: Update period of the map cell publication update
 # Units: ms
 update_rate: 2000
+
+map_1_correction: [3.0,
+1.0,
+4.0,
+0.0,
+0.0,
+0.0,
+1.0] 
