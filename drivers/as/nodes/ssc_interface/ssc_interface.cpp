@@ -200,7 +200,6 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
   // vehicle_status.light
 
   vehicle_status_pub_.publish(vehicle_status);
-
   current_gear_ = msg_gear->current_gear.gear;
 }
 
@@ -250,11 +249,11 @@ void SSCInterface::publishCommand()
     desired_speed = 0;
   }
 
-  if( wait_for_brake )
-  {
-     // gear command
-     desired_gear_ = current_gear_;
-  }
+  // if( wait_for_brake )
+  // {
+  //    // gear command
+  //    desired_gear_ = current_gear_;
+  // }
 
   // Turn signal
   unsigned char desired_turn_signal = automotive_platform_msgs::TurnSignalCommand::NONE;
@@ -325,6 +324,8 @@ void SSCInterface::publishCommand()
   ROS_INFO_STREAM("Mode: " << (int)desired_mode << ", "
                            << "Speed: " << speed_mode.speed << ", "
                            << "Curvature: " << steer_mode.curvature << ", "
+                           << "wait_for_brake: " << wait_for_brake << ", "
+                           << "Current Gear: " << current_gear_ << ", "
                            << "Gear: " << (int)gear_cmd.command.gear << ", "
                            << "TurnSignal: " << (int)turn_signal.turn_signal);
 }
