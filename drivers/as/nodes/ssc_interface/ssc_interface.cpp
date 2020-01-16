@@ -200,6 +200,8 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
   // vehicle_status.light
 
   vehicle_status_pub_.publish(vehicle_status);
+
+  current_gear_ = msg_gear->current_gear.gear;
 }
 
 void SSCInterface::publishCommand()
