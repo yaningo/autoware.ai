@@ -61,8 +61,8 @@ void binMapCallback(autoware_lanelet2_msgs::MapBin msg)
   lanelet::ConstLanelets crosswalk_lanelets = lanelet::utils::query::crosswalkLanelets(all_lanelets);
   std::vector<lanelet::ConstLineString3d> stop_lines = lanelet::utils::query::stopLinesLanelets(road_lanelets);
   std::vector<lanelet::TrafficLightConstPtr> tl_reg_elems = lanelet::utils::query::trafficLights(all_lanelets);
-  std::vector<lanelet::AutowareTrafficLightConstPtr> aw_tl_reg_elems =
-      lanelet::utils::query::autowareTrafficLights(all_lanelets);
+  // std::vector<lanelet::AutowareTrafficLightConstPtr> aw_tl_reg_elems =
+  //     lanelet::utils::query::autowareTrafficLights(all_lanelets);
 
   std_msgs::ColorRGBA cl_road, cl_cross, cl_ll_borders, cl_stoplines, cl_trafficlights;
   setColor(&cl_road, 0.2, 0.7, 0.7, 0.3);
@@ -82,8 +82,8 @@ void binMapCallback(autoware_lanelet2_msgs::MapBin msg)
   insertMarkerArray(&map_marker_array, lanelet::visualization::laneletDirectionAsMarkerArray(road_lanelets));
   insertMarkerArray(&map_marker_array, lanelet::visualization::lineStringsAsMarkerArray(stop_lines, "stop_lines",
                                                                                               cl_stoplines, 0.5));
-  insertMarkerArray(&map_marker_array, lanelet::visualization::autowareTrafficLightsAsMarkerArray(
-                                           aw_tl_reg_elems, cl_trafficlights));
+  // insertMarkerArray(&map_marker_array, lanelet::visualization::autowareTrafficLightsAsMarkerArray(
+  //                                          aw_tl_reg_elems, cl_trafficlights));
 
   g_map_pub.publish(map_marker_array);
 }
