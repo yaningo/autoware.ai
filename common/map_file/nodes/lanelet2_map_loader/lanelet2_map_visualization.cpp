@@ -60,7 +60,7 @@ void binMapCallback(autoware_lanelet2_msgs::MapBin msg)
   lanelet::ConstLanelets road_lanelets = lanelet::utils::query::roadLanelets(all_lanelets);
   lanelet::ConstLanelets crosswalk_lanelets = lanelet::utils::query::crosswalkLanelets(all_lanelets);
   std::vector<lanelet::ConstLineString3d> stop_lines = lanelet::utils::query::stopLinesLanelets(road_lanelets);
-  std::vector<lanelet::TrafficLightConstPtr> tl_reg_elems = lanelet::utils::query::trafficLights(all_lanelets);
+  // std::vector<lanelet::TrafficLightConstPtr> tl_reg_elems = lanelet::utils::query::trafficLights(all_lanelets);
   // std::vector<lanelet::AutowareTrafficLightConstPtr> aw_tl_reg_elems =
   //     lanelet::utils::query::autowareTrafficLights(all_lanelets);
 
@@ -75,8 +75,8 @@ void binMapCallback(autoware_lanelet2_msgs::MapBin msg)
 
   insertMarkerArray(&map_marker_array, lanelet::visualization::laneletsBoundaryAsMarkerArray(
                                            road_lanelets, cl_ll_borders, g_viz_lanelets_centerline));
-  insertMarkerArray(&map_marker_array, lanelet::visualization::laneletsAsTriangleMarkerArray(
-                                           "road_lanelets", road_lanelets, cl_road));
+  // insertMarkerArray(&map_marker_array, lanelet::visualization::laneletsAsTriangleMarkerArray(
+  //                                          "road_lanelets", road_lanelets, cl_road));
   insertMarkerArray(&map_marker_array, lanelet::visualization::laneletsAsTriangleMarkerArray(
                                            "crosswalk_lanelets", crosswalk_lanelets, cl_cross));
   insertMarkerArray(&map_marker_array, lanelet::visualization::laneletDirectionAsMarkerArray(road_lanelets));
