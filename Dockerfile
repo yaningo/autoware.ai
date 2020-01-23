@@ -1,10 +1,10 @@
-FROM usdotfhwastol/carma-base:3.4.0 as build
+FROM usdotfhwastol/carma-base:3.5.0 as build
 
 COPY --chown=carma . /home/carma/autoware.ai
 RUN /home/carma/autoware.ai/docker/checkout.sh
 RUN ./home/carma/autoware.ai/docker/install.sh
 
-FROM usdotfhwastol/carma-base:3.4.0
+FROM usdotfhwastol/carma-base:3.5.0
 
 ARG BUILD_DATE="NULL"
 ARG VCS_REF="NULL"
