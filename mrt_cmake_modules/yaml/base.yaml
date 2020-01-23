@@ -8,6 +8,16 @@ aravis:
     name: Aravis
   ubuntu:
   - mrt-libaravis-dev
+pybind11-dev:
+  cmake:
+    # Only find_package pybind as it is needed only for python cpp files.
+    # This is linked manually.
+    name: pybind11
+    include_dirs: []
+    libraries: []
+    library_dirs: []
+  ubuntu:
+  - mrt-pybind11-dev
 armadillo:
   cmake:
     include_dirs:
@@ -68,8 +78,8 @@ cuda:
       - cuda-toolkit-9-2
       - g++-6
     bionic:
-      - cuda-toolkit-10-0
-      - g++-7
+      - cuda-toolkit-10-2
+      - g++-8
 eigen:
   cmake:
     components: []
@@ -234,7 +244,7 @@ liblapack-dev:
     include_dirs: []
     libraries:
     - LAPACK_LIBRARIES
-    name: LAPACK
+    name: MrtLAPACK
 libmagick:
   cmake:
     components:
@@ -499,6 +509,8 @@ mrt_qt4-dev:
     name: MrtQt4
   ubuntu:
   - libqt4-dev
+  - libqt4-opengl-dev
+  - libqtwebkit-dev
 mrt_qt-dev:
   cmake:
     components:
