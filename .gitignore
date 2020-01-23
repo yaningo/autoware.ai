@@ -1,3 +1,6 @@
+# Added colcon build folders
+# Kyle Rush - 10/30/2019
+
 # GNU global tags
 GTAGS
 GRTAGS
@@ -47,3 +50,6 @@ ENV/
 *.csv
 
 /.metadata/
+build/
+install/
+log/
