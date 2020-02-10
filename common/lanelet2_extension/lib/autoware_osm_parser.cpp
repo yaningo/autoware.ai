@@ -22,8 +22,9 @@
 #include <lanelet2_io/io_handlers/Factory.h>
 #include <lanelet2_io/io_handlers/OsmFile.h>
 #include <lanelet2_io/io_handlers/OsmHandler.h>
-
 #include <string>
+#include <sstream>
+#include <boost/algorithm/string.hpp> 
 
 namespace lanelet
 {
@@ -87,5 +88,56 @@ void AutowareOsmParser::parseVersions(const std::string& filename, std::string* 
     *map_version = metainfo.attribute("map_version").value();
 }
 
-}  // namespace io_handlers
-}  // namespace lanelet
+void AutowareOsmParser::parseMapParams (const std::string& filename, int* projector_type, std::string* base_frame, 
+                                      std::string* target_frame)
+{
+  if (base_frame == nullptr || target_frame == nullptr)
+  {
+    throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
+    std::string(": Errors occured while parsing .osm file - either frame of the geo_reference is a null pointer!"));
+    return;
+  }
+
+  pugi::xml_document doc;
+  auto result = doc.load_file(filename.c_str());
+  if (!result)
+  {
+    throw lanelet::ParseError(std::string("Errors occured while parsing osm file: ") + result.description());
+  }
+
+  auto osmNode = doc.child("osm");
+  auto geoRef = osmNode.child("geoReference");
+
+  if (geoRef.attribute("projector_type"))
+  {
+    int proj_type;
+    std::stringstream s_to_int(geoRef.attribute("projector_type").value());
+    s_to_int >> proj_type;
+    *projector_type = proj_type;
+  }
+  else
+    *projector_type = 1; // default value
+
+  if (geoRef.attribute("base_frame"))
+    *base_frame = geoRef.attribute("base_frame").value();
+  else
+    throw lanelet::ParseError(std::string("While parsing .osm file, base_frame could not be found in geoReference tag."));
+
+  if (geoRef.attribute("target_frame"))
+  {
+    std::string raw_geo_ref = geoRef.attribute("target_frame").value();
+    // Filter unnecessary part out of georeference.
+    std::vector<std::string> buffer;
+    boost::split(buffer,  raw_geo_ref, boost::is_any_of(" "));
+
+    for (int i = 0; i < buffer.size(); i++)
+    {
+      if (!boost::algorithm::contains(buffer[i], "+geoidgrids"))
+        target_frame->append(buffer[i] + " "); //geo reference value
+    }
+  }
+  else
+    throw lanelet::ParseError(std::string("While parsing .osm file, target_frame could not be found in geoReference tag."));
+}
+} // namespace io_handlers
+} // namespace lanelet
