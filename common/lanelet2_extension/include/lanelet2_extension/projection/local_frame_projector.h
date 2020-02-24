@@ -34,7 +34,7 @@ class LocalFrameProjector : public Projector
 
 public:
 
-  explicit LocalFrameProjector(const char* base_frame, const char* target_frame, Origin origin = Origin({ 0.0, 0.0 }));
+  explicit LocalFrameProjector(const char* target_frame, Origin origin = Origin({ 0.0, 0.0 }));
 
   /**
    * [LocalFrameProjector::forward projects gps lat/lon to local map frame]
@@ -42,6 +42,15 @@ public:
    * @return     [projected point in local map coordinate]
    */
   BasicPoint3d forward(const GPSPoint& p) const override;
+
+  /**
+   * [LocalFrameProjector::projectECEF projects between WGS-84 ECEF and local map]
+   * @param  ecef_point             [point with x,y,z in ecef information]
+   * @param  proj_dir               [1 for forward -1 for reverse]
+   * @return                        [projected point in local map coordinate]
+   * @throw  std::invalid_argument  [if direction is neither of 1 (forward) or -1 (reverse)]
+   */
+  BasicPoint3d projectECEF(const BasicPoint3d& p, const int& proj_dir) const;
 
   /**
    * [LocalFrameProjector::reverse projects point within local map frame into gps lat/lon (WGS84)]
@@ -52,7 +61,12 @@ public:
 
 private:
   
-  PJ *P;
+  PJ *P_;
+
+  const std::string map_proj_string_;
+
+  // The PROJ string used to define a WGS-84 ECEF frame
+  static constexpr char ECEF_PROJ_STR[] = "+proj=geocent +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 };
 
 }  // namespace projection

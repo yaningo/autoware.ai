@@ -22,8 +22,9 @@
 #include <lanelet2_io/io_handlers/Factory.h>
 #include <lanelet2_io/io_handlers/OsmFile.h>
 #include <lanelet2_io/io_handlers/OsmHandler.h>
-
 #include <string>
+#include <sstream>
+#include <boost/algorithm/string.hpp> 
 
 namespace lanelet
 {
@@ -87,5 +88,49 @@ void AutowareOsmParser::parseVersions(const std::string& filename, std::string* 
     *map_version = metainfo.attribute("map_version").value();
 }
 
-}  // namespace io_handlers
-}  // namespace lanelet
+void AutowareOsmParser::parseMapParams (const std::string& filename, int* projector_type, std::string* target_frame)
+{
+  if (target_frame == nullptr)
+  {
+    throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
+    std::string(": Errors occured while parsing .osm file - target frame is a null pointer!"));
+    return;
+  }
+
+  pugi::xml_document doc;
+  auto result = doc.load_file(filename.c_str());
+  if (!result)
+  {
+    throw lanelet::ParseError(std::string("Errors occured while parsing .osm file: ") + result.description());
+  }
+
+  auto osmNode = doc.child("osm");
+  auto geoRef = osmNode.child("geoReference");
+
+  if (geoRef)
+  {
+    std::string raw_geo_ref = geoRef.child_value();
+
+    // Filter unnecessary part out of georeference.
+    std::vector<std::string> buffer;
+    boost::split(buffer,  raw_geo_ref, boost::is_any_of(" "));
+
+    for (int i = 0; i < buffer.size(); i++)
+    {
+      if (!boost::algorithm::contains(buffer[i], "+geoidgrids")) {
+        target_frame->append(buffer[i] + " "); //geo reference value
+      } else {
+        std::cerr << "Removing +geoidgrids from input projection as this is not currently supported by AutowareOsmParser" << std::endl;
+      }
+    }
+  }
+  else
+  {
+    throw lanelet::ParseError(std::string("While parsing .osm file, geoReference was not found!"));
+  }
+
+  // Default values
+  *projector_type = 1; // default value for autoware.ai projector type for CARMA purposes
+}
+} // namespace io_handlers
+} // namespace lanelet
