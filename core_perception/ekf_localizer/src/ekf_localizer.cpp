@@ -31,6 +31,7 @@ EKFLocalizer::EKFLocalizer() : nh_(""), pnh_("~"), dim_x_(6 /* x, y, yaw, yaw_bi
   pnh_.param("enable_yaw_bias_estimation", enable_yaw_bias_estimation_, bool(true));
   pnh_.param("extend_state_step", extend_state_step_, int(50));
   pnh_.param("pose_frame_id", pose_frame_id_, std::string("/map"));
+  pnh_.param("child_frame_id", child_frame_id_, std::string("base_link"));
 
   /* pose measurement */
   pnh_.param("pose_additional_delay", pose_additional_delay_, double(0.0));
@@ -193,7 +194,7 @@ void EKFLocalizer::timerTFCallback(const ros::TimerEvent& e)
   geometry_msgs::TransformStamped transformStamped;
   transformStamped.header.stamp = ros::Time::now();
   transformStamped.header.frame_id = current_ekf_pose_.header.frame_id;
-  transformStamped.child_frame_id = "ekf_pose";
+  transformStamped.child_frame_id = child_frame_id_;
   transformStamped.transform.translation.x = current_ekf_pose_.pose.position.x;
   transformStamped.transform.translation.y = current_ekf_pose_.pose.position.y;
   transformStamped.transform.translation.z = current_ekf_pose_.pose.position.z;
