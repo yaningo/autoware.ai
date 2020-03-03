@@ -236,6 +236,8 @@ static nav_msgs::Odometry odom;
 // static tf::TransformListener local_transform_listener;
 static tf::StampedTransform local_transform;
 
+static std::string _base_frame = "base_link";
+
 static unsigned int points_map_num = 0;
 
 pthread_mutex_t mutex;
@@ -871,10 +873,58 @@ static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
 
 static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 {
-  // std::cout << __func__ << std::endl;
 
-  if (_imu_upside_down)
-    imuUpsideDown(input);
+  static bool transform_set = false;
+  static tf::Transform imu_rotation_only_tf;
+
+  if (!transform_set) {
+    tf::StampedTransform imu_transform;
+    try {
+      imu_transform = getStaticTF(_base_frame, input.header.frame_id);
+
+    } catch (tf::TransformException& ex) {
+
+      ROS_ERROR("ndt_matching: %s", ex.what());
+      ROS_ERROR("ndt_matching: attempting to use imu identity transform with base frame");
+      imu_transform.setIdentity();
+    }
+    imu_rotation_only_tf = tf::Transform(imu_transform.getRotation());
+    transform_set = true;
+  }
+
+  // Transform the imu velocity and acceleration by rotating them to match the base frame
+  // The orientation is not transformed as that is a globaly referenced orientation
+  tf::Vector3 imu_angular_vel = imu_rotation_only_tf * tf::Vector3(input->angular_velocity.x, input->angular_velocity.y, input->angular_velocity.z);
+  tf::Vector3 imu_linear_accel = imu_rotation_only_tf * tf::Vector3(input->linear_acceleration.x, input->linear_acceleration.y, input->linear_acceleration.z);
+ 
+  ROS_WARN_STREAM("IMU Info");
+
+  ROS_WARN_STREAM("Origional Angular X: " << input->angular_velocity.x);
+  ROS_WARN_STREAM("Origional Angular Y: " << input->angular_velocity.y);
+  ROS_WARN_STREAM("Origional Angular Z: " << input->angular_velocity.z);
+  ROS_WARN_STREAM("Origional Linear X: " << input->linear_acceleration.x);
+  ROS_WARN_STREAM("Origional Linear Y: " << input->linear_acceleration.y);
+  ROS_WARN_STREAM("Origional Linear Z: " << input->linear_acceleration.z);
+
+ 
+  // Update input message
+  input->header.frame_id = _base_frame;
+  input->angular_velocity.x = imu_angular_vel.getX();
+  input->angular_velocity.y = imu_angular_vel.getY();
+  input->angular_velocity.z = imu_angular_vel.getZ();
+
+  input->linear_acceleration.x = imu_linear_accel.getX();
+  input->linear_acceleration.y = imu_linear_accel.getY();
+  input->linear_acceleration.z = imu_linear_accel.getZ();
+
+  ROS_WARN_STREAM("Transformed Angular X: " << input->angular_velocity.x);
+  ROS_WARN_STREAM("Transformed Angular Y: " << input->angular_velocity.y);
+  ROS_WARN_STREAM("Transformed Angular Z: " << input->angular_velocity.z);
+  ROS_WARN_STREAM("Transformed Linear X: " << input->linear_acceleration.x);
+  ROS_WARN_STREAM("Transformed Linear Y: " << input->linear_acceleration.y);
+  ROS_WARN_STREAM("Transformed Linear Z: " << input->linear_acceleration.z);
+
+  ROS_WARN_STREAM("Done IMU Info");
 
   const ros::Time current_time = input->header.stamp;
   static ros::Time previous_time = current_time;
@@ -920,6 +970,29 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_roll = imu_roll;
   previous_imu_pitch = imu_pitch;
   previous_imu_yaw = imu_yaw;
+}
+
+/**
+ * @brief Helper function to greate a subscription for static transforms do a lookup then return
+ *        This function is not meant to be used for dynamic transforms as the listener is created and destroyed on each call
+ * 
+ * @param target_frame The frame to transform into
+ * @param source_frame The data source frame
+ * 
+ * @throw tf::TransformException if requested transform cannot be found in 10s
+ * 
+ * @return Stamped transform from source into target
+ */ 
+static tf::StampedTransform getStaticTF(const std::string& target_frame, const std:;string& source_frame) {
+
+  tf::TransformListener tf_listener;
+
+  tf::StampedTransform transform;
+  ros::Time now = ros::Time(0);
+  tf_listener.waitForTransform(target_frame, source_frame, now, ros::Duration(10.0));
+  tf_listener.lookupTransform(target_frame, source_frame, now, transform);
+
+  return transform;
 }
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
@@ -1386,7 +1459,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Set values for /estimate_twist
     estimate_twist_msg.header.stamp = current_scan_time;
-    estimate_twist_msg.header.frame_id = "/base_link";
+    estimate_twist_msg.header.frame_id = _base_frame;
     estimate_twist_msg.twist.linear.x = current_velocity;
     estimate_twist_msg.twist.linear.y = 0.0;
     estimate_twist_msg.twist.linear.z = 0.0;
@@ -1560,6 +1633,7 @@ int main(int argc, char** argv)
   private_nh.getParam("use_odom", _use_odom);
   private_nh.getParam("imu_upside_down", _imu_upside_down);
   private_nh.getParam("imu_topic", _imu_topic);
+  private_nh.getParam("base_frame", _base_frame);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
 
 
@@ -1613,6 +1687,7 @@ int main(int argc, char** argv)
   std::cout << "imu_topic: " << _imu_topic << std::endl;
   std::cout << "localizer: " << _localizer << std::endl;
   std::cout << "gnss_reinit_fitness: " << _gnss_reinit_fitness << std::endl;
+  std::cout << "base_frame: " << _base_frame << std::endl;
   std::cout << "(tf_x,tf_y,tf_z,tf_roll,tf_pitch,tf_yaw): (" << _tf_x << ", " << _tf_y << ", " << _tf_z << ", "
             << _tf_roll << ", " << _tf_pitch << ", " << _tf_yaw << ")" << std::endl;
   std::cout << "-----------------------------------------------------------------" << std::endl;
