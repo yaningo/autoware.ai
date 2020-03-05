@@ -237,6 +237,7 @@ static nav_msgs::Odometry odom;
 static tf::StampedTransform local_transform;
 
 static std::string _base_frame = "base_link";
+static std::string _map_frame = "map";
 
 static unsigned int points_map_num = 0;
 
@@ -432,6 +433,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   if (points_map_num != input->width)
   {
     std::cout << "Update points_map." << std::endl;
+    _map_frame = input->header.frame_id; // Update map frame to be the frame of the map points topic
 
     points_map_num = input->width;
 
@@ -444,8 +446,8 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       try
       {
         ros::Time now = ros::Time(0);
-        local_transform_listener.waitForTransform("/map", "/world", now, ros::Duration(10.0));
-        local_transform_listener.lookupTransform("/map", "world", now, local_transform);
+        local_transform_listener.waitForTransform(_map_frame, "/world", now, ros::Duration(10.0));
+        local_transform_listener.lookupTransform(_map_frame, "world", now, local_transform);
       }
       catch (tf::TransformException& ex)
       {
@@ -613,8 +615,8 @@ static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped:
   try
   {
     ros::Time now = ros::Time(0);
-    listener.waitForTransform("/map", input->header.frame_id, now, ros::Duration(10.0));
-    listener.lookupTransform("/map", input->header.frame_id, now, transform);
+    listener.waitForTransform(_map_frame, input->header.frame_id, now, ros::Duration(10.0));
+    listener.lookupTransform(_map_frame, input->header.frame_id, now, transform);
   }
   catch (tf::TransformException& ex)
   {
@@ -848,6 +850,7 @@ static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
   odom_calc(input->header.stamp);
 }
 
+// NOTE: Deprecated function
 static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
 {
   double input_roll, input_pitch, input_yaw;
@@ -871,6 +874,29 @@ static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
   input->orientation = tf::createQuaternionMsgFromRollPitchYaw(input_roll, input_pitch, input_yaw);
 }
 
+/**
+ * @brief Helper function to greate a subscription for static transforms do a lookup then return
+ *        This function is not meant to be used for dynamic transforms as the listener is created and destroyed on each call
+ * 
+ * @param target_frame The frame to transform into
+ * @param source_frame The data source frame
+ * 
+ * @throw tf::TransformException if requested transform cannot be found in 10s
+ * 
+ * @return Stamped transform from source into target
+ */ 
+static tf::StampedTransform getStaticTF(const std::string& target_frame, const std::string& source_frame) {
+
+  tf::TransformListener tf_listener;
+
+  tf::StampedTransform transform;
+  ros::Time now = ros::Time(0);
+  tf_listener.waitForTransform(target_frame, source_frame, now, ros::Duration(10.0));
+  tf_listener.lookupTransform(target_frame, source_frame, now, transform);
+
+  return transform;
+}
+
 static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 {
 
@@ -880,7 +906,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   if (!transform_set) {
     tf::StampedTransform imu_transform;
     try {
-      imu_transform = getStaticTF(_base_frame, input.header.frame_id);
+      imu_transform = getStaticTF(_base_frame, input->header.frame_id);
 
     } catch (tf::TransformException& ex) {
 
@@ -897,14 +923,14 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   tf::Vector3 imu_angular_vel = imu_rotation_only_tf * tf::Vector3(input->angular_velocity.x, input->angular_velocity.y, input->angular_velocity.z);
   tf::Vector3 imu_linear_accel = imu_rotation_only_tf * tf::Vector3(input->linear_acceleration.x, input->linear_acceleration.y, input->linear_acceleration.z);
  
-  ROS_WARN_STREAM("IMU Info");
+  ROS_ERROR_STREAM("IMU Info");
 
-  ROS_WARN_STREAM("Origional Angular X: " << input->angular_velocity.x);
-  ROS_WARN_STREAM("Origional Angular Y: " << input->angular_velocity.y);
-  ROS_WARN_STREAM("Origional Angular Z: " << input->angular_velocity.z);
-  ROS_WARN_STREAM("Origional Linear X: " << input->linear_acceleration.x);
-  ROS_WARN_STREAM("Origional Linear Y: " << input->linear_acceleration.y);
-  ROS_WARN_STREAM("Origional Linear Z: " << input->linear_acceleration.z);
+  ROS_ERROR_STREAM("Origional Angular X: " << input->angular_velocity.x);
+  ROS_ERROR_STREAM("Origional Angular Y: " << input->angular_velocity.y);
+  ROS_ERROR_STREAM("Origional Angular Z: " << input->angular_velocity.z);
+  ROS_ERROR_STREAM("Origional Linear X: " << input->linear_acceleration.x);
+  ROS_ERROR_STREAM("Origional Linear Y: " << input->linear_acceleration.y);
+  ROS_ERROR_STREAM("Origional Linear Z: " << input->linear_acceleration.z);
 
  
   // Update input message
@@ -917,14 +943,12 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   input->linear_acceleration.y = imu_linear_accel.getY();
   input->linear_acceleration.z = imu_linear_accel.getZ();
 
-  ROS_WARN_STREAM("Transformed Angular X: " << input->angular_velocity.x);
-  ROS_WARN_STREAM("Transformed Angular Y: " << input->angular_velocity.y);
-  ROS_WARN_STREAM("Transformed Angular Z: " << input->angular_velocity.z);
-  ROS_WARN_STREAM("Transformed Linear X: " << input->linear_acceleration.x);
-  ROS_WARN_STREAM("Transformed Linear Y: " << input->linear_acceleration.y);
-  ROS_WARN_STREAM("Transformed Linear Z: " << input->linear_acceleration.z);
-
-  ROS_WARN_STREAM("Done IMU Info");
+  ROS_ERROR_STREAM("Transformed Angular X: " << input->angular_velocity.x);
+  ROS_ERROR_STREAM("Transformed Angular Y: " << input->angular_velocity.y);
+  ROS_ERROR_STREAM("Transformed Angular Z: " << input->angular_velocity.z);
+  ROS_ERROR_STREAM("Transformed Linear X: " << input->linear_acceleration.x);
+  ROS_ERROR_STREAM("Transformed Linear Y: " << input->linear_acceleration.y);
+  ROS_ERROR_STREAM("Transformed Linear Z: " << input->linear_acceleration.z);
 
   const ros::Time current_time = input->header.stamp;
   static ros::Time previous_time = current_time;
@@ -953,9 +977,15 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
   if (diff_time != 0)
   {
+    //tf::Vector3 computed_imu_angular_vel = imu_rotation_only_tf * tf::Vector3(diff_imu_roll / diff_time, diff_imu_pitch / diff_time, diff_imu_yaw / diff_time);
     imu.angular_velocity.x = diff_imu_roll / diff_time;
     imu.angular_velocity.y = diff_imu_pitch / diff_time;
     imu.angular_velocity.z = diff_imu_yaw / diff_time;
+
+    ROS_ERROR_STREAM("Computed Angular X: " << imu.angular_velocity.x);
+    ROS_ERROR_STREAM("Computed Angular Y: " << imu.angular_velocity.y);
+    ROS_ERROR_STREAM("Computed Angular Z: " << imu.angular_velocity.z);
+
   }
   else
   {
@@ -970,30 +1000,10 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   previous_imu_roll = imu_roll;
   previous_imu_pitch = imu_pitch;
   previous_imu_yaw = imu_yaw;
+
+  ROS_ERROR_STREAM("Done IMU Info");
 }
 
-/**
- * @brief Helper function to greate a subscription for static transforms do a lookup then return
- *        This function is not meant to be used for dynamic transforms as the listener is created and destroyed on each call
- * 
- * @param target_frame The frame to transform into
- * @param source_frame The data source frame
- * 
- * @throw tf::TransformException if requested transform cannot be found in 10s
- * 
- * @return Stamped transform from source into target
- */ 
-static tf::StampedTransform getStaticTF(const std::string& target_frame, const std:;string& source_frame) {
-
-  tf::TransformListener tf_listener;
-
-  tf::StampedTransform transform;
-  ros::Time now = ros::Time(0);
-  tf_listener.waitForTransform(target_frame, source_frame, now, ros::Duration(10.0));
-  tf_listener.lookupTransform(target_frame, source_frame, now, transform);
-
-  return transform;
-}
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
@@ -1297,7 +1307,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       tf::Vector3 v(predict_pose.x, predict_pose.y, predict_pose.z);
       tf::Transform transform(predict_q, v);
-      predict_pose_msg.header.frame_id = "/map";
+      predict_pose_msg.header.frame_id = _map_frame;
       predict_pose_msg.header.stamp = current_scan_time;
       predict_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
       predict_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
@@ -1309,7 +1319,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
     else
     {
-      predict_pose_msg.header.frame_id = "/map";
+      predict_pose_msg.header.frame_id = _map_frame;
       predict_pose_msg.header.stamp = current_scan_time;
       predict_pose_msg.pose.position.x = predict_pose.x;
       predict_pose_msg.pose.position.y = predict_pose.y;
@@ -1364,7 +1374,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       tf::Vector3 v(ndt_pose.x, ndt_pose.y, ndt_pose.z);
       tf::Transform transform(ndt_q, v);
-      ndt_pose_msg.header.frame_id = "/map";
+      ndt_pose_msg.header.frame_id = _map_frame;
       ndt_pose_msg.header.stamp = current_scan_time;
       ndt_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
       ndt_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
@@ -1376,7 +1386,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
     else
     {
-      ndt_pose_msg.header.frame_id = "/map";
+      ndt_pose_msg.header.frame_id = _map_frame;
       ndt_pose_msg.header.stamp = current_scan_time;
       ndt_pose_msg.pose.position.x = ndt_pose.x;
       ndt_pose_msg.pose.position.y = ndt_pose.y;
@@ -1390,7 +1400,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
     // current_pose is published by vel_pose_mux
     /*
-    current_pose_msg.header.frame_id = "/map";
+    current_pose_msg.header.frame_id = _map_frame;
     current_pose_msg.header.stamp = current_scan_time;
     current_pose_msg.pose.position.x = current_pose.x;
     current_pose_msg.pose.position.y = current_pose.y;
@@ -1406,7 +1416,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     {
       tf::Vector3 v(localizer_pose.x, localizer_pose.y, localizer_pose.z);
       tf::Transform transform(localizer_q, v);
-      localizer_pose_msg.header.frame_id = "/map";
+      localizer_pose_msg.header.frame_id = _map_frame;
       localizer_pose_msg.header.stamp = current_scan_time;
       localizer_pose_msg.pose.position.x = (local_transform * transform).getOrigin().getX();
       localizer_pose_msg.pose.position.y = (local_transform * transform).getOrigin().getY();
@@ -1418,7 +1428,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     }
     else
     {
-      localizer_pose_msg.header.frame_id = "/map";
+      localizer_pose_msg.header.frame_id = _map_frame;
       localizer_pose_msg.header.stamp = current_scan_time;
       localizer_pose_msg.pose.position.x = localizer_pose.x;
       localizer_pose_msg.pose.position.y = localizer_pose.y;
@@ -1436,18 +1446,18 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     //    current_pose_pub.publish(current_pose_msg);
     localizer_pose_pub.publish(localizer_pose_msg);
 
-    // Send TF "/base_link" to "/map"
+    // Send TF _base_frame to _map_frame
     transform.setOrigin(tf::Vector3(current_pose.x, current_pose.y, current_pose.z));
     transform.setRotation(current_q);
-    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+    //    br.sendTransform(tf::StampedTransform(transform, current_scan_time, _map_frame, _base_frame));
     /* Removed to allow CARMA localization node to publish this TF
     if (_use_local_transform == true)
     {
-      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, "/map", "/base_link"));
+      br.sendTransform(tf::StampedTransform(local_transform * transform, current_scan_time, _map_frame, _base_frame));
     }
     else
     {
-      br.sendTransform(tf::StampedTransform(transform, current_scan_time, "/map", "/base_link"));
+      br.sendTransform(tf::StampedTransform(transform, current_scan_time, _map_frame, _base_frame));
     }
     */
 

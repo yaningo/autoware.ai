@@ -29,7 +29,7 @@
     <param name="use_local_transform" value="$(arg use_local_transform)" />
     <param name="output_log_data" value="$(arg output_log_data)" />
     <param name="gnss_reinit_fitness" value="$(arg gnss_reinit_fitness)" />
-    <param name="base_link" value="$(arg base_link)" />
+    <param name="base_frame" value="$(arg base_frame)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
   </node>
 
