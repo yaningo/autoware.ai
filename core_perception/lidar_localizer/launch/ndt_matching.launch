@@ -15,6 +15,7 @@
   <arg name="output_log_data" default="false" />
   <arg name="gnss_reinit_fitness" default="500.0" />
   <arg name="base_frame" default="base_link" />
+  <arg name="use_estimated_pose" default="false" />
 
   <node pkg="lidar_localizer" type="ndt_matching" name="ndt_matching" output="log">
     <param name="method_type" value="$(arg method_type)" />
@@ -30,6 +31,7 @@
     <param name="output_log_data" value="$(arg output_log_data)" />
     <param name="gnss_reinit_fitness" value="$(arg gnss_reinit_fitness)" />
     <param name="base_frame" value="$(arg base_frame)" />
+    <param name="use_estimated_pose" value="$(arg use_estimated_pose)" />
     <remap from="/points_raw" to="/sync_drivers/points_raw" if="$(arg sync)" />
   </node>
 
