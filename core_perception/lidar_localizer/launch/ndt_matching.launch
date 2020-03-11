@@ -10,7 +10,7 @@
   <arg name="queue_size" default="1" />
   <arg name="offset" default="linear" />
   <arg name="get_height" default="false" />
-  <arg name="use_local_transform" default="false" doc="This parameter is deprecated"/>/>
+  <arg name="use_local_transform" default="false" doc="This parameter is deprecated"/>
   <arg name="sync" default="false" />
   <arg name="output_log_data" default="false" />
   <arg name="gnss_reinit_fitness" default="500.0" />
