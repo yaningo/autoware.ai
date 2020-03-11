@@ -725,7 +725,7 @@ static void imu_odom_calc(ros::Time current_time)
   current_pose_imu_odom.pitch = imu_pitch;
   current_pose_imu_odom.yaw = imu_yaw;
 
-  ROS_ERROR_STREAM("NDT IMU ODOM R: " << imu_roll << " P: "<< imu_pitch << " Y: " << imu_yaw);
+  ROS_DEBUG_STREAM("NDT IMU ODOM R: " << imu_roll << " P: "<< imu_pitch << " Y: " << imu_yaw);
 
   double diff_distance = odom.twist.twist.linear.x * diff_time;
   offset_imu_odom_x += diff_distance * cos(-current_pose_imu_odom.pitch) * cos(current_pose_imu_odom.yaw);
@@ -743,7 +743,7 @@ static void imu_odom_calc(ros::Time current_time)
   predict_pose_imu_odom.pitch = current_pose_imu_odom.pitch;
   predict_pose_imu_odom.yaw = current_pose_imu_odom.yaw;
 
-   ROS_ERROR_STREAM("NDT IMU ODOM X: " << predict_pose_imu_odom.x << " Y: "<< predict_pose_imu_odom.y << " Z: " << predict_pose_imu_odom.z);
+   ROS_DEBUG_STREAM("NDT IMU ODOM X: " << predict_pose_imu_odom.x << " Y: "<< predict_pose_imu_odom.y << " Z: " << predict_pose_imu_odom.z);
 
   previous_time = current_time;
 }
@@ -777,8 +777,8 @@ static void odom_calc(ros::Time current_time)
   predict_pose_odom.pitch = previous_pose.pitch + offset_odom_pitch;
   predict_pose_odom.yaw = previous_pose.yaw + offset_odom_yaw;
 
-  ROS_ERROR_STREAM("NDT ODOM R: " << predict_pose_odom.roll << " P: "<< predict_pose_odom.pitch << " Y: " << predict_pose_odom.yaw);
-  ROS_ERROR_STREAM("NDT ODOM X: " << predict_pose_odom.x << " Y: "<< predict_pose_odom.y << " Z: " << predict_pose_odom.z);
+  ROS_DEBUG_STREAM("NDT ODOM R: " << predict_pose_odom.roll << " P: "<< predict_pose_odom.pitch << " Y: " << predict_pose_odom.yaw);
+  ROS_DEBUG_STREAM("NDT ODOM X: " << predict_pose_odom.x << " Y: "<< predict_pose_odom.y << " Z: " << predict_pose_odom.z);
 
 
   previous_time = current_time;
@@ -862,7 +862,7 @@ static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
   // std::cout << __func__ << std::endl;
 
   odom = *input;
-  odom_calc(input->header.stamp);
+  //odom_calc(input->header.stamp);
 }
 
 // NOTE: Deprecated function
@@ -922,6 +922,7 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
     tf::StampedTransform imu_transform;
     try {
       imu_transform = getStaticTF(_base_frame, input->header.frame_id);
+      ROS_INFO("ndt_matching: Got IMU Transform");
 
     } catch (tf::TransformException& ex) {
 
@@ -1005,12 +1006,13 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
   }
   else
   {
+    imu.orientation = input->orientation;
     imu.angular_velocity.x = 0;
     imu.angular_velocity.y = 0;
     imu.angular_velocity.z = 0;
   }
 
-  imu_calc(input->header.stamp);
+  //imu_calc(input->header.stamp);
 
   previous_time = current_time;
   previous_imu_roll = imu_roll;
@@ -1110,7 +1112,6 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     if (_use_imu == true && _use_odom == true) {
       imu_odom_calc(current_scan_time);
-      odom_calc(current_scan_time);
     }
     if (_use_imu == true && _use_odom == false)
       imu_calc(current_scan_time);
@@ -1135,7 +1136,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     Eigen::AngleAxisf init_rotation_x(predict_pose_for_ndt.roll, Eigen::Vector3f::UnitX());
     Eigen::AngleAxisf init_rotation_y(predict_pose_for_ndt.pitch, Eigen::Vector3f::UnitY());
     Eigen::AngleAxisf init_rotation_z(predict_pose_for_ndt.yaw, Eigen::Vector3f::UnitZ());
-    Eigen::Matrix4f init_guess = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x) * tf_btol;
+    Eigen::Matrix4f init_guess = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x) * tf_btol; // Intrinsic z,y,x is equivalent to extrinsic x,y,z
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -1788,18 +1789,23 @@ int main(int argc, char** argv)
 
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 10, gnss_callback);
-  ros::Subscriber estimated_pose_sub = nh.subscribe("estimated_pose", _queue_size, estimated_pose_callback);
+  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback);
+  ros::Subscriber estimated_pose_sub = nh.subscribe("estimated_pose", 1, estimated_pose_callback);
   //  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
-  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 10, initialpose_callback);
-  ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
-  ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size * 10, odom_callback);
-  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size * 10, imu_callback);
+  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback);
+  ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback);
+  ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", 1, odom_callback);
+  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), 1, imu_callback);
 
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
 
-  ros::spin();
+  ros::Rate r(10);
+  while (nh.ok())
+  {
+    ros::spinOnce();
+    r.sleep();
+  }
 
   return 0;
 }
