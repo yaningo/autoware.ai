@@ -20,6 +20,11 @@
  Yuki KITSUKAWA
  */
 
+/*
+ Modified by Michael McConnell
+ 3/10/2019 To use imu orientation directly for imu_odom_calc
+*/
+
 #include <pthread.h>
 #include <chrono>
 #include <fstream>
@@ -711,29 +716,26 @@ static void imu_odom_calc(ros::Time current_time)
   static ros::Time previous_time = current_time;
   double diff_time = (current_time - previous_time).toSec();
 
-  double diff_imu_roll = imu.angular_velocity.x * diff_time;
-  double diff_imu_pitch = imu.angular_velocity.y * diff_time;
-  double diff_imu_yaw = imu.angular_velocity.z * diff_time;
+  double imu_roll, imu_pitch, imu_yaw;
+  tf::Quaternion imu_orientation;
+  tf::quaternionMsgToTF(imu.orientation, imu_orientation);
+  tf::Matrix3x3(imu_orientation).getRPY(imu_roll, imu_pitch, imu_yaw);
 
-  current_pose_imu_odom.roll += diff_imu_roll;
-  current_pose_imu_odom.pitch += diff_imu_pitch;
-  current_pose_imu_odom.yaw += diff_imu_yaw;
+  current_pose_imu_odom.roll = imu_roll;
+  current_pose_imu_odom.pitch = imu_pitch;
+  current_pose_imu_odom.yaw = imu_yaw;
 
   double diff_distance = odom.twist.twist.linear.x * diff_time;
   offset_imu_odom_x += diff_distance * cos(-current_pose_imu_odom.pitch) * cos(current_pose_imu_odom.yaw);
   offset_imu_odom_y += diff_distance * cos(-current_pose_imu_odom.pitch) * sin(current_pose_imu_odom.yaw);
   offset_imu_odom_z += diff_distance * sin(-current_pose_imu_odom.pitch);
 
-  offset_imu_odom_roll += diff_imu_roll;
-  offset_imu_odom_pitch += diff_imu_pitch;
-  offset_imu_odom_yaw += diff_imu_yaw;
-
   predict_pose_imu_odom.x = previous_pose.x + offset_imu_odom_x;
   predict_pose_imu_odom.y = previous_pose.y + offset_imu_odom_y;
   predict_pose_imu_odom.z = previous_pose.z + offset_imu_odom_z;
-  predict_pose_imu_odom.roll = previous_pose.roll + offset_imu_odom_roll;
-  predict_pose_imu_odom.pitch = previous_pose.pitch + offset_imu_odom_pitch;
-  predict_pose_imu_odom.yaw = previous_pose.yaw + offset_imu_odom_yaw;
+  predict_pose_imu_odom.roll = current_pose_imu_odom.roll;
+  predict_pose_imu_odom.pitch = current_pose_imu_odom.pitch;
+  predict_pose_imu_odom.yaw = current_pose_imu_odom.yaw;
 
   previous_time = current_time;
 }
@@ -848,7 +850,6 @@ static void odom_callback(const nav_msgs::Odometry::ConstPtr& input)
   // std::cout << __func__ << std::endl;
 
   odom = *input;
-  odom_calc(input->header.stamp);
 }
 
 static void imuUpsideDown(const sensor_msgs::Imu::Ptr input)
@@ -908,18 +909,18 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
   if (diff_time != 0)
   {
+    imu.orientation = input->orientation;
     imu.angular_velocity.x = diff_imu_roll / diff_time;
     imu.angular_velocity.y = diff_imu_pitch / diff_time;
     imu.angular_velocity.z = diff_imu_yaw / diff_time;
   }
   else
   {
+    imu.orientation = input->orientation;
     imu.angular_velocity.x = 0;
     imu.angular_velocity.y = 0;
     imu.angular_velocity.z = 0;
   }
-
-  imu_calc(input->header.stamp);
 
   previous_time = current_time;
   previous_imu_roll = imu_roll;
@@ -1023,7 +1024,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     Eigen::AngleAxisf init_rotation_x(predict_pose_for_ndt.roll, Eigen::Vector3f::UnitX());
     Eigen::AngleAxisf init_rotation_y(predict_pose_for_ndt.pitch, Eigen::Vector3f::UnitY());
     Eigen::AngleAxisf init_rotation_z(predict_pose_for_ndt.yaw, Eigen::Vector3f::UnitZ());
-    Eigen::Matrix4f init_guess = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x) * tf_btol;
+    Eigen::Matrix4f init_guess = (init_translation * init_rotation_z * init_rotation_y * init_rotation_x) * tf_btol; // Intrinsic z,y,x is equivalent to extrinsic x,y,z
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
