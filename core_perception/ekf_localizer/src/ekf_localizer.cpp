@@ -177,7 +177,7 @@ void EKFLocalizer::setCurrentResult()
   q_tf.setRPY(roll, pitch, yaw);
   tf2::convert(q_tf, current_ekf_pose_.pose.orientation);
 
-  current_ekf_twist_.header.frame_id = "base_link";
+  current_ekf_twist_.header.frame_id = child_frame_id_;
   current_ekf_twist_.header.stamp = ros::Time::now();
   current_ekf_twist_.twist.linear.x = ekf_.getXelement(IDX::VX);
   current_ekf_twist_.twist.angular.z = ekf_.getXelement(IDX::WZ);
@@ -560,9 +560,9 @@ void EKFLocalizer::measurementUpdatePose(const geometry_msgs::PoseStamped& pose)
  */
 void EKFLocalizer::measurementUpdateTwist(const geometry_msgs::TwistStamped& twist)
 {
-  if (twist.header.frame_id != "base_link")
+  if (twist.header.frame_id != child_frame_id_)
   {
-    ROS_WARN_DELAYED_THROTTLE(2.0, "twist frame_id must be base_link");
+    ROS_WARN_STREAM_DELAYED_THROTTLE(2.0, "twist frame_id must be " << child_frame_id_);
   }
 
   Eigen::MatrixXd X_curr(dim_x_, 1);  // curent state

@@ -204,7 +204,7 @@ static std::chrono::time_point<std::chrono::system_clock> matching_start, matchi
 static ros::Publisher time_ndt_matching_pub;
 static std_msgs::Float32 time_ndt_matching;
 
-static int _queue_size = 1000;
+static int _queue_size = 1;
 
 static ros::Publisher ndt_stat_pub;
 static autoware_msgs::NDTStat ndt_stat_msg;
@@ -435,6 +435,8 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   if (points_map_num != input->width)
   {
     std::cout << "Update points_map." << std::endl;
+    _map_frame = input->header.frame_id; // Update map frame to be the frame of the map points topic
+
     _map_frame = input->header.frame_id; // Update map frame to be the frame of the map points topic
 
     points_map_num = input->width;
@@ -1367,7 +1369,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_imu;
     predict_q_imu.setRPY(predict_pose_imu.roll, predict_pose_imu.pitch, predict_pose_imu.yaw);
-    predict_pose_imu_msg.header.frame_id = "map";
+    predict_pose_imu_msg.header.frame_id = _map_frame;
     predict_pose_imu_msg.header.stamp = input->header.stamp;
     predict_pose_imu_msg.pose.position.x = predict_pose_imu.x;
     predict_pose_imu_msg.pose.position.y = predict_pose_imu.y;
@@ -1380,7 +1382,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_odom;
     predict_q_odom.setRPY(predict_pose_odom.roll, predict_pose_odom.pitch, predict_pose_odom.yaw);
-    predict_pose_odom_msg.header.frame_id = "map";
+    predict_pose_odom_msg.header.frame_id = _map_frame;
     predict_pose_odom_msg.header.stamp = input->header.stamp;
     predict_pose_odom_msg.pose.position.x = predict_pose_odom.x;
     predict_pose_odom_msg.pose.position.y = predict_pose_odom.y;
@@ -1393,7 +1395,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     tf::Quaternion predict_q_imu_odom;
     predict_q_imu_odom.setRPY(predict_pose_imu_odom.roll, predict_pose_imu_odom.pitch, predict_pose_imu_odom.yaw);
-    predict_pose_imu_odom_msg.header.frame_id = "map";
+    predict_pose_imu_odom_msg.header.frame_id = _map_frame;
     predict_pose_imu_odom_msg.header.stamp = input->header.stamp;
     predict_pose_imu_odom_msg.pose.position.x = predict_pose_imu_odom.x;
     predict_pose_imu_odom_msg.pose.position.y = predict_pose_imu_odom.y;
@@ -1681,6 +1683,7 @@ int main(int argc, char** argv)
   private_nh.getParam("base_frame", _base_frame);
   private_nh.getParam("use_estimated_pose", _use_estimated_pose);
   private_nh.param<double>("gnss_reinit_fitness", _gnss_reinit_fitness, 500.0);
+  private_nh.getParam("base_frame", _base_frame);
 
 
   if (nh.getParam("localizer", _localizer) == false)
@@ -1789,13 +1792,13 @@ int main(int argc, char** argv)
 
   // Subscribers
   ros::Subscriber param_sub = nh.subscribe("config/ndt", 10, param_callback);
-  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", 1, gnss_callback);
+  ros::Subscriber gnss_sub = nh.subscribe("gnss_pose", _queue_size, gnss_callback);
   ros::Subscriber estimated_pose_sub = nh.subscribe("estimated_pose", 1, estimated_pose_callback);
   //  ros::Subscriber map_sub = nh.subscribe("points_map", 1, map_callback);
-  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", 1, initialpose_callback);
-  ros::Subscriber points_sub = nh.subscribe("filtered_points", 1, points_callback);
-  ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", 1, odom_callback);
-  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), 1, imu_callback);
+  ros::Subscriber initialpose_sub = nh.subscribe("initialpose", _queue_size, initialpose_callback);
+  ros::Subscriber points_sub = nh.subscribe("filtered_points", _queue_size, points_callback);
+  ros::Subscriber odom_sub = nh.subscribe("/vehicle/odom", _queue_size, odom_callback);
+  ros::Subscriber imu_sub = nh.subscribe(_imu_topic.c_str(), _queue_size, imu_callback);
 
   pthread_t thread;
   pthread_create(&thread, NULL, thread_func, NULL);
