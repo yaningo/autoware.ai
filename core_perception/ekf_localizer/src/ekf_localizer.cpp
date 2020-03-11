@@ -562,7 +562,7 @@ void EKFLocalizer::measurementUpdateTwist(const geometry_msgs::TwistStamped& twi
 {
   if (twist.header.frame_id != child_frame_id_)
   {
-    ROS_WARN_DELAYED_THROTTLE(2.0, "twist frame_id must be " + child_frame_id_);
+    ROS_WARN_DELAYED_THROTTLE(2.0, "twist frame_id must be " + child_frame_id_.c_str());
   }
 
   Eigen::MatrixXd X_curr(dim_x_, 1);  // curent state
