@@ -1,4 +1,4 @@
-set -ex
+set -exo pipefail
 
 dir=~
 if [[ -n ${1} ]]; then
