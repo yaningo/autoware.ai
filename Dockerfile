@@ -4,7 +4,7 @@ COPY --chown=carma . /home/carma/autoware.ai
 RUN /home/carma/autoware.ai/docker/checkout.sh
 RUN ./home/carma/autoware.ai/docker/install.sh
 
-FROM usdotfhwastol/carma-base:3.7.0
+FROM usdotfhwastol/carma-base:3.7.1
 
 ARG BUILD_DATE="NULL"
 ARG VCS_REF="NULL"
