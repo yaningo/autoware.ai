@@ -21,6 +21,12 @@
 
 #include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
+#include <lanelet2_core/primitives/Area.h>
+#include <lanelet2_core/primitives/LineString.h>
+#include <lanelet2_core/primitives/Point.h>
+#include <lanelet2_core/primitives/RegulatoryElement.h>
+#include <lanelet2_core/primitives/BasicRegulatoryElements.h>
+#include <lanelet2_core/primitives/Primitive.h>
 
 #include <geometry_msgs/PolygonStamped.h>
 
@@ -28,6 +34,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 namespace lanelet
 {
@@ -41,6 +48,35 @@ namespace utils
 {
 namespace query
 {
+enum direction {CHECK_CHILD,CHECK_PARENT};
+struct References
+{
+    References() {};
+    struct comparator
+    {
+        template <typename PrimT>
+        bool operator()(const PrimT& prim1, const PrimT& prim2) const {
+            return prim1.id() == prim2.id();
+        }
+        bool operator()(const lanelet::RegulatoryElementConstPtr& prim1, 
+        const lanelet::RegulatoryElementConstPtr& prim2) const {
+            return prim1->id() == prim2->id();
+        }
+    };
+    std::unordered_set<lanelet::ConstLineString3d, std::hash<lanelet::ConstLineString3d>, comparator> lss;
+    std::unordered_set<lanelet::ConstLanelet, std::hash<lanelet::ConstLanelet>, comparator> llts;
+    std::unordered_set<lanelet::ConstArea, std::hash<lanelet::ConstArea>, comparator> areas;
+    std::unordered_set<lanelet::RegulatoryElementConstPtr, std::hash<lanelet::RegulatoryElementConstPtr>, comparator> regems;
+};
+/**
+ * [findReferences finds all primitives that reference the given primitive in a given map]
+ * @param  ll_Map [input lanelet map]
+ * @return        [References object with referenced element sets for each primitive layers]
+ * NOTE: Polygons and Compound primitives such as LaneletOrArea are not currently supported
+ */
+template <class primT>
+References findReferences (const primT& prim, const lanelet::LaneletMapPtr ll_Map);
+
 /**
  * [laneletLayer converts laneletLayer into lanelet vector]
  * @param  ll_Map [input lanelet map]
@@ -114,5 +150,9 @@ std::vector<lanelet::ConstLineString3d> stopSignStopLines(const lanelet::ConstLa
 }  // namespace query
 }  // namespace utils
 }  // namespace lanelet
+
+// Template functions cannot be linked unless the implementation is provided
+// Therefore include implementation to allow for template functions
+#include "../../../lib/query.tpp"
 
 #endif  // LANELET2_EXTENSION_UTILITY_QUERY_H
