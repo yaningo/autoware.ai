@@ -19,6 +19,7 @@
 #include <lanelet2_io/Io.h>
 #include <lanelet2_io/io_handlers/Factory.h>
 #include <lanelet2_io/io_handlers/Writer.h>
+#include <lanelet2_extension/io/autoware_osm_parser.h>
 
 #include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
 #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
@@ -41,6 +42,32 @@ using ::testing::ReturnArg;
 namespace lanelet
 {
 using namespace lanelet::units::literals;
+TEST(MapLoadingTest, parseMapParams)
+{
+  int projector_type = 1; // default value
+  std::string target_frame, lanelet2_filename;
+  std::string correct_georeference = "+proj=tmerc +lat_0=39.46636844371259 +lon_0=-76.16919523566943 +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +vunits=m +no_defs ";
+  // Test regular way
+  lanelet2_filename = "resources/test_map.osm";
+  lanelet::io_handlers::AutowareOsmParser::parseMapParams(lanelet2_filename, &projector_type, &target_frame);
+  EXPECT_EQ(correct_georeference, target_frame);
+  // Test v="string" way
+  target_frame = "";
+  lanelet2_filename = "resources/test_map_v.osm";
+  lanelet::io_handlers::AutowareOsmParser::parseMapParams(lanelet2_filename, &projector_type, &target_frame);
+  EXPECT_EQ(correct_georeference, target_frame);
+  // Test v="string" way
+  target_frame = "";
+  lanelet2_filename = "resources/test_map_value.osm";
+  lanelet::io_handlers::AutowareOsmParser::parseMapParams(lanelet2_filename, &projector_type, &target_frame);
+  EXPECT_EQ(correct_georeference, target_frame);
+  // Test unsupported way
+  target_frame = "";
+  lanelet2_filename = "resources/test_map_nogeoreference.osm";
+  EXPECT_THROW(lanelet::io_handlers::AutowareOsmParser::parseMapParams(lanelet2_filename, &projector_type, &target_frame), lanelet::ParseError);
+}
+
+
 
 TEST(MapLoadingTest, mapLoadingTest)
 {
