@@ -15,7 +15,7 @@
 #  the License.
 
 # This script takes a system release name and version number as arguments, and 
-# updates version dependencies in Dockerfile and /docker/checkout.sh accordingly.
+# updates version dependencies in Dockerfile.
 
 # The -u | --unprompted option can be used to skip the interactive prompts, and
 # provide arguments directly from the commandline.
@@ -56,7 +56,7 @@ if git ls-remote -q | grep $RELEASE_BRANCH; then
 
     git tag -a $SYSTEM_RELEASE -m "$SYSTEM_RELEASE version tag."
 
-    echo "Dockerfile and checkout.sh updated, committed, and tagged."
+    echo "Dockerfile updated, committed, and tagged."
 else
     echo "$RELEASE_BRANCH does not exist. Exiting script."
     exit 0
