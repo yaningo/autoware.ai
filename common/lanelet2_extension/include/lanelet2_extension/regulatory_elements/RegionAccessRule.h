@@ -37,6 +37,8 @@ public:
   static constexpr char RuleName[] = "region_access_rule";
   std::unordered_set<std::string> participants_;
 
+  std::string getRuleName() const override { return RegionAccessRule::RuleName; };
+
   /**
    * @brief Returns the lanelets this rule applies to
    *

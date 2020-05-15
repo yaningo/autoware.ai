@@ -17,6 +17,9 @@ class TrafficLight : public RegulatoryElement {
  public:
   using Ptr = std::shared_ptr<TrafficLight>;
   static constexpr char RuleName[] = "traffic_light";
+
+  std::string getRuleName() const override { return TrafficLight::RuleName; };
+
   //! Directly construct a stop line from its required rule parameters.
   //! Might modify the input data in oder to get correct tags.
   static Ptr make(Id id, const AttributeMap& attributes, const LineStringsOrPolygons3d& trafficLights,
@@ -87,6 +90,8 @@ class RightOfWay : public RegulatoryElement {
  public:
   using Ptr = std::shared_ptr<RightOfWay>;
   static constexpr char RuleName[] = "right_of_way";
+
+  std::string getRuleName() const override { return RightOfWay::RuleName; };
 
   /**
    * @brief Create a valid Right of Way object
@@ -164,6 +169,8 @@ class AllWayStop : public RegulatoryElement {
   using Ptr = std::shared_ptr<AllWayStop>;
   static constexpr char RuleName[] = "all_way_stop";
 
+  std::string getRuleName() const override { return AllWayStop::RuleName; };
+
   /**
    * @brief Create a valid all way stop object
    * @param id id for this rule
@@ -230,6 +237,8 @@ class TrafficSign : public RegulatoryElement {
  public:
   using Ptr = std::shared_ptr<TrafficSign>;
   static constexpr char RuleName[] = "traffic_sign";
+
+  std::string getRuleName() const override { return TrafficSign::RuleName; };
 
   /**
    * @brief Create a valid TrafficSign object
@@ -336,6 +345,8 @@ class SpeedLimit : public TrafficSign {
  public:
   using Ptr = std::shared_ptr<SpeedLimit>;
   static constexpr char RuleName[] = "speed_limit";
+
+  std::string getRuleName() const override { return SpeedLimit::RuleName; };
 
   //! Create a speed limit regulatory element. Similar to a traffic sign.
   static Ptr make(Id id, const AttributeMap& attributes, const TrafficSignsWithType& trafficSigns,

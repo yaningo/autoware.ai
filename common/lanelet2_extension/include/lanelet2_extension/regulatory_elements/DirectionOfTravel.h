@@ -42,6 +42,8 @@ public:
   std::unordered_set<std::string> participants_;
   std::string direction_;
 
+  std::string getRuleName() const override { return DirectionOfTravel::RuleName; };
+
   /**
    * @brief Returns the lanelets this rule applies to
    *

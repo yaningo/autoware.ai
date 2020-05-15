@@ -42,6 +42,8 @@ public:
   std::unordered_set<std::string> left_participants_;
   std::unordered_set<std::string> right_participants_;
 
+  std::string getRuleName() const override { return PassingControlLine::RuleName; };
+
   /**
    * @brief get the list of contigious line strings that from this control line
    * @return the lines as a list of line strings

@@ -237,6 +237,9 @@ class RegulatoryElement  // NOLINT
   //! applies a visitor to every parameter in the regulatory element
   void applyVisitor(RuleParameterVisitor& visitor) const;
 
+  //! Getter for the rule name to support polymorphic behavior
+  virtual std::string getRuleName() const = 0;
+
  protected:
   const_iterator begin() const { return constData()->parameters.begin(); }
   const_iterator end() const { return constData()->parameters.end(); }
@@ -289,6 +292,8 @@ class GenericRegulatoryElement final : public Primitive<RegulatoryElement> {
 
   //! getter for all parameters of a regulatory element.
   RuleParameterMap& parameters() noexcept { return data()->parameters; }
+
+  std::string getRuleName() const override { return GenericRegulatoryElement::RuleName; };
 };
 
 namespace traits {

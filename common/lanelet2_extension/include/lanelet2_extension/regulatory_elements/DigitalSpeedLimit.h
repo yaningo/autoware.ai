@@ -41,6 +41,8 @@ public:
   Velocity speed_limit_ = 0;
   std::unordered_set<std::string> participants_;
 
+  std::string getRuleName() const override { return DigitalSpeedLimit::RuleName; };
+
   /**
    * @brief Returns the lanelets this rule applies to
    *
