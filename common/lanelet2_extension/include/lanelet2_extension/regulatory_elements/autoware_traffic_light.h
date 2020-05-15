@@ -38,6 +38,8 @@ public:
   using Ptr = std::shared_ptr<AutowareTrafficLight>;
   static constexpr char RuleName[] = "traffic_light";
 
+  std::string getRuleName() const override { return AutowareTrafficLight::RuleName; };
+
   //! Directly construct a stop line from its required rule parameters.
   //! Might modify the input data in oder to get correct tags.
   static Ptr make(Id id, const AttributeMap& attributes, const LineStringsOrPolygons3d& trafficLights,
