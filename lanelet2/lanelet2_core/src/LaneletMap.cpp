@@ -233,6 +233,15 @@ struct UsageLookup<RegulatoryElementPtr> {
       }
     }
   }
+  void remove(const RegulatoryElementPtr& prim) {
+    for (auto it = ownedLookup.begin(); it != ownedLookup.end(); ){
+      if (it->second->id() == prim->id()) { 
+        ownedLookup.erase(it++); 
+      } else { 
+        ++it;          
+      }
+    }
+  }
   std::unordered_multimap<ConstRuleParameter, RegulatoryElementPtr> ownedLookup;
 };
 template <>
@@ -268,6 +277,7 @@ struct UsageLookup<Lanelet> {
 template <>
 struct UsageLookup<Point3d> {
   void add(const Point3d& /*unused*/) {}
+  void remove(const Point3d& /*unused*/) {}
 };
 
 template <typename T>
@@ -410,6 +420,42 @@ void PrimitiveLayer<RegulatoryElementPtr>::add(const PrimitiveLayer<RegulatoryEl
   tree_->usage.add(element);
   elements_.insert({element->id(), element});
   tree_->insert(element);
+}
+
+template <typename T>
+void PrimitiveLayer<T>::remove(Id id) {
+  // find the element with this id (the user must make sure it exists)
+  T element = elements_.find(id)->second;
+  
+  // remove from usage lookup
+  for (auto it = tree_->usage.ownedLookup.begin(); it != tree_->usage.ownedLookup.end(); )
+  {
+    if (it->second.id() == element.id()) { 
+      tree_->usage.ownedLookup.erase(it++); 
+    } else { 
+      ++it;          
+    }
+  }
+  // erase id from registered elements in this layer
+  elements_.erase(id);
+  // erase from tree
+  tree_->erase(element);
+}
+
+template <>
+void PrimitiveLayer<Point3d>::remove(Id id) {
+  Point3d p = elements_.find(id)->second;
+  tree_->usage.remove(p);
+  elements_.erase(id);
+  tree_->erase(p);
+}
+
+template <>
+void PrimitiveLayer<RegulatoryElementPtr>::remove(Id id) {
+  RegulatoryElementPtr element = elements_.find(id)->second;
+  tree_->usage.remove(element);
+  elements_.erase(id);
+  tree_->erase(element);
 }
 
 template <typename T>
@@ -613,6 +659,31 @@ void LaneletMap::add(Area area) {
   areaLayer.add(area);
   for (const auto& regElem : area.regulatoryElements()) {
     add(regElem);
+  }
+}
+
+void LaneletMap::remove(const RegulatoryElementPtr& regElem)
+{
+  if (!regElem) 
+  {
+    throw NullptrError("Empty regulatory element passed to remove()!");
+  }
+  if (regElem->id() == InvalId)
+  {
+    throw InvalidInputError("Regulatory element with InvalidId is passed to remove()!");
+  }
+  if (regulatoryElementLayer.exists(regElem->id()))
+  {
+    regulatoryElementLayer.remove(regElem->id());
+  }
+  // remove local copies of regem inside lanelet and areas
+  for (Lanelet llt : laneletLayer.findUsages(regElem))
+  {
+    llt.removeRegulatoryElement(regElem);
+  }
+  for (Area area : areaLayer.findUsages(regElem))
+  {
+    area.removeRegulatoryElement(regElem);
   }
 }
 

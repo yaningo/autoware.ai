@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <lanelet2_extension/utility/query.h>
+#include <lanelet2_extension/utility/utilities.h>
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <math.h>
 #include <ros/ros.h>
@@ -117,7 +118,6 @@ public:
 
 private:
 };
-
 TEST_F(TestSuite, QueryReferences)
 {
   // Test references to a point
