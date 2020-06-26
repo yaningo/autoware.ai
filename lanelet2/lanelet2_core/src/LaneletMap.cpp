@@ -307,15 +307,9 @@ struct UsageLookup<Lanelet> {
     }
   }
   void update(Lanelet ll, ConstLineString3d ls) {
-    auto it = ownedLookup.find(ls);
-    if (it != ownedLookup.end() && it->second.id() == ll.id())
-      return;
     ownedLookup.insert(std::make_pair(ls, ll));
   }
   void update(Lanelet ll, RegulatoryElementConstPtr regem_ptr) {
-    auto it = regElemLookup.find(regem_ptr);
-    if (it != regElemLookup.end() && it->second.id() == ll.id())
-      return;
     regElemLookup.insert(std::make_pair(regem_ptr, ll));
   }
 
@@ -536,8 +530,8 @@ void PrimitiveLayer<RegulatoryElementPtr>::remove(Id id) {
 }
 
 template <>
-template <>
-void PrimitiveLayer<RegulatoryElementPtr>::remove(Id element_id, const traits::ConstPrimitiveType<traits::OwnedT<PrimitiveT>>& subelement) {
+template <typename SubT>
+void PrimitiveLayer<RegulatoryElementPtr>::remove(Id element_id, const SubT& subelement) {
   RegulatoryElementPtr element = elements_.find(element_id)->second;
   tree_->usage.remove(element, subelement);
 }
@@ -774,6 +768,46 @@ void LaneletMap::add(Area area) {
   }
 }
 
+void LaneletMap::remove(Lanelet ll, const RegulatoryElementPtr& regElem)
+{
+  if (ll.id() == InvalId) {
+    throw InvalidInputError("Lanelet element with InvalId is passed to remove()!");
+  }
+  else if (!laneletLayer.exists(ll.id()))
+  {
+    throw InvalidInputError("Lanelet element that is not in the map is passed to remove()!");
+  }
+  if (!regElem) {
+    throw NullptrError("Empty regulatory element passed to remove()!");
+  }
+  
+  if (regElem->id() == InvalId) {
+    throw InvalidInputError("Regulatory element with InvalId is passed to remove()!");
+  }
+  else if (!regulatoryElementLayer.exists(regElem->id())) {
+    throw InvalidInputError("Id of the regulatory element is not registered in the map");
+  }
+ 
+  lanelet::Lanelets parent_llts = laneletLayer.findUsages(regElem);
+
+  if (std::find(parent_llts.begin(), parent_llts.end(), ll) == parent_llts.end()) {
+    throw InvalidInputError("In remove function: The specified lanelet does not hold a regulatory element with that Id!");
+  }
+
+  // remove local copies of regem inside lanelets and their relationship in laneletlayer
+  // as well as the connection of this lanelet to the regem as a parameter
+  for (Lanelet llt : laneletLayer.findUsages(regElem))
+  {
+    if (llt.id() == ll.id())
+    {
+      laneletLayer.remove(llt.id(), regElem);
+      llt.removeRegulatoryElement(regElem);
+      regulatoryElementLayer.remove(regElem->id(), llt);
+    }
+  }
+}
+
+
 void LaneletMap::remove(const RegulatoryElementPtr& regElem)
 {
   if (!regElem) 
@@ -829,13 +863,12 @@ void LaneletMap::update(Lanelet ll, const RegulatoryElementPtr& regElem)
   else {
     utils::registerId(regElem->id());
   }
- 
   // Add the regem to the map in general (regulatoryElementLayer)
   add(regElem);
-  // Add this regem to specified ll so that it can be queried in laneletLayer
-  laneletLayer.update(ll.id(), regElem);
   // Add this to the lanelet itself
   laneletLayer.find(ll.id())->addRegulatoryElement(regElem);
+  // Add this regem to specified ll so that it can be queried in laneletLayer
+  laneletLayer.update(ll.id(), regElem);
 }
 
 void LaneletMap::add(const RegulatoryElementPtr& regElem) {
