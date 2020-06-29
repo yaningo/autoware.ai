@@ -1,4 +1,6 @@
-set -ex
+#!/bin/bash
+
+set -exo pipefail
 
 dir=~
 if [[ -n ${1} ]]; then

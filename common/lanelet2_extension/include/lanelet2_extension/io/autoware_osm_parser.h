@@ -52,7 +52,9 @@ public:
 
   /**
    * [parseMapParams parses GeoReference (i.e. map parameters) info from osm file and loads default ECEF proj strings]
-   * NOTE: projector_type = 0 is currently not supported by CARMA
+   * NOTE: geoReference is expected to be encoded inside bracket:<geoReference>string</geoReference>, or as "v" or "value"
+   *       attributes: <geoReference v="string"/> or <geoReference value="string"/>
+   *       projector_type = 0 is currently not supported by CARMA
    *       +geoidgrids is also currently not a supported georeference field by the parser
    * @param filename            [path to osm file]
    * @param projector_type      [parsed information about map projector_type: Currently it supposes 0 as Autoware default MGRSProjector and 1 as CARMA LocalFrameProjector]

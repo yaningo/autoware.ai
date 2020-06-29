@@ -77,7 +77,9 @@ void AutowareOsmParser::parseVersions(const std::string& filename, std::string* 
   auto result = doc.load_file(filename.c_str());
   if (!result)
   {
-    throw lanelet::ParseError(std::string("Errors occured while parsing osm file: ") + result.description());
+    throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
+    std::string(":\nErrors occured while parsing osm file: ") + result.description());
+    return;
   }
 
   auto osmNode = doc.child("osm");
@@ -93,7 +95,7 @@ void AutowareOsmParser::parseMapParams (const std::string& filename, int* projec
   if (target_frame == nullptr)
   {
     throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
-    std::string(": Errors occured while parsing .osm file - target frame is a null pointer!"));
+    std::string(":\nErrors occured while parsing .osm file - target frame is a null pointer!"));
     return;
   }
 
@@ -101,16 +103,40 @@ void AutowareOsmParser::parseMapParams (const std::string& filename, int* projec
   auto result = doc.load_file(filename.c_str());
   if (!result)
   {
-    throw lanelet::ParseError(std::string("Errors occured while parsing .osm file: ") + result.description());
+    throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
+    std::string(":\nErrors occured while parsing .osm file: ") + result.description());
+    return;
   }
 
   auto osmNode = doc.child("osm");
   auto geoRef = osmNode.child("geoReference");
-
+  std::string raw_geo_ref = "";
+  
   if (geoRef)
   {
-    std::string raw_geo_ref = geoRef.child_value();
-
+    // check common ways the geoReference might have been encoded in the map
+    if (std::string(geoRef.child_value()) != "")
+    {
+      raw_geo_ref = geoRef.child_value();
+    }
+    else if(geoRef.attribute("v"))
+    {
+      raw_geo_ref = geoRef.attribute("v").value();
+    }
+    else if (geoRef.attribute("value"))
+    {
+      raw_geo_ref = geoRef.attribute("value").value();
+    }
+  }
+  // parser was not able to find a valid geoReference from the map
+  if (raw_geo_ref == "")
+  {
+    throw lanelet::ParseError(std::string("In function ") + __FUNCTION__ + 
+    std::string(":\nWhile parsing .osm file, geoReference was not found! Please check geoReference syntax in vector_map.osm"));
+    return;
+  }
+  else
+  {
     // Filter unnecessary part out of georeference.
     std::vector<std::string> buffer;
     boost::split(buffer,  raw_geo_ref, boost::is_any_of(" "));
@@ -123,10 +149,6 @@ void AutowareOsmParser::parseMapParams (const std::string& filename, int* projec
         std::cerr << "Removing +geoidgrids from input projection as this is not currently supported by AutowareOsmParser" << std::endl;
       }
     }
-  }
-  else
-  {
-    throw lanelet::ParseError(std::string("While parsing .osm file, geoReference was not found!"));
   }
 
   // Default values
