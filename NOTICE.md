@@ -1,6 +1,6 @@
 ## Note
 
-This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/carma-platform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
 
 ### For developers working in this repository:
 
@@ -53,4 +53,10 @@ For any modified file please follow these steps to ensure proper documentation o
 - Undid deletion of the colcon_release script which was removed in Autoware.ai v1.13 as it is still used by the carma_autoware_build script
   - 11/18/2019
   - Michael McConnell
+
+- Updated to revise the way centerline recalulation works to better
+  reflect the kinds of maps that CARMA has and to work better with
+  the CARMA World Model.
+  - 3/11/2020
+  - Kyle Rush
 

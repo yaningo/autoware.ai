@@ -243,6 +243,12 @@ class PrimitiveLayer {
 
   void add(const PrimitiveT& element);
   void remove(Id element);
+  // removes specified subelement from the element's UsageLookup
+  template <typename SubT>
+  void remove(Id element_id, const SubT& subelement);
+  // adds specified subelement to the the element's UsageLookup
+  template <typename SubT>
+  void update(Id element_id, const SubT& subelement);
 
   // NOLINTNEXTLINE
   Map elements_;  //!< the list of elements in this layer
@@ -377,7 +383,7 @@ class LaneletMap : public LaneletMapLayers {
 
   /**
    * @brief adds a lanelet and all the elements it owns to the map
-   * @throws InvalidInputError if lanelet has a reglatory element without
+   * @throws InvalidInputError if lanelet has a regulatory element without
    * members
    *
    * If the lanelet or elements owned by the lanelet have InvalId as Id, they
@@ -385,6 +391,17 @@ class LaneletMap : public LaneletMapLayers {
    * sure that the id has not already been for a different element.
    */
   void add(Lanelet lanelet);
+
+  /**
+   * @brief adds the regElem to specified ll that is in the map
+   * @throws NullptrError if has a regulatory element without members and 
+   * @throws InvalidInputError if lanelet is not in the map, or it has InvalId, or
+   *         if regElem that is different from the one in the map with same ID is passed,
+   *         this regElem and lanelet combination is already there
+   * Except above, if the new element that will be owned by lanelet have InvalId as Id, they
+   * will be assigned a new, unique id.
+   */
+  void update(Lanelet ll, const RegulatoryElementPtr& regElem);
 
   /**
    * @brief adds an area and all the elements it owns
@@ -434,6 +451,30 @@ class LaneletMap : public LaneletMapLayers {
    * sure that the id has not already been for a different element.
    */
   void add(Point3d point);
+
+  /**
+   * @brief removes the regElem from the specified ll that is in the map. Used when one regulatory element is appied 
+   *        to multiple lanelets
+   * @throw NullptrError if regElem is a nullptr
+   * @throw InvalidInputError if lanelet or regem is not in the map, or they have InvalId, or
+   *         if regElem and lanelet ID combination that is not in the map
+   * NOTE: the user must make sure that the id associated to each of the element is correctly
+   *       referencing those with correct data
+   */
+  void remove(Lanelet ll, const RegulatoryElementPtr& regElem);
+
+  /**
+   * @brief removes the regulatory element without removing its referenced parameters
+   * @param regElem regulatory element to be removed
+   * @throw NullptrError if regElem is a nullptr
+   * @throw InvalidInputError if regElem has InvalId as Id
+   *
+   * NOTE: currently removing this regElem will not remove elements that it owns from the map.
+   *       This means that elements that are no longer being referenced anywhere would still remain in the map.
+   *       The function is expected to be overloaded with remaining primitive types in the future.
+   */
+  void remove(const RegulatoryElementPtr& regElem);
+
 };
 
 /**
