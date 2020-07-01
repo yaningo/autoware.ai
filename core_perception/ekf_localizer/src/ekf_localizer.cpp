@@ -154,8 +154,9 @@ void EKFLocalizer::showCurrentX()
  */
 void EKFLocalizer::setCurrentResult()
 {
+  ros::Time now = ros::Time::now();
   current_ekf_pose_.header.frame_id = pose_frame_id_;
-  current_ekf_pose_.header.stamp = ros::Time::now();
+  current_ekf_pose_.header.stamp = now;
   current_ekf_pose_.pose.position.x = ekf_.getXelement(IDX::X);
   current_ekf_pose_.pose.position.y = ekf_.getXelement(IDX::Y);
 
@@ -178,7 +179,7 @@ void EKFLocalizer::setCurrentResult()
   tf2::convert(q_tf, current_ekf_pose_.pose.orientation);
 
   current_ekf_twist_.header.frame_id = child_frame_id_;
-  current_ekf_twist_.header.stamp = ros::Time::now();
+  current_ekf_twist_.header.stamp = now;
   current_ekf_twist_.twist.linear.x = ekf_.getXelement(IDX::VX);
   current_ekf_twist_.twist.angular.z = ekf_.getXelement(IDX::WZ);
 }
