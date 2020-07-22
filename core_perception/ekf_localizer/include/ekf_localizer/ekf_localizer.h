@@ -51,6 +51,7 @@ private:
   ros::Publisher pub_debug_;             //!< @brief debug info publisher
   ros::Publisher pub_measured_pose_;     //!< @brief debug measurement pose publisher
   ros::Publisher pub_yaw_bias_;          //!< @brief ekf estimated yaw bias publisher
+  ros::Publisher pub_initial_pose_forward_;
   ros::Subscriber sub_initialpose_;      //!< @brief initial pose subscriber
   ros::Subscriber sub_pose_;             //!< @brief measurement pose subscriber
   ros::Subscriber sub_twist_;            //!< @brief measurement twist subscriber

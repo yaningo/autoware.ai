@@ -77,6 +77,7 @@ EKFLocalizer::EKFLocalizer() : nh_(""), pnh_("~"), dim_x_(6 /* x, y, yaw, yaw_bi
   pub_twist_ = nh_.advertise<geometry_msgs::TwistStamped>("ekf_twist", 1);
   pub_twist_cov_ = nh_.advertise<geometry_msgs::TwistWithCovarianceStamped>("ekf_twist_with_covariance", 1);
   pub_yaw_bias_ = pnh_.advertise<std_msgs::Float64>("estimated_yaw_bias", 1);
+  pub_initial_pose_forward_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("ekf_initial_pose", 1);
   sub_initialpose_ = nh_.subscribe("initialpose", 1, &EKFLocalizer::callbackInitialPose, this);
   sub_pose_with_cov_ = nh_.subscribe("in_pose_with_covariance", 1, &EKFLocalizer::callbackPoseWithCovariance, this);
   sub_pose_ = nh_.subscribe("in_pose", 1, &EKFLocalizer::callbackPose, this);
@@ -268,6 +269,10 @@ void EKFLocalizer::callbackInitialPose(const geometry_msgs::PoseWithCovarianceSt
   P(IDX::WZ, IDX::WZ) = 0.01;
 
   ekf_.init(X, P, extend_state_step_);
+  // After initializing EKF forward the initial pose as a trigger for other downstream nodes that initialization is completed
+  geometry_msgs::PoseWithCovarianceStamped updated_initialpose = initialpose;
+  updated_initialpose.header.stamp = ros::Time::now();
+  pub_initial_pose_forward_.publish(updated_initialpose);
 };
 
 /*
