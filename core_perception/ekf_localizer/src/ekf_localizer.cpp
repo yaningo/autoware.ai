@@ -244,6 +244,7 @@ bool EKFLocalizer::getTransformFromTF(std::string parent_frame, std::string chil
  */
 void EKFLocalizer::callbackInitialPose(const geometry_msgs::PoseWithCovarianceStamped& initialpose)
 {
+  initializing_ = true;
   geometry_msgs::TransformStamped transform;
   if (!getTransformFromTF(pose_frame_id_, initialpose.header.frame_id, transform))
   {
@@ -269,6 +270,11 @@ void EKFLocalizer::callbackInitialPose(const geometry_msgs::PoseWithCovarianceSt
   P(IDX::WZ, IDX::WZ) = 0.01;
 
   ekf_.init(X, P, extend_state_step_);
+
+
+  prev_initial_pose_ = initialpose.pose.pose;
+
+
   // After initializing EKF forward the initial pose as a trigger for other downstream nodes that initialization is completed
   geometry_msgs::PoseWithCovarianceStamped updated_initialpose = initialpose;
   updated_initialpose.header.stamp = ros::Time::now();
@@ -677,6 +683,13 @@ bool EKFLocalizer::mahalanobisGate(const double& dist_max, const Eigen::MatrixXd
  */
 void EKFLocalizer::publishEstimateResult()
 {
+  if (initializing_ && 
+    fabs(prev_initial_pose_.position.x - current_ekf_pose_.pose.position.x) < 0.01 && 
+    fabs(prev_initial_pose_.position.y - current_ekf_pose_.pose.position.y) < 0.01 &&
+    fabs(prev_initial_pose_.position.z - current_ekf_pose_.pose.position.z) < 0.01) {
+    initializing_ = false;
+    return;
+  }
   ros::Time current_time = ros::Time::now();
   Eigen::MatrixXd X(dim_x_, 1);
   Eigen::MatrixXd P(dim_x_, dim_x_);

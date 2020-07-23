@@ -103,6 +103,9 @@ private:
   double proc_cov_vx_d_;        //!< @brief  discrete process noise in d_vx=0
   double proc_cov_wz_d_;        //!< @brief  discrete process noise in d_wz=0
 
+  bool initializing_ = false;
+  geometry_msgs::Pose prev_initial_pose_;
+
   enum IDX
   {
     X = 0,
