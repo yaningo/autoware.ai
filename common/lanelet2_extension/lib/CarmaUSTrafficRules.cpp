@@ -250,27 +250,35 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit, sL;
+  Velocity speed_limit, sL; //Speed Limit values
   for (auto sign_speed_limit : sign_speed_limits)
   {
-    sL = trafficSignToVelocity(sign_speed_limit->type());
+    sL = trafficSignToVelocity(sign_speed_limit->type()); //Retrieve speed limit information from  trafficSignToVelocity function
 
+    //Determine whether or not the value exceeds the predetermined maximum speed limit value.
     if (sL > 80_mph)
     {
-      ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");
-      sL = 80_mph;
+      ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+      sL = 80_mph;//Reset the speed limit value to be capped at the maximum value.
     }
     speed_limit = sL ;
   }
   for (auto dig_speed_limit : digital_speed_limits)
   {
+    sL = dig_speed_limit->getSpeedLimit();
     if (dig_speed_limit->appliesTo(participant()))
     {
-      speed_limit = dig_speed_limit->getSpeedLimit();
+        //Determine whether or not the value exceeds the predetermined maximum speed limit value.
+        if (sL > 80_mph)
+        {
+          ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+          sL = 80_mph;//Reset the speed limit value to be capped at the maximum value.
+        }
+      speed_limit = sL;
     }
   }
 
-  return SpeedLimitInformation{ speed_limit, true };
+  return SpeedLimitInformation{ speed_limit, true };//Return Speed limit data.
 }
 
 SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLanelet& lanelet) const
