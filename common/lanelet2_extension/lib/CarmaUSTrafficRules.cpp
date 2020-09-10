@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+#include <ros/ros.h>
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <lanelet2_core/geometry/Lanelet.h>
@@ -28,6 +29,7 @@
 #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
+using namespace lanelet::units::literals;
 
 namespace lanelet
 {
@@ -248,10 +250,17 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit;
+  Velocity speed_limit, sL;
   for (auto sign_speed_limit : sign_speed_limits)
   {
-    speed_limit = trafficSignToVelocity(sign_speed_limit->type());
+    sL = trafficSignToVelocity(sign_speed_limit->type());
+
+    if (sL > 80_mph)
+    {
+      ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");
+      sL = 80_mph;
+    }
+    speed_limit = sL ;
   }
   for (auto dig_speed_limit : digital_speed_limits)
   {
