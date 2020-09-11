@@ -250,10 +250,18 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit, sL; //Speed Limit values
+  Velocity speed_limit, sL, config_limit; //Speed Limit values 
+  config_limit = 0_mph; //Configurable speed limit can be adjusted for activation
+
   for (auto sign_speed_limit : sign_speed_limits)
   {
     sL = trafficSignToVelocity(sign_speed_limit->type()); //Retrieve speed limit information from  trafficSignToVelocity function
+
+    if(config_limit > 0_mph && config_limit < 80_mph)//Accounting for the configured speed limit, input zero when not in use
+      {
+        ROS_WARN_STREAM("Configurable value in use.");
+        sL = config_limit;
+      }
 
     //Determine whether or not the value exceeds the predetermined maximum speed limit value.
     if (sL > 80_mph)
@@ -266,6 +274,14 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
   for (auto dig_speed_limit : digital_speed_limits)
   {
     sL = dig_speed_limit->getSpeedLimit();
+
+    if(config_limit > 0_mph && config_limit < 80_mph)//Accounting for the configured speed limit, input zero when not in use
+       { 
+          ROS_WARN_STREAM("Configurable value in use.");
+
+          sL = config_limit;
+       }
+
     if (dig_speed_limit->appliesTo(participant()))
     {
         //Determine whether or not the value exceeds the predetermined maximum speed limit value.
