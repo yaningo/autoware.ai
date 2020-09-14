@@ -64,3 +64,8 @@ For any modified file please follow these steps to ensure proper documentation o
   - 7/16/2020
   - Michael McConnell
 
+- Added support for longitudinal velocity limiting in twist_filter, refactored
+  node to support unit testing for added feature.
+  - 9/13/2020
+  - Kyle Rush
+
