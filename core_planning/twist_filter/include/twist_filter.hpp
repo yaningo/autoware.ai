@@ -34,10 +34,10 @@ struct StampedValue
 class TwistFilter
 {
 public:
-  TwistFilter();
+  TwistFilter(ros::NodeHandle* nh, ros::NodeHandle* private_nh);
 private:
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
+  ros::NodeHandle* nh_ = nullptr;
+  ros::NodeHandle* private_nh_ = nullptr;
 
   // publishers
   ros::Publisher twist_pub_, ctrl_pub_;

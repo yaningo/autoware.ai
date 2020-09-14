@@ -64,4 +64,5 @@ if (CATKIN_ENABLE_TESTING)
   catkin_add_gtest(${PROJECT_NAME}-test 
     test/test_twist_filter.cpp
     src/twist_filter.cpp)
+  target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
 endif ()

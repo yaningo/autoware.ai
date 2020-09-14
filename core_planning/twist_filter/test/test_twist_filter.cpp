@@ -7,31 +7,31 @@
 namespace twist_filter
 {
     TEST(TwistFilterTest, test_longitudinal_twist_filter) {
-        twist_filter::TwistFilter tf;
+        twist_filter::TwistFilter tf(nullptr, nullptr);
 
         tf.longitudinal_velocity_limit_ = 5.0;
 
         geometry_msgs::TwistStamped twist;
-        twist.linear.x = 7.0;
+        twist.twist.linear.x = 7.0;
 
-        geomentry_msgs::TwistStamped out = tf.longitudinalLimitTwist(twist);
+        geometry_msgs::TwistStamped out = tf.longitudinalLimitTwist(twist);
 
-        ASSERT_DOUBLE_EQ(5.0, out.linear.x);
+        ASSERT_DOUBLE_EQ(5.0, out.twist.linear.x);
 
-        twist_filter::TwistFilter tf2;
+        twist_filter::TwistFilter tf2(nullptr, nullptr);
 
         tf2.longitudinal_velocity_limit_ = 100.0;
 
         geometry_msgs::TwistStamped twist2;
-        twist2.linear.x = 50.0;
+        twist2.twist.linear.x = 50.0;
 
-        geomentry_msgs::TwistStamped out2 = tf2.longitudinalLimitTwist(twist2);
+        geometry_msgs::TwistStamped out2 = tf2.longitudinalLimitTwist(twist2);
 
-        ASSERT_LT(36.0, out2.linear.x);
+        ASSERT_LT(36.0, out2.twist.linear.x);
     }
 
     TEST(TwistFilterTest, test_longitudinal_ctrl_filter) {
-        twist_filter::TwistFilter tf;
+        twist_filter::TwistFilter tf(nullptr, nullptr);
 
         tf.longitudinal_velocity_limit_ = 5.0;
 
@@ -42,7 +42,7 @@ namespace twist_filter
 
         ASSERT_DOUBLE_EQ(5.0, out.cmd.linear_velocity);
 
-        twist_filter::TwistFilter tf2;
+        twist_filter::TwistFilter tf2(nullptr, nullptr);
 
         tf2.longitudinal_velocity_limit_ = 100.0;
 

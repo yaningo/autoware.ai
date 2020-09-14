@@ -431,46 +431,48 @@ void TwistFilter::CtrlCmdCallback(
   updatePrevCtrl(ccs);
 }
 
-TwistFilter::TwistFilter()
-  : nh_()
-  , private_nh_("~")
-  , health_checker_(nh_, private_nh_)
+TwistFilter::TwistFilter(ros::NodeHandle *nh, ros::NodeHandle *private_nh):
+    nh_(nh),
+    private_nh_(private_nh), 
+    health_checker_(*nh_, *private_nh_)
 {
-  nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
-  private_nh_.param("longitudinal_velocity_limit", longitudinal_velocity_limit_, 35.7632);
-  private_nh_.param("lateral_accel_limit", lateral_accel_limit_, 5.0);
-  private_nh_.param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
-  private_nh_.param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
-  private_nh_.param("lowpass_gain_angular_z", lowpass_gain_angular_z_, 0.0);
-  private_nh_.param(
-    "lowpass_gain_steering_angle", lowpass_gain_steering_angle_, 0.0);
+  if (nh_ != nullptr && private_nh_ != nullptr) {
+    nh_->param("vehicle_info/wheel_base", wheel_base_, 2.7);
+    private_nh_->param("longitudinal_velocity_limit", longitudinal_velocity_limit_, 35.7632);
+    private_nh_->param("lateral_accel_limit", lateral_accel_limit_, 5.0);
+    private_nh_->param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
+    private_nh_->param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
+    private_nh_->param("lowpass_gain_angular_z", lowpass_gain_angular_z_, 0.0);
+    private_nh_->param(
+      "lowpass_gain_steering_angle", lowpass_gain_steering_angle_, 0.0);
 
-  twist_sub_ = nh_.subscribe(
-    "twist_raw", 1, &TwistFilter::TwistCmdCallback, this);
-  ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilter::CtrlCmdCallback, this);
-  config_sub_ = nh_.subscribe(
-    "config/twist_filter", 10, &TwistFilter::configCallback, this);
+    twist_sub_ = nh_->subscribe(
+      "twist_raw", 1, &TwistFilter::TwistCmdCallback, this);
+    ctrl_sub_ = nh_->subscribe("ctrl_raw", 1, &TwistFilter::CtrlCmdCallback, this);
+    config_sub_ = nh_->subscribe(
+      "config/twist_filter", 10, &TwistFilter::configCallback, this);
 
-  twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  ctrl_pub_ =
-    nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
-  twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/twist/lateral_accel", 5);
-  twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/twist/lateral_jerk", 5);
-  ctrl_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/ctrl/lateral_accel", 5);
-  ctrl_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/ctrl/lateral_jerk", 5);
-  twist_lacc_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/twist/lateral_accel", 5);
-  twist_ljerk_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/twist/lateral_jerk", 5);
-  ctrl_lacc_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/ctrl/lateral_accel", 5);
-  ctrl_ljerk_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/ctrl/lateral_jerk", 5);
-  health_checker_.ENABLE();
+    twist_pub_ = nh_->advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
+    ctrl_pub_ =
+      nh_->advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
+    twist_lacc_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/twist/lateral_accel", 5);
+    twist_ljerk_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/twist/lateral_jerk", 5);
+    ctrl_lacc_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/ctrl/lateral_accel", 5);
+    ctrl_ljerk_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/ctrl/lateral_jerk", 5);
+    twist_lacc_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/twist/lateral_accel", 5);
+    twist_ljerk_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/twist/lateral_jerk", 5);
+    ctrl_lacc_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/ctrl/lateral_accel", 5);
+    ctrl_ljerk_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/ctrl/lateral_jerk", 5);
+    health_checker_.ENABLE();
+  }
 }
 
 }  // namespace
@@ -478,7 +480,9 @@ TwistFilter::TwistFilter()
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "twist_filter");
-  twist_filter::TwistFilter twist_filter;
+  ros::NodeHandle nh;
+  ros::NodeHandle pnh("~");
+  twist_filter::TwistFilter twist_filter(&nh, &pnh);
   ros::spin();
   return 0;
 }
