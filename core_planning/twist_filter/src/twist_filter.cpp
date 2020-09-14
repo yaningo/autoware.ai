@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-#include <iostream>
-#include <boost/optional.hpp>
-#include <ros/ros.h>
-#include <std_msgs/Float32.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <autoware_msgs/ControlCommandStamped.h>
-#include <autoware_config_msgs/ConfigTwistFilter.h>
-#include <autoware_health_checker/health_checker/health_checker.h>
+/**
+ * Modifications:
+ * - Added limiting for longitudinal velocity per CARMA specifications. Refactored
+ *   namespacing and header as needed to support unit testing.
+ *   - Kyle Rush 
+ *   - 9/11/2020
+ */
 
-namespace
+#include "twist_filter.hpp"
+
+namespace twist_filter
 {
-// const values
-constexpr double MIN_LINEAR_X = 1e-3;
-constexpr double MIN_LENGTH = 1e-3;
-constexpr double MIN_DURATION = 1e-3;
 
 auto lowpass_filter()
 {
@@ -39,85 +36,6 @@ auto lowpass_filter()
     return y;
   };
 }
-
-struct StampedValue
-{
-  ros::Time time;
-  double dt;
-  double val;
-  StampedValue() : time(0.0), dt(0.0), val(0.0) {}
-  void reset()
-  {
-    time = ros::Time(0.0);
-    val = 0.0;
-  }
-};
-
-class TwistFilter
-{
-public:
-  TwistFilter();
-private:
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
-
-  // publishers
-  ros::Publisher twist_pub_, ctrl_pub_;
-  ros::Publisher twist_lacc_limit_debug_pub_, twist_ljerk_limit_debug_pub_;
-  ros::Publisher ctrl_lacc_limit_debug_pub_, ctrl_ljerk_limit_debug_pub_;
-  ros::Publisher twist_lacc_result_pub_, twist_ljerk_result_pub_;
-  ros::Publisher ctrl_lacc_result_pub_, ctrl_ljerk_result_pub_;
-
-  // subscribers
-  ros::Subscriber twist_sub_, ctrl_sub_, config_sub_;
-
-  // ros params
-  double wheel_base_;
-  double lateral_accel_limit_;
-  double lateral_jerk_limit_;
-  double lowpass_gain_linear_x_;
-  double lowpass_gain_angular_z_;
-  double lowpass_gain_steering_angle_;
-
-  // dataset
-  StampedValue az_prev_;
-  StampedValue sa_prev_;
-
-  // health_checker
-  autoware_health_checker::HealthChecker health_checker_;
-
-  boost::optional<double>
-    calcLaccWithAngularZ(const double& lv, const double& az) const;
-  boost::optional<double>
-    calcLjerkWithAngularZ(const double& lv, const double& az) const;
-  boost::optional<double>
-    calcLaccWithSteeringAngle(const double& lv, const double& sa) const;
-  boost::optional<double>
-    calcLjerkWithSteeringAngle(const double& lv, const double& sa) const;
-  void publishLateralResultsWithTwist(
-    const geometry_msgs::TwistStamped& msg) const;
-  void publishLateralResultsWithCtrl(
-    const autoware_msgs::ControlCommandStamped& msg) const;
-  void checkTwist(const geometry_msgs::TwistStamped& msg);
-  void checkCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  geometry_msgs::TwistStamped
-    lateralLimitTwist(const geometry_msgs::TwistStamped& msg);
-  geometry_msgs::TwistStamped
-    smoothTwist(const geometry_msgs::TwistStamped& msg);
-  autoware_msgs::ControlCommandStamped
-    lateralLimitCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  autoware_msgs::ControlCommandStamped
-    smoothCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  void updatePrevTwist(const geometry_msgs::TwistStamped& msg);
-  void updatePrevCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  void configCallback(
-    const autoware_config_msgs::ConfigTwistFilterConstPtr& config);
-  void TwistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg);
-  void CtrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg);
-};
-
-
-
 
 boost::optional<double> TwistFilter::calcLaccWithAngularZ(
   const double& lv, const double& az) const
@@ -199,6 +117,12 @@ void TwistFilter::checkTwist(const geometry_msgs::TwistStamped& msg)
   const double az = msg.twist.angular.z;
   const auto lacc = calcLaccWithAngularZ(lv, az);
   const auto ljerk = calcLjerkWithAngularZ(lv, az);
+
+  // Check Longitudinal velocity vs limiter
+  health_checker_.CHECK_MAX_VALUE("twist_longitudinal_v_high",
+    lv, longitudinal_velocity_limit_ * 0.9, longitudinal_velocity_limit_, MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S,
+    "longitudinal velocity is too high in twist_filtering");
+
   if (lacc)
   {
     health_checker_.CHECK_MAX_VALUE("twist_lateral_accel_high",
@@ -219,6 +143,12 @@ void TwistFilter::checkCtrl(const autoware_msgs::ControlCommandStamped& msg)
   const double sa = msg.cmd.steering_angle;
   const auto lacc = calcLaccWithSteeringAngle(lv, sa);
   const auto ljerk = calcLjerkWithSteeringAngle(lv, sa);
+
+  // Check Longitudinal velocity vs limiter
+  health_checker_.CHECK_MAX_VALUE("ctrl_longitudinal_v_high",
+    lv, longitudinal_velocity_limit_ * 0.9, longitudinal_velocity_limit_, MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S,
+    "longitudinal velocity is too high in ctrl_filtering");
+
   if (lacc)
   {
     health_checker_.CHECK_MAX_VALUE("ctrl_lateral_accel_high",
@@ -294,6 +224,62 @@ geometry_msgs::TwistStamped
   twist_ljerk_limit_debug_pub_.publish(ljerk_msg);
 
   return ts;
+}
+
+geometry_msgs::TwistStamped
+  TwistFilter::longitudinalLimitTwist(const geometry_msgs::TwistStamped& msg)
+{
+  geometry_msgs::TwistStamped ts;
+  ts = msg;
+
+  auto orig_longitudinal_velocity = msg.twist.linear.x;
+  auto longitudinal_velocity = msg.twist.linear.x;
+
+  if (longitudinal_velocity > longitudinal_velocity_limit_) {
+    ROS_WARN_STREAM("Longitudinal velocity of " << 
+      orig_longitudinal_velocity << 
+      " exceeds configured limit of " <<
+      longitudinal_velocity_limit_);
+    longitudinal_velocity = longitudinal_velocity_limit_;
+  }
+  if (longitudinal_velocity > MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S) {
+    ROS_ERROR_STREAM("Longitudinal velocity of " << 
+      orig_longitudinal_velocity << 
+      " exceeds hard-coded limit of " <<
+      MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S);
+    longitudinal_velocity = MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S;
+  }
+  
+  ts.twist.linear.x = longitudinal_velocity;
+  return ts;
+}
+
+autoware_msgs::ControlCommandStamped
+  TwistFilter::longitudinalLimitCtrl(const autoware_msgs::ControlCommandStamped& msg)
+{
+  autoware_msgs::ControlCommandStamped ccs;
+  ccs = msg;
+
+  auto orig_longitudinal_velocity = msg.cmd.linear_velocity;
+  auto longitudinal_velocity = msg.cmd.linear_velocity;
+
+  if (longitudinal_velocity > longitudinal_velocity_limit_) {
+    ROS_WARN_STREAM("Longitudinal velocity of " << 
+      orig_longitudinal_velocity << 
+      " exceeds configured limit of " <<
+      longitudinal_velocity_limit_);
+    longitudinal_velocity = longitudinal_velocity_limit_;
+  }
+  if (longitudinal_velocity > MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S) {
+    ROS_ERROR_STREAM("Longitudinal velocity of " << 
+      orig_longitudinal_velocity << 
+      " exceeds hard-coded limit of " <<
+      MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S);
+    longitudinal_velocity = MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S;
+  }
+  
+  ccs.cmd.linear_velocity = longitudinal_velocity;
+  return ccs;
 }
 
 geometry_msgs::TwistStamped
@@ -423,6 +409,7 @@ void TwistFilter::TwistCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkTwist(*msg);
   geometry_msgs::TwistStamped ts;
+  ts = longitudinalLimitTwist(*msg);
   ts = lateralLimitTwist(*msg);
   ts = smoothTwist(ts);
   twist_pub_.publish(ts);
@@ -436,6 +423,7 @@ void TwistFilter::CtrlCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkCtrl(*msg);
   autoware_msgs::ControlCommandStamped ccs;
+  ccs = longitudinalLimitCtrl(*msg);
   ccs = lateralLimitCtrl(*msg);
   ccs = smoothCtrl(ccs);
   ctrl_pub_.publish(ccs);
@@ -449,6 +437,7 @@ TwistFilter::TwistFilter()
   , health_checker_(nh_, private_nh_)
 {
   nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
+  private_nh_.param("longitudinal_velocity_limit", longitudinal_velocity_limit_, 35.7632);
   private_nh_.param("lateral_accel_limit", lateral_accel_limit_, 5.0);
   private_nh_.param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
   private_nh_.param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
@@ -489,7 +478,7 @@ TwistFilter::TwistFilter()
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "twist_filter");
-  TwistFilter twist_filter;
+  twist_filter::TwistFilter twist_filter;
   ros::spin();
   return 0;
 }

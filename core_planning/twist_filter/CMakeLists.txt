@@ -1,3 +1,9 @@
+# Modifications:
+# - Add unit testing for CARMA velocity limit code and adjust CMake to account
+#   for refactoring required in that process
+#    - Kyle Rush
+#    - 9/13/2020
+
 cmake_minimum_required(VERSION 2.8.3)
 project(twist_filter)
 
@@ -33,6 +39,7 @@ SET(CMAKE_CXX_FLAGS "-O2 -g -Wall ${CMAKE_CXX_FLAGS}")
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 add_executable(twist_filter src/twist_filter.cpp)
@@ -54,4 +61,7 @@ install(
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   roslint_add_test()
+  catkin_add_gtest(${PROJECT_NAME}-test 
+    test/test_twist_filter.cpp
+    src/twist_filter.cpp)
 endif ()
