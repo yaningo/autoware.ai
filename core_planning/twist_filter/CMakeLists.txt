@@ -42,7 +42,9 @@ include_directories(
   include
 )
 
-add_executable(twist_filter src/twist_filter.cpp)
+add_executable(twist_filter 
+  src/twist_filter_node.cpp
+  src/twist_filter.cpp)
 target_link_libraries(twist_filter ${catkin_LIBRARIES})
 add_dependencies(twist_filter ${catkin_EXPORTED_TARGETS})
 

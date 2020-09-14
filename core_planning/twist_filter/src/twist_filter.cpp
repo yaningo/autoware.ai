@@ -477,12 +477,3 @@ TwistFilter::TwistFilter(ros::NodeHandle *nh, ros::NodeHandle *private_nh):
 
 }  // namespace
 
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "twist_filter");
-  ros::NodeHandle nh;
-  ros::NodeHandle pnh("~");
-  twist_filter::TwistFilter twist_filter(&nh, &pnh);
-  ros::spin();
-  return 0;
-}
