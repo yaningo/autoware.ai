@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright 2015-2019 Autoware Foundation. All rights reserved.
  *
@@ -38,7 +39,6 @@ namespace twist_filter
 constexpr double MIN_LINEAR_X = 1e-3;
 constexpr double MIN_LENGTH = 1e-3;
 constexpr double MIN_DURATION = 1e-3;
-constexpr double MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S = 35.7632;
 
 struct StampedValue
 {
@@ -104,11 +104,7 @@ private:
   geometry_msgs::TwistStamped
     lateralLimitTwist(const geometry_msgs::TwistStamped& msg);
   geometry_msgs::TwistStamped
-    longitudinalLimitTwist(const geometry_msgs::TwistStamped& msg);
-  geometry_msgs::TwistStamped
     smoothTwist(const geometry_msgs::TwistStamped& msg);
-  autoware_msgs::ControlCommandStamped
-    longitudinalLimitCtrl(const autoware_msgs::ControlCommandStamped& msg);
   autoware_msgs::ControlCommandStamped
     lateralLimitCtrl(const autoware_msgs::ControlCommandStamped& msg);
   autoware_msgs::ControlCommandStamped

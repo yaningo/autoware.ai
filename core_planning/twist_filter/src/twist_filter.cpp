@@ -23,6 +23,7 @@
  */
 
 #include "twist_filter.hpp"
+#include "velocity_limit.hpp"
 
 namespace twist_filter
 {
@@ -227,62 +228,6 @@ geometry_msgs::TwistStamped
 }
 
 geometry_msgs::TwistStamped
-  TwistFilter::longitudinalLimitTwist(const geometry_msgs::TwistStamped& msg)
-{
-  geometry_msgs::TwistStamped ts;
-  ts = msg;
-
-  auto orig_longitudinal_velocity = msg.twist.linear.x;
-  auto longitudinal_velocity = msg.twist.linear.x;
-
-  if (longitudinal_velocity > longitudinal_velocity_limit_) {
-    ROS_WARN_STREAM("Longitudinal velocity of " << 
-      orig_longitudinal_velocity << 
-      " exceeds configured limit of " <<
-      longitudinal_velocity_limit_);
-    longitudinal_velocity = longitudinal_velocity_limit_;
-  }
-  if (longitudinal_velocity > MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S) {
-    ROS_ERROR_STREAM("Longitudinal velocity of " << 
-      orig_longitudinal_velocity << 
-      " exceeds hard-coded limit of " <<
-      MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S);
-    longitudinal_velocity = MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S;
-  }
-  
-  ts.twist.linear.x = longitudinal_velocity;
-  return ts;
-}
-
-autoware_msgs::ControlCommandStamped
-  TwistFilter::longitudinalLimitCtrl(const autoware_msgs::ControlCommandStamped& msg)
-{
-  autoware_msgs::ControlCommandStamped ccs;
-  ccs = msg;
-
-  auto orig_longitudinal_velocity = msg.cmd.linear_velocity;
-  auto longitudinal_velocity = msg.cmd.linear_velocity;
-
-  if (longitudinal_velocity > longitudinal_velocity_limit_) {
-    ROS_WARN_STREAM("Longitudinal velocity of " << 
-      orig_longitudinal_velocity << 
-      " exceeds configured limit of " <<
-      longitudinal_velocity_limit_);
-    longitudinal_velocity = longitudinal_velocity_limit_;
-  }
-  if (longitudinal_velocity > MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S) {
-    ROS_ERROR_STREAM("Longitudinal velocity of " << 
-      orig_longitudinal_velocity << 
-      " exceeds hard-coded limit of " <<
-      MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S);
-    longitudinal_velocity = MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S;
-  }
-  
-  ccs.cmd.linear_velocity = longitudinal_velocity;
-  return ccs;
-}
-
-geometry_msgs::TwistStamped
   TwistFilter::smoothTwist(const geometry_msgs::TwistStamped& msg)
 {
   static auto lp_lx = lowpass_filter();
@@ -409,7 +354,7 @@ void TwistFilter::TwistCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkTwist(*msg);
   geometry_msgs::TwistStamped ts;
-  ts = longitudinalLimitTwist(*msg);
+  ts = twist_filter::longitudinalLimitTwist(*msg, longitudinal_velocity_limit_);
   ts = lateralLimitTwist(*msg);
   ts = smoothTwist(ts);
   twist_pub_.publish(ts);
@@ -423,7 +368,7 @@ void TwistFilter::CtrlCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkCtrl(*msg);
   autoware_msgs::ControlCommandStamped ccs;
-  ccs = longitudinalLimitCtrl(*msg);
+  ccs = twist_filter::longitudinalLimitCtrl(*msg, longitudinal_velocity_limit_);
   ccs = lateralLimitCtrl(*msg);
   ccs = smoothCtrl(ccs);
   ctrl_pub_.publish(ccs);

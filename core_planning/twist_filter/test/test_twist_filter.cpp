@@ -16,57 +16,40 @@
 
 #include <ros/ros.h>
 #include <gtest/gtest.h>
-#include "twist_filter.hpp"
+#include "velocity_limit.hpp"
 
 namespace twist_filter
 {
     TEST(TwistFilterTest, test_longitudinal_twist_filter) {
-        twist_filter::TwistFilter tf(nullptr, nullptr);
-
-        tf.longitudinal_velocity_limit_ = 5.0;
-
         geometry_msgs::TwistStamped twist;
         twist.twist.linear.x = 7.0;
 
-        geometry_msgs::TwistStamped out = tf.longitudinalLimitTwist(twist);
+        geometry_msgs::TwistStamped out = twist_filter::longitudinalLimitTwist(twist, 5.0);
 
         ASSERT_DOUBLE_EQ(5.0, out.twist.linear.x);
-
-        twist_filter::TwistFilter tf2(nullptr, nullptr);
-
-        tf2.longitudinal_velocity_limit_ = 100.0;
 
         geometry_msgs::TwistStamped twist2;
         twist2.twist.linear.x = 50.0;
 
-        geometry_msgs::TwistStamped out2 = tf2.longitudinalLimitTwist(twist2);
+        geometry_msgs::TwistStamped out2 = twist_filter::longitudinalLimitTwist(twist2, 100.0);
 
-        ASSERT_LT(36.0, out2.twist.linear.x);
+        ASSERT_LT(out2.twist.linear.x, 36.0);
     }
 
     TEST(TwistFilterTest, test_longitudinal_ctrl_filter) {
-        twist_filter::TwistFilter tf(nullptr, nullptr);
-
-        tf.longitudinal_velocity_limit_ = 5.0;
-
         autoware_msgs::ControlCommandStamped ccs;
         ccs.cmd.linear_velocity = 7.0;
 
-        autoware_msgs::ControlCommandStamped out = tf.longitudinalLimitCtrl(ccs);
+        autoware_msgs::ControlCommandStamped out = twist_filter::longitudinalLimitCtrl(ccs, 5.0);
 
         ASSERT_DOUBLE_EQ(5.0, out.cmd.linear_velocity);
 
-        twist_filter::TwistFilter tf2(nullptr, nullptr);
-
-        tf2.longitudinal_velocity_limit_ = 100.0;
-
         autoware_msgs::ControlCommandStamped ccs2;
-        ccs2.cmd.linear_velocity = 7.0;
+        ccs2.cmd.linear_velocity = 50.0;
 
-        autoware_msgs::ControlCommandStamped out2 = tf2.longitudinalLimitCtrl(ccs2);
+        autoware_msgs::ControlCommandStamped out2 = twist_filter::longitudinalLimitCtrl(ccs2, 100.0);
 
-
-        ASSERT_LT(36.0, out2.cmd.linear_velocity);
+        ASSERT_LT(out2.cmd.linear_velocity, 36.0);
     }
 }
 
