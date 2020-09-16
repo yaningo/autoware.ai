@@ -246,12 +246,11 @@ Velocity CarmaUSTrafficRules::trafficSignToVelocity(const std::string& typeStrin
   }
 }
 
-SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& lanelet_or_area) const
+SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
   Velocity speed_limit, sL, config_limit; //Speed Limit values 
-  config_limit = 0_mph; //Configurable speed limit can be adjusted for activation
 
   for (auto sign_speed_limit : sign_speed_limits)
   {
@@ -318,6 +317,13 @@ bool CarmaUSTrafficRules::hasDynamicRules(const ConstLanelet& lanelet) const
 {
   return true;  // All regulations are considered dynamic in CARMA
 }
+
+void CarmaUSTrafficRules::setConfigSpeedLimit(double config_lim)
+{
+  /*Logic to change config_lim to Velocity value config_limit*/
+  config_limit = lanelet::Velocity(config_lim * lanelet::units::MPH());
+}
+
 
 // Register carma traffic rules with lanelet2
 // Since CarmaUSTrafficRules is based solely on regulatory elements there is never a need to infer the participant

@@ -72,6 +72,9 @@ public:
    */
   bool hasDynamicRules(const ConstLanelet& lanelet) const override;
 
+  void setConfigSpeedLimit(double config_lim);
+
+
 private:
   /**
    * @brief Same usage as PassingControlLine::boundPassable, but the participant is provided by this class
@@ -106,8 +109,9 @@ private:
    *
    * @return The speed limit for the provided region
    */
-  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area) const;
+  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const;
 };
+  lanelet::Velocity config_limit;
 
 }  // namespace traffic_rules
 }  // namespace lanelet
