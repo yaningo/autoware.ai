@@ -299,13 +299,13 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLanelet& lanelet) const
 {
   ConstLaneletOrArea lanelet_or_area(lanelet);
-  return speedLimit(lanelet_or_area);
+  return speedLimit(lanelet_or_area, config_limit);
 }
 
 SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstArea& area) const
 {
   ConstLaneletOrArea lanelet_or_area(area);
-  return speedLimit(lanelet_or_area);
+  return speedLimit(lanelet_or_area, config_limit);
 }
 
 bool CarmaUSTrafficRules::isOneWay(const ConstLanelet& lanelet) const
