@@ -66,13 +66,15 @@ public:
 
   bool isOneWay(const ConstLanelet& lanelet) const override;
 
+  void setConfigSpeedLimit(double config_lim);
+
   /**
    * @brief NOTE: This function always returns true as all elements in CARMA can contain dynamic rules there is never a
    * reason to assume otherwise
    */
   bool hasDynamicRules(const ConstLanelet& lanelet) const override;
 
-  void setConfigSpeedLimit(double config_lim);
+  
 
 
 private:
