@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-#include <iostream>
-#include <boost/optional.hpp>
-#include <ros/ros.h>
-#include <std_msgs/Float32.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <autoware_msgs/ControlCommandStamped.h>
-#include <autoware_config_msgs/ConfigTwistFilter.h>
-#include <autoware_health_checker/health_checker/health_checker.h>
+/**
+ * Modifications:
+ * - Added limiting for longitudinal velocity per CARMA specifications. Refactored
+ *   namespacing and header as needed to support unit testing.
+ *   - Kyle Rush 
+ *   - 9/11/2020
+ */
 
-namespace
+#include "twist_filter.hpp"
+#include "velocity_limit.hpp"
+
+namespace twist_filter
 {
-// const values
-constexpr double MIN_LINEAR_X = 1e-3;
-constexpr double MIN_LENGTH = 1e-3;
-constexpr double MIN_DURATION = 1e-3;
 
 auto lowpass_filter()
 {
@@ -39,85 +37,6 @@ auto lowpass_filter()
     return y;
   };
 }
-
-struct StampedValue
-{
-  ros::Time time;
-  double dt;
-  double val;
-  StampedValue() : time(0.0), dt(0.0), val(0.0) {}
-  void reset()
-  {
-    time = ros::Time(0.0);
-    val = 0.0;
-  }
-};
-
-class TwistFilter
-{
-public:
-  TwistFilter();
-private:
-  ros::NodeHandle nh_;
-  ros::NodeHandle private_nh_;
-
-  // publishers
-  ros::Publisher twist_pub_, ctrl_pub_;
-  ros::Publisher twist_lacc_limit_debug_pub_, twist_ljerk_limit_debug_pub_;
-  ros::Publisher ctrl_lacc_limit_debug_pub_, ctrl_ljerk_limit_debug_pub_;
-  ros::Publisher twist_lacc_result_pub_, twist_ljerk_result_pub_;
-  ros::Publisher ctrl_lacc_result_pub_, ctrl_ljerk_result_pub_;
-
-  // subscribers
-  ros::Subscriber twist_sub_, ctrl_sub_, config_sub_;
-
-  // ros params
-  double wheel_base_;
-  double lateral_accel_limit_;
-  double lateral_jerk_limit_;
-  double lowpass_gain_linear_x_;
-  double lowpass_gain_angular_z_;
-  double lowpass_gain_steering_angle_;
-
-  // dataset
-  StampedValue az_prev_;
-  StampedValue sa_prev_;
-
-  // health_checker
-  autoware_health_checker::HealthChecker health_checker_;
-
-  boost::optional<double>
-    calcLaccWithAngularZ(const double& lv, const double& az) const;
-  boost::optional<double>
-    calcLjerkWithAngularZ(const double& lv, const double& az) const;
-  boost::optional<double>
-    calcLaccWithSteeringAngle(const double& lv, const double& sa) const;
-  boost::optional<double>
-    calcLjerkWithSteeringAngle(const double& lv, const double& sa) const;
-  void publishLateralResultsWithTwist(
-    const geometry_msgs::TwistStamped& msg) const;
-  void publishLateralResultsWithCtrl(
-    const autoware_msgs::ControlCommandStamped& msg) const;
-  void checkTwist(const geometry_msgs::TwistStamped& msg);
-  void checkCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  geometry_msgs::TwistStamped
-    lateralLimitTwist(const geometry_msgs::TwistStamped& msg);
-  geometry_msgs::TwistStamped
-    smoothTwist(const geometry_msgs::TwistStamped& msg);
-  autoware_msgs::ControlCommandStamped
-    lateralLimitCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  autoware_msgs::ControlCommandStamped
-    smoothCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  void updatePrevTwist(const geometry_msgs::TwistStamped& msg);
-  void updatePrevCtrl(const autoware_msgs::ControlCommandStamped& msg);
-  void configCallback(
-    const autoware_config_msgs::ConfigTwistFilterConstPtr& config);
-  void TwistCmdCallback(const geometry_msgs::TwistStampedConstPtr& msg);
-  void CtrlCmdCallback(const autoware_msgs::ControlCommandStampedConstPtr& msg);
-};
-
-
-
 
 boost::optional<double> TwistFilter::calcLaccWithAngularZ(
   const double& lv, const double& az) const
@@ -199,6 +118,12 @@ void TwistFilter::checkTwist(const geometry_msgs::TwistStamped& msg)
   const double az = msg.twist.angular.z;
   const auto lacc = calcLaccWithAngularZ(lv, az);
   const auto ljerk = calcLjerkWithAngularZ(lv, az);
+
+  // Check Longitudinal velocity vs limiter
+  health_checker_.CHECK_MAX_VALUE("twist_longitudinal_v_high",
+    lv, longitudinal_velocity_limit_ * 0.9, longitudinal_velocity_limit_, MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S,
+    "longitudinal velocity is too high in twist_filtering");
+
   if (lacc)
   {
     health_checker_.CHECK_MAX_VALUE("twist_lateral_accel_high",
@@ -219,6 +144,12 @@ void TwistFilter::checkCtrl(const autoware_msgs::ControlCommandStamped& msg)
   const double sa = msg.cmd.steering_angle;
   const auto lacc = calcLaccWithSteeringAngle(lv, sa);
   const auto ljerk = calcLjerkWithSteeringAngle(lv, sa);
+
+  // Check Longitudinal velocity vs limiter
+  health_checker_.CHECK_MAX_VALUE("ctrl_longitudinal_v_high",
+    lv, longitudinal_velocity_limit_ * 0.9, longitudinal_velocity_limit_, MAX_LONGITUDINAL_VELOCITY_HARDCODED_LIMIT_M_S,
+    "longitudinal velocity is too high in ctrl_filtering");
+
   if (lacc)
   {
     health_checker_.CHECK_MAX_VALUE("ctrl_lateral_accel_high",
@@ -423,6 +354,7 @@ void TwistFilter::TwistCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkTwist(*msg);
   geometry_msgs::TwistStamped ts;
+  ts = twist_filter::longitudinalLimitTwist(*msg, longitudinal_velocity_limit_);
   ts = lateralLimitTwist(*msg);
   ts = smoothTwist(ts);
   twist_pub_.publish(ts);
@@ -436,6 +368,7 @@ void TwistFilter::CtrlCmdCallback(
   health_checker_.NODE_ACTIVATE();
   checkCtrl(*msg);
   autoware_msgs::ControlCommandStamped ccs;
+  ccs = twist_filter::longitudinalLimitCtrl(*msg, longitudinal_velocity_limit_);
   ccs = lateralLimitCtrl(*msg);
   ccs = smoothCtrl(ccs);
   ctrl_pub_.publish(ccs);
@@ -443,53 +376,49 @@ void TwistFilter::CtrlCmdCallback(
   updatePrevCtrl(ccs);
 }
 
-TwistFilter::TwistFilter()
-  : nh_()
-  , private_nh_("~")
-  , health_checker_(nh_, private_nh_)
+TwistFilter::TwistFilter(ros::NodeHandle *nh, ros::NodeHandle *private_nh):
+    nh_(nh),
+    private_nh_(private_nh), 
+    health_checker_(*nh_, *private_nh_)
 {
-  nh_.param("vehicle_info/wheel_base", wheel_base_, 2.7);
-  private_nh_.param("lateral_accel_limit", lateral_accel_limit_, 5.0);
-  private_nh_.param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
-  private_nh_.param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
-  private_nh_.param("lowpass_gain_angular_z", lowpass_gain_angular_z_, 0.0);
-  private_nh_.param(
-    "lowpass_gain_steering_angle", lowpass_gain_steering_angle_, 0.0);
+  if (nh_ != nullptr && private_nh_ != nullptr) {
+    nh_->param("vehicle_info/wheel_base", wheel_base_, 2.7);
+    private_nh_->param("longitudinal_velocity_limit", longitudinal_velocity_limit_, 35.7632);
+    private_nh_->param("lateral_accel_limit", lateral_accel_limit_, 5.0);
+    private_nh_->param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
+    private_nh_->param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
+    private_nh_->param("lowpass_gain_angular_z", lowpass_gain_angular_z_, 0.0);
+    private_nh_->param(
+      "lowpass_gain_steering_angle", lowpass_gain_steering_angle_, 0.0);
 
-  twist_sub_ = nh_.subscribe(
-    "twist_raw", 1, &TwistFilter::TwistCmdCallback, this);
-  ctrl_sub_ = nh_.subscribe("ctrl_raw", 1, &TwistFilter::CtrlCmdCallback, this);
-  config_sub_ = nh_.subscribe(
-    "config/twist_filter", 10, &TwistFilter::configCallback, this);
+    twist_sub_ = nh_->subscribe(
+      "twist_raw", 1, &TwistFilter::TwistCmdCallback, this);
+    ctrl_sub_ = nh_->subscribe("ctrl_raw", 1, &TwistFilter::CtrlCmdCallback, this);
+    config_sub_ = nh_->subscribe(
+      "config/twist_filter", 10, &TwistFilter::configCallback, this);
 
-  twist_pub_ = nh_.advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
-  ctrl_pub_ =
-    nh_.advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
-  twist_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/twist/lateral_accel", 5);
-  twist_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/twist/lateral_jerk", 5);
-  ctrl_lacc_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/ctrl/lateral_accel", 5);
-  ctrl_ljerk_limit_debug_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "limitation_debug/ctrl/lateral_jerk", 5);
-  twist_lacc_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/twist/lateral_accel", 5);
-  twist_ljerk_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/twist/lateral_jerk", 5);
-  ctrl_lacc_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/ctrl/lateral_accel", 5);
-  ctrl_ljerk_result_pub_ = private_nh_.advertise<std_msgs::Float32>(
-    "result/ctrl/lateral_jerk", 5);
-  health_checker_.ENABLE();
+    twist_pub_ = nh_->advertise<geometry_msgs::TwistStamped>("twist_cmd", 5);
+    ctrl_pub_ =
+      nh_->advertise<autoware_msgs::ControlCommandStamped>("ctrl_cmd", 5);
+    twist_lacc_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/twist/lateral_accel", 5);
+    twist_ljerk_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/twist/lateral_jerk", 5);
+    ctrl_lacc_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/ctrl/lateral_accel", 5);
+    ctrl_ljerk_limit_debug_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "limitation_debug/ctrl/lateral_jerk", 5);
+    twist_lacc_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/twist/lateral_accel", 5);
+    twist_ljerk_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/twist/lateral_jerk", 5);
+    ctrl_lacc_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/ctrl/lateral_accel", 5);
+    ctrl_ljerk_result_pub_ = private_nh_->advertise<std_msgs::Float32>(
+      "result/ctrl/lateral_jerk", 5);
+    health_checker_.ENABLE();
+  }
 }
 
 }  // namespace
 
-int main(int argc, char** argv)
-{
-  ros::init(argc, argv, "twist_filter");
-  TwistFilter twist_filter;
-  ros::spin();
-  return 0;
-}
