@@ -250,7 +250,7 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit, sL, config_limit; //Speed Limit values 
+  Velocity speed_limit, sL; //Speed Limit values 
 
   for (auto sign_speed_limit : sign_speed_limits)
   {
