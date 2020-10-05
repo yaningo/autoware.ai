@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 #include <vector>
 #include <memory>
 #include <lanelet2_core/Forward.h>
@@ -66,11 +67,16 @@ public:
 
   bool isOneWay(const ConstLanelet& lanelet) const override;
 
+  void setConfigSpeedLimit(double config_lim);
+
   /**
    * @brief NOTE: This function always returns true as all elements in CARMA can contain dynamic rules there is never a
    * reason to assume otherwise
    */
   bool hasDynamicRules(const ConstLanelet& lanelet) const override;
+
+  
+
 
 private:
   /**
@@ -106,7 +112,12 @@ private:
    *
    * @return The speed limit for the provided region
    */
-  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area) const;
+  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const;
+
+
+  lanelet::Velocity config_limit;
+
+
 };
 
 }  // namespace traffic_rules
