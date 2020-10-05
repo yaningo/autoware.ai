@@ -14,8 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#ifndef CRMAUSTRULES_H
-#define CRMAUSTRULES_H
+
 #include <vector>
 #include <memory>
 #include <lanelet2_core/Forward.h>
@@ -123,5 +122,3 @@ private:
 
 }  // namespace traffic_rules
 }  // namespace lanelet
-
-#endif;
