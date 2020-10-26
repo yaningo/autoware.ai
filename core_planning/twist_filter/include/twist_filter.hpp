@@ -32,6 +32,7 @@
 #include <autoware_config_msgs/ConfigTwistFilter.h>
 #include <autoware_health_checker/health_checker/health_checker.h>
 #include <gtest/gtest_prod.h>
+#include "accel_limiter.hpp"
 
 namespace twist_filter
 {
@@ -74,6 +75,7 @@ private:
   // ros params
   double wheel_base_;
   double longitudinal_velocity_limit_;
+  double longitudinal_accel_limit_;
   double lateral_accel_limit_;
   double lateral_jerk_limit_;
   double lowpass_gain_linear_x_;
@@ -83,6 +85,8 @@ private:
   // dataset
   StampedValue az_prev_;
   StampedValue sa_prev_;
+
+  LongitudinalAccelLimiter _lon_accel_limiter;
 
   // health_checker
   autoware_health_checker::HealthChecker health_checker_;

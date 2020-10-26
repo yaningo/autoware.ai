@@ -17,6 +17,7 @@
 #include <ros/ros.h>
 #include <gtest/gtest.h>
 #include "velocity_limit.hpp"
+#include "accel_limiter.hpp"
 
 namespace twist_filter
 {
@@ -50,6 +51,84 @@ namespace twist_filter
         autoware_msgs::ControlCommandStamped out2 = twist_filter::longitudinalLimitCtrl(ccs2, 100.0);
 
         ASSERT_LT(out2.cmd.linear_velocity, 36.0);
+    }
+
+    TEST(TwistFilterTest, test_longitudinal_accel_limiter1) {
+        LongitudinalAccelLimiter limiter{5.0};
+
+        geometry_msgs::TwistStamped msg1;
+        msg1.header.stamp = ros::Time(0.0);
+        msg1.twist.linear.x = 0.0;
+
+        geometry_msgs::TwistStamped out1 = limiter.longitudinalAccelLimitTwist(msg1);
+        ASSERT_DOUBLE_EQ(0.0, out1.twist.linear.x);
+
+        geometry_msgs::TwistStamped msg2;
+        msg2.header.stamp = ros::Time(1.0);
+        msg2.twist.linear.x = 6.0;
+
+        geometry_msgs::TwistStamped out2 = limiter.longitudinalAccelLimitTwist(msg2);
+        ASSERT_DOUBLE_EQ(5.0, out2.twist.linear.x);
+
+        geometry_msgs::TwistStamped msg3;
+        msg3.header.stamp = ros::Time(3.0);
+        msg3.twist.linear.x = 9.0;
+
+        geometry_msgs::TwistStamped out3 = limiter.longitudinalAccelLimitTwist(msg3);
+        ASSERT_DOUBLE_EQ(9.0, out3.twist.linear.x);
+
+        geometry_msgs::TwistStamped msg4;
+        msg4.header.stamp = ros::Time(4.0);
+        msg4.twist.linear.x = 6.0;
+
+        geometry_msgs::TwistStamped out4 = limiter.longitudinalAccelLimitTwist(msg4);
+        ASSERT_DOUBLE_EQ(6.0, out4.twist.linear.x);
+
+        geometry_msgs::TwistStamped msg5;
+        msg4.header.stamp = ros::Time(5.0);
+        msg4.twist.linear.x = 0.0;
+
+        geometry_msgs::TwistStamped out5 = limiter.longitudinalAccelLimitTwist(msg5);
+        ASSERT_DOUBLE_EQ(1.0, out5.twist.linear.x);
+    }
+
+    TEST(TwistFilterTest, test_longitudinal_accel_limiter2) {
+        LongitudinalAccelLimiter limiter{5.0};
+
+        autoware_msgs::ControlCommandStamped msg1;
+        msg1.cmd.linear_velocity = 0.0;
+        msg1.header.stamp = ros::Time(0.0);
+
+        autoware_msgs::ControlCommandStamped out1 = limiter.longitudinalAccelLimitCtrl(msg1);
+        ASSERT_DOUBLE_EQ(0.0, out1.cmd.linear_velocity);
+
+        autoware_msgs::ControlCommandStamped msg2;
+        msg2.header.stamp = ros::Time(1.0);
+        msg2.cmd.linear_velocity = 6.0;
+
+        autoware_msgs::ControlCommandStamped out2 = limiter.longitudinalAccelLimitCtrl(msg2);
+        ASSERT_DOUBLE_EQ(5.0, out2.cmd.linear_velocity);
+
+        autoware_msgs::ControlCommandStamped msg3;
+        msg3.header.stamp = ros::Time(3.0);
+        msg3.cmd.linear_velocity = 9.0;
+
+        autoware_msgs::ControlCommandStamped out3 = limiter.longitudinalAccelLimitCtrl(msg3);
+        ASSERT_DOUBLE_EQ(9.0, out3.cmd.linear_velocity);
+
+        autoware_msgs::ControlCommandStamped msg4;
+        msg4.header.stamp = ros::Time(4.0);
+        msg4.cmd.linear_velocity = 6.0;
+
+        autoware_msgs::ControlCommandStamped out4 = limiter.longitudinalAccelLimitCtrl(msg4);
+        ASSERT_DOUBLE_EQ(6.0, out4.cmd.linear_velocity);
+
+        autoware_msgs::ControlCommandStamped msg5;
+        msg4.header.stamp = ros::Time(5.0);
+        msg4.cmd.linear_velocity = 0.0;
+
+        autoware_msgs::ControlCommandStamped out5 = limiter.longitudinalAccelLimitCtrl(msg5);
+        ASSERT_DOUBLE_EQ(1.0, out5.cmd.linear_velocity);
     }
 }
 

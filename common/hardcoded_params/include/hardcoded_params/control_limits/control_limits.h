@@ -24,5 +24,6 @@ namespace control_limits
  * The maximum allowable longitudinal velocity of the vehicle in m/s 
  */
 constexpr double MAX_LONGITUDINAL_VELOCITY_MPS = 35.7632;
+constexpr double MAX_LONGITUDINAL_ACCEL_MPS2 = 3.5;
 }
 }  // namespace hardcoded_params

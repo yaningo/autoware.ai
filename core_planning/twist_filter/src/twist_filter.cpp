@@ -355,7 +355,8 @@ void TwistFilter::TwistCmdCallback(
   checkTwist(*msg);
   geometry_msgs::TwistStamped ts;
   ts = twist_filter::longitudinalLimitTwist(*msg, longitudinal_velocity_limit_);
-  ts = lateralLimitTwist(*msg);
+  ts = _lon_accel_limiter.longitudinalAccelLimitTwist(ts);
+  ts = lateralLimitTwist(ts);
   ts = smoothTwist(ts);
   twist_pub_.publish(ts);
   publishLateralResultsWithTwist(ts);
@@ -369,7 +370,8 @@ void TwistFilter::CtrlCmdCallback(
   checkCtrl(*msg);
   autoware_msgs::ControlCommandStamped ccs;
   ccs = twist_filter::longitudinalLimitCtrl(*msg, longitudinal_velocity_limit_);
-  ccs = lateralLimitCtrl(*msg);
+  ccs = _lon_accel_limiter.longitudinalAccelLimitCtrl(ccs);
+  ccs = lateralLimitCtrl(ccs);
   ccs = smoothCtrl(ccs);
   ctrl_pub_.publish(ccs);
   publishLateralResultsWithCtrl(ccs);
@@ -384,6 +386,10 @@ TwistFilter::TwistFilter(ros::NodeHandle *nh, ros::NodeHandle *private_nh):
   if (nh_ != nullptr && private_nh_ != nullptr) {
     nh_->param("vehicle_info/wheel_base", wheel_base_, 2.7);
     private_nh_->param("longitudinal_velocity_limit", longitudinal_velocity_limit_, 35.7632);
+    private_nh_->param("longitudinal_accel_limit", longitudinal_accel_limit_, 3.5);
+    _lon_accel_limiter = LongitudinalAccelLimiter{
+      std::min(longitudinal_accel_limit_, 
+      MAX_LONGITUDINAL_ACCEL_HARDCODED_LIMIT_M_S_2)};
     private_nh_->param("lateral_accel_limit", lateral_accel_limit_, 5.0);
     private_nh_->param("lateral_jerk_limit", lateral_jerk_limit_, 5.0);
     private_nh_->param("lowpass_gain_linear_x", lowpass_gain_linear_x_, 0.0);
