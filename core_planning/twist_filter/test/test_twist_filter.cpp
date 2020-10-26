@@ -85,8 +85,8 @@ namespace twist_filter
         ASSERT_DOUBLE_EQ(6.0, out4.twist.linear.x);
 
         geometry_msgs::TwistStamped msg5;
-        msg4.header.stamp = ros::Time(5.0);
-        msg4.twist.linear.x = 0.0;
+        msg5.header.stamp = ros::Time(5.0);
+        msg5.twist.linear.x = 0.0;
 
         geometry_msgs::TwistStamped out5 = limiter.longitudinalAccelLimitTwist(msg5);
         ASSERT_DOUBLE_EQ(1.0, out5.twist.linear.x);
@@ -124,8 +124,8 @@ namespace twist_filter
         ASSERT_DOUBLE_EQ(6.0, out4.cmd.linear_velocity);
 
         autoware_msgs::ControlCommandStamped msg5;
-        msg4.header.stamp = ros::Time(5.0);
-        msg4.cmd.linear_velocity = 0.0;
+        msg5.header.stamp = ros::Time(5.0);
+        msg5.cmd.linear_velocity = 0.0;
 
         autoware_msgs::ControlCommandStamped out5 = limiter.longitudinalAccelLimitCtrl(msg5);
         ASSERT_DOUBLE_EQ(1.0, out5.cmd.linear_velocity);
