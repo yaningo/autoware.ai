@@ -46,6 +46,7 @@ include_directories(
 add_executable(twist_filter 
   src/twist_filter_node.cpp
   src/velocity_limit.cpp
+  src/accel_limit.cpp
   src/twist_filter.cpp)
 target_link_libraries(twist_filter ${catkin_LIBRARIES})
 add_dependencies(twist_filter ${catkin_EXPORTED_TARGETS})
@@ -67,6 +68,7 @@ if (CATKIN_ENABLE_TESTING)
   roslint_add_test()
   catkin_add_gtest(${PROJECT_NAME}-test 
     test/test_twist_filter.cpp
+    src/accel_limit.cpp
     src/velocity_limit.cpp)
   target_link_libraries(${PROJECT_NAME}-test ${catkin_LIBRARIES})
 endif ()
