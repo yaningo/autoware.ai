@@ -250,48 +250,51 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit, sL; //Speed Limit values 
+  Velocity speed_limit = MAX_SPEED_LIMIT; //Speed Limit values 
+  if (config_limit > 0_mph) {
+    speed_limit = std::min(config_limit, speed_limit);
+  }
 
   for (auto sign_speed_limit : sign_speed_limits)
   {
-    sL = trafficSignToVelocity(sign_speed_limit->type()); //Retrieve speed limit information from  trafficSignToVelocity function
+    speed_limit = trafficSignToVelocity(sign_speed_limit->type()); //Retrieve speed limit information from  trafficSignToVelocity function
 
-    if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT)//Accounting for the configured speed limit, input zero when not in use
+    if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT && speed_limit > config_limit)//Accounting for the configured speed limit, input zero when not in use
       {
-        ROS_WARN_STREAM("Configurable value in use.");
-        sL = config_limit;
+        ROS_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
+        speed_limit = config_limit;
       }
 
     //Determine whether or not the value exceeds the predetermined maximum speed limit value.
-    if (sL > MAX_SPEED_LIMIT)
+    if (speed_limit > MAX_SPEED_LIMIT)
     {
       ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
-      sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+      speed_limit = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
     }
-    speed_limit = sL ;
   }
   for (auto dig_speed_limit : digital_speed_limits)
   {
-    sL = dig_speed_limit->getSpeedLimit();
-
-    if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT)//Accounting for the configured speed limit, input zero when not in use
-       { 
-          ROS_WARN_STREAM("Configurable value in use.");
-
-          sL = config_limit;
-       }
 
     if (dig_speed_limit->appliesTo(participant()))
     {
-        //Determine whether or not the value exceeds the predetermined maximum speed limit value.
-        if (sL > MAX_SPEED_LIMIT)
-        {
-          ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
-          sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
-        }
-      speed_limit = sL;
+      speed_limit = dig_speed_limit->getSpeedLimit();
+
+      if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT && speed_limit > config_limit)//Accounting for the configured speed limit, input zero when not in use
+      { 
+        ROS_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
+
+        speed_limit = config_limit;
+      }
+      //Determine whether or not the value exceeds the predetermined maximum speed limit value.
+      if (speed_limit > MAX_SPEED_LIMIT)
+      {
+        ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+        speed_limit = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+      }
     }
   }
+
+  ROS_DEBUG_STREAM("Returning Speed Limit: " << speed_limit.value());
 
   return SpeedLimitInformation{ speed_limit, true };//Return Speed limit data.
 }
