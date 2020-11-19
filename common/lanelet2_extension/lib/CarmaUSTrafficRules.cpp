@@ -272,22 +272,28 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
   }
   for (auto dig_speed_limit : digital_speed_limits)
   {
-    sL = dig_speed_limit->getSpeedLimit();
 
     if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT)//Accounting for the configured speed limit, input zero when not in use
        { 
-          ROS_WARN_STREAM("Configurable value in use.");
-
           sL = config_limit;
        }
-
+    else
+    {
+        ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+        sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+    }
+  
     if (dig_speed_limit->appliesTo(participant()))
     {
+        lanelet::Velocity dig_sL = dig_speed_limit->getSpeedLimit();
         //Determine whether or not the value exceeds the predetermined maximum speed limit value.
-        if (sL > MAX_SPEED_LIMIT)
+        if (dig_sL<sL)
         {
-          ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
-          sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+          sL=dig_sL;
+        }
+        else
+        {
+          ROS_WARN_STREAM("Configurable value in use.");
         }
       speed_limit = sL;
     }
