@@ -1,6 +1,6 @@
 ## Note
 
-This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/CARMAPlatform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
+This is a fork of Autoware containing modifications to support usage with the [CARMAPlatform](https://github.com/usdot-fhwa-stol/carma-platform). This repository contains changes to the Autoware source code and configuration that may not be supported by the Autoware Foundation and may not be consistent with the original design intent of Autoware. All modifications in this repository are licensed under the same Apache License 2.0 as Autoware and all modifications of the source code made will be marked as such in accordance with the terms of the Apache License 2.0. For a list of modifications and their descriptions please see [NOTICE.md](NOTICE.md).
 
 ### For developers working in this repository:
 
@@ -54,3 +54,21 @@ For any modified file please follow these steps to ensure proper documentation o
   - 11/18/2019
   - Michael McConnell
 
+- Updated to revise the way centerline recalulation works to better
+  reflect the kinds of maps that CARMA has and to work better with
+  the CARMA World Model.
+  - 3/11/2020
+  - Kyle Rush
+
+- Removed the use of centerline overwriting as it was causing issues with map loading. It may be added back in the future if the need arises. 
+  - 7/16/2020
+  - Michael McConnell
+
+- Added support for longitudinal velocity limiting in twist_filter, refactored
+  node to support unit testing for added feature.
+  - 9/13/2020
+  - Kyle Rush
+
+- Added hardcoded_params package to be used by twist_filter for the longitudinal velocity change above. 
+  - 10/6/2020
+  - Michael McConnell

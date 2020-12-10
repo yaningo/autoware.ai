@@ -14,6 +14,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 #include <vector>
 #include <memory>
 #include <lanelet2_core/Forward.h>
@@ -26,6 +27,7 @@
 #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
+#include <hardcoded_params/control_limits/control_limits.h>
 
 namespace lanelet
 {
@@ -37,6 +39,7 @@ class CarmaUSTrafficRules : public TrafficRules
 public:
   // Declare new US location. Prefix with carma to prevent future collisions if lanelet adds US support
   static constexpr char Location[] = "carma_us";
+  const lanelet::Velocity MAX_SPEED_LIMIT = lanelet::Velocity(hardcoded_params::control_limits::MAX_LONGITUDINAL_VELOCITY_MPS * lanelet::units::MPS());
 
   CarmaUSTrafficRules(Configuration config = Configuration()) : TrafficRules(config){};
 
@@ -66,11 +69,16 @@ public:
 
   bool isOneWay(const ConstLanelet& lanelet) const override;
 
+  void setConfigSpeedLimit(double config_lim);
+
   /**
    * @brief NOTE: This function always returns true as all elements in CARMA can contain dynamic rules there is never a
    * reason to assume otherwise
    */
   bool hasDynamicRules(const ConstLanelet& lanelet) const override;
+
+  
+
 
 private:
   /**
@@ -106,7 +114,12 @@ private:
    *
    * @return The speed limit for the provided region
    */
-  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area) const;
+  SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const;
+
+
+  lanelet::Velocity config_limit;
+
+
 };
 
 }  // namespace traffic_rules

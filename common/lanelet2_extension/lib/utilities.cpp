@@ -17,6 +17,13 @@
  *
  */
 
+/*
+ * Updated to revise the way centerline recalulation works to better
+ * reflect the kinds of maps that CARMA has and to work better with
+ * the CARMA World Model.
+ * Kyle Rush<kyle.rush@leidos.com> 3/11/2020 
+ */
+
 #include <lanelet2_core/geometry/LineString.h>
 #include <lanelet2_core/primitives/BasicRegulatoryElements.h>
 #include <lanelet2_traffic_rules/TrafficRules.h>
@@ -25,9 +32,9 @@
 #include <lanelet2_extension/utility/utilities.h>
 #include <ros/ros.h>
 
+#include <algorithm>
 #include <map>
 #include <utility>
-#include <algorithm>
 #include <vector>
 
 namespace lanelet
@@ -52,7 +59,7 @@ bool exists(const std::vector<int>& array, const int element)
 void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
                                 const lanelet::routing::RoutingGraphPtr routing_graph,
                                 const std::vector<autoware_msgs::Waypoint>& waypoints,
-                                std::map<int, std::vector<int> >* wp_candidate_lanelets)
+                                std::map<int, std::vector<int> >* wp_candidate_lanelets, const bool reverse)
 {
   if (!lanelet_map)
   {
@@ -87,7 +94,16 @@ void removeImpossibleCandidates(const lanelet::LaneletMapPtr lanelet_map,
         continue;
 
       auto lanelet = lanelet_map->laneletLayer.get(candidate_id);
-      auto previous_lanelets = routing_graph->previous(lanelet);
+      // get available previous lanelet from routing graph
+      lanelet::ConstLanelets previous_lanelets;
+      if (reverse)
+      {
+        previous_lanelets = routing_graph->following(lanelet);
+      }
+      else
+      {
+        previous_lanelets = routing_graph->previous(lanelet);
+      }
 
       // connection is impossible if none of predecessor lanelets match with
       // lanelet candidates from previous waypoint
@@ -274,33 +290,41 @@ std::vector<lanelet::BasicPoint3d> resamplePoints(const lanelet::ConstLineString
   return resampled_points;
 }
 
+/*!
+  * \brief Return a recomputed centerline for the given input lanelet without 
+  *        modifiying the input lanelet
+  * 
+  * Computes a centerline by averaging each point in the left and right boundary
+  * of the lanelet. Assumes that the points on the left and right bound are 
+  * evenly spaced as well as equally numbered. i.e. average(left[i], right[i])
+  * = center[i].
+  * 
+  * \param lanelet_obj The lanelet to evaluate the centerline for
+  * \return A LineString3d describing the geometry of the center line
+  * \throws std::invalid_argument If the left and right bounds are not the same size
+  */
 lanelet::LineString3d generateFineCenterline(const lanelet::ConstLanelet& lanelet_obj)
 {
-  // Parameter
-  constexpr double point_interval = 1.0;  // [m]
-
-  // Get length of longer border
-  const double left_length = lanelet::geometry::length(lanelet_obj.leftBound());
-  const double right_length = lanelet::geometry::length(lanelet_obj.rightBound());
-  const double longer_distance = (left_length > right_length) ? left_length : right_length;
-  const int num_segments = std::max(static_cast<int>(ceil(longer_distance / point_interval)), 1);
-
-  // Resample points
-  const auto left_points = resamplePoints(lanelet_obj.leftBound(), num_segments);
-  const auto right_points = resamplePoints(lanelet_obj.rightBound(), num_segments);
-
-  // Create centerline
-  lanelet::LineString3d centerline(lanelet::utils::getId());
-  for (int i = 0; i < num_segments + 1; i++)
-  {
-    // Add ID for the average point of left and right
-    const auto center_basic_point = (right_points.at(i) + left_points.at(i)) / 2;
-    const lanelet::Point3d center_point(lanelet::utils::getId(), center_basic_point.x(), center_basic_point.y(),
-                                        center_basic_point.z());
-    centerline.push_back(center_point);
+  if (lanelet_obj.rightBound2d().size() != lanelet_obj.leftBound2d().size()) {
+    throw std::invalid_argument("Left and right bound not the same size for centerline computation");
   }
-  return centerline;
+
+  lanelet::ConstLineString3d left = lanelet_obj.leftBound3d();
+  lanelet::ConstLineString3d right = lanelet_obj.rightBound3d();
+  lanelet::LineString3d center;
+  double x, y, z;
+  for (int i = 0; i < lanelet_obj.rightBound3d().size(); i++) {
+    x = (left[i].x() + right[i].x())/2.0;
+    y = (left[i].y() + right[i].y())/2.0;
+    z = (left[i].z() + right[i].z())/2.0;
+    lanelet::Point3d point(lanelet::utils::getId(), x, y, z);
+    center.push_back(point);
+  }
+
+  return center;
 }
+
+
 
 }  // namespace
 
@@ -346,7 +370,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
   // eliminate impossible candidates using routing graph. (forward direction)
   for (const auto& lane : lane_array.lanes)
   {
-    removeImpossibleCandidates(lanelet_map, routing_graph, lane.waypoints, &wp_candidate_lanelet_ids);
+    removeImpossibleCandidates(lanelet_map, routing_graph, lane.waypoints, &wp_candidate_lanelet_ids, false);
   }
 
   // eliminate impossible candidates using routing graph. (reverse direction)
@@ -354,7 +378,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
   {
     auto reverse_waypoints = lane.waypoints;
     std::reverse(reverse_waypoints.begin(), reverse_waypoints.end());
-    removeImpossibleCandidates(lanelet_map, routing_graph, reverse_waypoints, &wp_candidate_lanelet_ids);
+    removeImpossibleCandidates(lanelet_map, routing_graph, reverse_waypoints, &wp_candidate_lanelet_ids, true);
   }
 
   for (auto candidate : wp_candidate_lanelet_ids)
@@ -364,7 +388,7 @@ void matchWaypointAndLanelet(const lanelet::LaneletMapPtr lanelet_map,
       ROS_WARN_STREAM("No lanelet was matched for waypoint with gid: " << candidate.first);
       continue;
     }
-    if (candidate.second.size() > 2)
+    if (candidate.second.size() >= 2)
     {
       ROS_WARN("ambiguous waypoint. Randomly choosing from candidates");
     }
@@ -384,5 +408,13 @@ void overwriteLaneletsCenterline(lanelet::LaneletMapPtr lanelet_map, const bool 
   }
 }
 
+void removeRegulatoryElements(std::vector<lanelet::RegulatoryElementPtr> regem_list, const lanelet::LaneletMapPtr lanelet_map)
+{
+  for (lanelet::RegulatoryElementPtr regem : regem_list)
+  {
+    lanelet_map->remove(regem);
+  }
+  return;
+}
 }  // namespace utils
 }  // namespace lanelet

@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+#include <ros/ros.h>
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <lanelet2_core/geometry/Lanelet.h>
@@ -28,6 +29,7 @@
 #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
+using namespace lanelet::units::literals;
 
 namespace lanelet
 {
@@ -244,36 +246,66 @@ Velocity CarmaUSTrafficRules::trafficSignToVelocity(const std::string& typeStrin
   }
 }
 
-SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& lanelet_or_area) const
+SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const
 {
   auto sign_speed_limits = lanelet_or_area.regulatoryElementsAs<SpeedLimit>();
   auto digital_speed_limits = lanelet_or_area.regulatoryElementsAs<DigitalSpeedLimit>();
-  Velocity speed_limit;
+  Velocity speed_limit, sL; //Speed Limit values 
+
   for (auto sign_speed_limit : sign_speed_limits)
   {
-    speed_limit = trafficSignToVelocity(sign_speed_limit->type());
+    sL = trafficSignToVelocity(sign_speed_limit->type()); //Retrieve speed limit information from  trafficSignToVelocity function
+
+    if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT)//Accounting for the configured speed limit, input zero when not in use
+      {
+        ROS_WARN_STREAM("Configurable value in use.");
+        sL = config_limit;
+      }
+
+    //Determine whether or not the value exceeds the predetermined maximum speed limit value.
+    if (sL > MAX_SPEED_LIMIT)
+    {
+      ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+      sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+    }
+    speed_limit = sL ;
   }
   for (auto dig_speed_limit : digital_speed_limits)
   {
+    sL = dig_speed_limit->getSpeedLimit();
+
+    if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT)//Accounting for the configured speed limit, input zero when not in use
+       { 
+          ROS_WARN_STREAM("Configurable value in use.");
+
+          sL = config_limit;
+       }
+
     if (dig_speed_limit->appliesTo(participant()))
     {
-      speed_limit = dig_speed_limit->getSpeedLimit();
+        //Determine whether or not the value exceeds the predetermined maximum speed limit value.
+        if (sL > MAX_SPEED_LIMIT)
+        {
+          ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+          sL = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
+        }
+      speed_limit = sL;
     }
   }
 
-  return SpeedLimitInformation{ speed_limit, true };
+  return SpeedLimitInformation{ speed_limit, true };//Return Speed limit data.
 }
 
 SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLanelet& lanelet) const
 {
   ConstLaneletOrArea lanelet_or_area(lanelet);
-  return speedLimit(lanelet_or_area);
+  return speedLimit(lanelet_or_area, config_limit);
 }
 
 SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstArea& area) const
 {
   ConstLaneletOrArea lanelet_or_area(area);
-  return speedLimit(lanelet_or_area);
+  return speedLimit(lanelet_or_area, config_limit);
 }
 
 bool CarmaUSTrafficRules::isOneWay(const ConstLanelet& lanelet) const
@@ -285,6 +317,13 @@ bool CarmaUSTrafficRules::hasDynamicRules(const ConstLanelet& lanelet) const
 {
   return true;  // All regulations are considered dynamic in CARMA
 }
+
+void CarmaUSTrafficRules::setConfigSpeedLimit(double config_lim)
+{
+  /*Logic to change config_lim to Velocity value config_limit*/
+  config_limit = lanelet::Velocity(config_lim * lanelet::units::MPH());
+}
+
 
 // Register carma traffic rules with lanelet2
 // Since CarmaUSTrafficRules is based solely on regulatory elements there is never a need to infer the participant

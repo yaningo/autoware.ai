@@ -45,6 +45,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   roslint
+  hardcoded_params
 )
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
@@ -53,7 +54,7 @@ roslint_cpp()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lanelet2_extension_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
+  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs hardcoded_params
 )
 
 include_directories(
@@ -77,6 +78,7 @@ add_library( lanelet2_extension_lib
   lib/visualization.cpp
   lib/CarmaUSTrafficRules.cpp
   lib/PassingControlLine.cpp
+  lib/StopRule.cpp
   lib/DigitalSpeedLimit.cpp
   lib/RegionAccessRule.cpp
   lib/DirectionOfTravel.cpp
@@ -134,6 +136,7 @@ if(CATKIN_ENABLE_TESTING)
   test/src/CarmaTestsMain.cpp
   test/src/RegionAccessRuleTest.cpp
   test/src/PassingControlLineTest.cpp
+  test/src/StopRuleTest.cpp
   test/src/DirectionOfTravelTest.cpp
   test/src/DigitalSpeedLimitTest.cpp
   test/src/CarmaUSTrafficRulesTest.cpp
