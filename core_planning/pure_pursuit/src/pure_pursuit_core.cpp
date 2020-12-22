@@ -286,8 +286,7 @@ void PurePursuitNode::callbackFromCurrentVelocity(
 void PurePursuitNode::callbackFromWayPoints(
   const autoware_msgs::LaneConstPtr& msg)
 {
-  command_linear_velocity_ =
-    (!msg->waypoints.empty()) ? msg->waypoints.at(0).twist.twist.linear.x : 0;
+  
   if (add_virtual_end_waypoints_)
   {
     const LaneDirection solved_dir = getLaneDirection(*msg);
@@ -296,7 +295,6 @@ void PurePursuitNode::callbackFromWayPoints(
     expand_size_ = -expanded_lane.waypoints.size();
     connectVirtualLastWaypoints(&expanded_lane, direction_);
     expand_size_ += expanded_lane.waypoints.size();
-
     pp_.setCurrentWaypoints(expanded_lane.waypoints);
   }
   else
@@ -304,7 +302,20 @@ void PurePursuitNode::callbackFromWayPoints(
     pp_.setCurrentWaypoints(msg->waypoints);
   }
   is_waypoint_set_ = true;
+  // lookahead distance is not needed as we are checking waypoint that is at immediately front of the vehicle.
+  int next_waypoint_number = pp_.getNextWaypointNumber(false);
+  if (next_waypoint_number != -1)
+  {
+    command_linear_velocity_ =
+      (!msg->waypoints.empty()) ? pp_.getCurrentWaypoints().at(next_waypoint_number).twist.twist.linear.x : 0;
+  }
+  else
+  {
+    ROS_WARN_STREAM("Pure pursuit is applying 0mph speed because it could not find satisfactory next_waypoint");
+    command_linear_velocity_ = 0;
+  }
 }
+
 
 void PurePursuitNode::connectVirtualLastWaypoints(
   autoware_msgs::Lane* lane, LaneDirection direction)
@@ -329,10 +340,23 @@ void PurePursuitNode::connectVirtualLastWaypoints(
   }
 }
 
+geometry_msgs::Point PurePursuitNode::getPoseOfNextWaypoint() const
+{
+  return pp_.getPoseOfNextWaypoint();
+}
+
+void PurePursuitNode::calculateNextWaypoint()
+{
+  int next_waypoint_number = pp_.getNextWaypointNumber();
+  pp_.setNextWaypoint(next_waypoint_number);
+}
+
 double convertCurvatureToSteeringAngle(
   const double& wheel_base, const double& kappa)
 {
   return atan(wheel_base * kappa);
 }
+
+
 
 }  // namespace waypoint_follower

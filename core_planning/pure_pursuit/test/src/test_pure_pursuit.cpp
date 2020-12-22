@@ -20,6 +20,15 @@
 
 namespace waypoint_follower
 {
+  geometry_msgs::PoseStamped generateCurrentPose(double x, double y, double yaw)
+  {
+    geometry_msgs::PoseStamped pose;
+    pose.pose.position.x = x;
+    pose.pose.position.y = y;
+    tf::Quaternion quaternion = tf::createQuaternionFromRPY(0, 0, yaw);
+    quaternionTFToMsg(quaternion, pose.pose.orientation);
+    return std::move(pose);
+  }
 class PurePursuitNodeTestSuite : public ::testing::Test
 {
 protected:
@@ -50,7 +59,42 @@ public:
   {
     obj_->connectVirtualLastWaypoints(expand_lane, direction);
   }
+  void ppcallbackFromCurrentPose(
+    const geometry_msgs::PoseStampedConstPtr& msg)
+  {
+    obj_->callbackFromCurrentPose(msg);
+  }
+  void ppcalculateNextWaypoint()
+  {
+    obj_->calculateNextWaypoint();
+  }
+  geometry_msgs::Point ppGetPoseOfNextWaypoint() const
+  {
+    return obj_->getPoseOfNextWaypoint();
+  }
+  void ASSERT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(double curr_pose_x, double curr_pose_y, double next_wp_pose_x, double next_wp_pose_y)
+  {
+    geometry_msgs::PoseStamped pose = waypoint_follower::generateCurrentPose(curr_pose_x, curr_pose_y, 0);
+    geometry_msgs::PoseStampedConstPtr pose_ptr = boost::make_shared<const geometry_msgs::PoseStamped>(pose);
+    ppcallbackFromCurrentPose(pose_ptr);
+    ppcalculateNextWaypoint();
+    auto next_wp_pose_calculated = ppGetPoseOfNextWaypoint();
+    ASSERT_NEAR(next_wp_pose_calculated.x, next_wp_pose_x, 0.0001);
+    ASSERT_NEAR(next_wp_pose_calculated.y, next_wp_pose_y, 0.0001);
+  }
+
+  void ASSERT_NOT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(double curr_pose_x, double curr_pose_y, double next_wp_pose_x, double next_wp_pose_y)
+  {
+    geometry_msgs::PoseStamped pose = waypoint_follower::generateCurrentPose(curr_pose_x, curr_pose_y, 0);
+    geometry_msgs::PoseStampedConstPtr pose_ptr = boost::make_shared<const geometry_msgs::PoseStamped>(pose);
+    ppcallbackFromCurrentPose(pose_ptr);
+    ppcalculateNextWaypoint();
+    auto next_wp_pose_calculated = ppGetPoseOfNextWaypoint();
+    ASSERT_FALSE(std::abs(next_wp_pose_calculated.x - next_wp_pose_x) < 0.001);
+  }
 };
+
+
 
 TEST_F(PurePursuitNodeTestSuite, inputPositivePath)
 {
@@ -111,6 +155,62 @@ TEST_F(PurePursuitNodeTestSuite, inputNormalLane)
   ASSERT_LT(original_lane.waypoints.size(), new_lane.waypoints.size())
     << "Fail to expand waypoints";
 }
+
+
+TEST_F(PurePursuitNodeTestSuite, checkWaypointIsAheadOrBehind)
+{  
+  /*
+  *           2.             |3  x. > x-th waypoint coordinate 
+  *                          |2  
+  *                          |1
+  *  0. 1.          3.    4. |0
+  * ------------------------ y 
+  *x 0  1  2  3  4  5  6  7   
+  */
+  
+  autoware_msgs::Lane original_lane;
+  original_lane.waypoints.resize(4, autoware_msgs::Waypoint());
+  original_lane.waypoints[0].pose.pose.position.x = 0;
+  original_lane.waypoints[1].pose.pose.position.x = 1;
+  original_lane.waypoints[2].pose.pose.position.x = 3; 
+  original_lane.waypoints[2].pose.pose.position.y = 3; 
+  original_lane.waypoints[3].pose.pose.position.x = 5;
+  original_lane.waypoints[4].pose.pose.position.x = 7;  
+  original_lane.waypoints[0].pose.pose.orientation =
+      tf::createQuaternionMsgFromYaw(0.0);
+  original_lane.waypoints[1].pose.pose.orientation =
+      tf::createQuaternionMsgFromYaw(0.0);
+  original_lane.waypoints[2].pose.pose.orientation =
+      tf::createQuaternionMsgFromYaw(0.0);
+  original_lane.waypoints[3].pose.pose.orientation =
+      tf::createQuaternionMsgFromYaw(0.0);
+  original_lane.waypoints[4].pose.pose.orientation =
+      tf::createQuaternionMsgFromYaw(0.0);
+
+  geometry_msgs::PoseStamped pose = generateCurrentPose(-0.5, 0, 0);
+  geometry_msgs::PoseStampedConstPtr pose_ptr = boost::make_shared<const geometry_msgs::PoseStamped>(pose);
+  ppcallbackFromCurrentPose(pose_ptr);
+
+  const autoware_msgs::LaneConstPtr
+    lp(boost::make_shared<autoware_msgs::Lane>(original_lane));
+  ppCallbackFromWayPoints(lp);
+  ppcalculateNextWaypoint();
+
+  // following simulates the car going straight on x coord, 1D
+  // despite the waypoint being in 2D to test the angles
+  ASSERT_NEAR(ppGetPoseOfNextWaypoint().x, 0, 0.001);
+
+  ASSERT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(0.95, 0, 1, 0); // closest next waypoint is 1. (<1,0> 0 degrees ahead): qualified
+
+  ASSERT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(2.95, 0, 5, 0); // closest next waypoint is 2. (<3,3> angle is 123.69): disqualified
+                                                                                    // so picked 3. (<5,0> 0 degrees ahead): qualified
+  ASSERT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(3.15, 0, 5, 0); // closest next waypoint is 3. qualified
+
+  ASSERT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(6.95, 0, 7, 0); // closest next waypoint is 4. (<7,0> 0 degrees ahead): qualified
+
+  ASSERT_NOT_NEAR_NEXT_WP_POSE_USING_CURR_POSE(7.95, 0, 7, 0); //  closest next waypoint is 5 (auto generated), not 4
+}
+
 }  // namespace waypoint_follower
 
 int main(int argc, char** argv)
