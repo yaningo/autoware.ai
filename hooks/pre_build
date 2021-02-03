@@ -6,6 +6,6 @@ if [[ "$SOURCE_BRANCH" = "carma-develop" ]]; then
         Dockerfile
 elif [[ "$SOURCE_BRANCH" =~ ^release/.*$ ]]; then
     # update image dependencies
-    sed -i "s|usdotfhwastol|usdotfhwastolcandidate|g; s|:[0-9]*\.[0-9]*\.[0-9]*|:candidate|g" \
+    sed -i "s|usdotfhwastol/|usdotfhwastolcandidate/|g; s|:[0-9]*\.[0-9]*\.[0-9]*|:candidate|g" \
         Dockerfile
 fi
