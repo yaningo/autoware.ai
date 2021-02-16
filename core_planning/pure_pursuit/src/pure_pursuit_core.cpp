@@ -204,11 +204,13 @@ int PurePursuitNode::getSgn() const
 
 double PurePursuitNode::computeCommandVelocity() const
 {
+  ROS_DEBUG_STREAM("const velocity :"<< const_velocity_<<" command_linear_velocity_:"<<command_linear_velocity_);
   if (velocity_source_ == enumToInteger(Mode::dialog))
   {
+    ROS_DEBUG_STREAM("Returning const_velocity");
     return getSgn() * kmph2mps(const_velocity_);
   }
-
+  ROS_DEBUG_STREAM("Returning command velocity");
   return command_linear_velocity_;
 }
 
