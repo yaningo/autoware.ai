@@ -268,6 +268,7 @@ int PurePursuit::getNextWaypointNumber(bool use_lookahead_distance)
       continue;
     }
     next_waypoint_number = i - 1;
+    ROS_INFO_STREAM("Closest distance in getwaypointnum:"<<closest_distance<<" Current distance:"<<current_distance<<" next waypoint num:"<<next_waypoint_number);
     return next_waypoint_number;
   }
   
