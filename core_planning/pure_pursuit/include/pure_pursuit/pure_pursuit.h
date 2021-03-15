@@ -89,6 +89,17 @@ public:
   {
     return minimum_lookahead_distance_;
   }
+  /**
+   * \brief Returns the idx number of next waypoint that is in front of the vehicle.
+   * \param use_lookahead_distance true to use dynamic lookahead, false to ignore 
+   * \return idx number of waypoint
+   */
+  int getNextWaypointNumber(bool use_lookahead_distance = true);
+  /**
+   * \brief Sets the next waypoint's idx number. Debug purpose only
+   * \return idx number of waypoint
+   */
+  void setNextWaypoint(int next_waypoint_number);
   // processing
   bool canGetCurvature(double* output_kappa);
 
@@ -111,7 +122,6 @@ private:
   double calcCurvature(geometry_msgs::Point target) const;
   bool interpolateNextTarget(
     int next_waypoint, geometry_msgs::Point* next_target) const;
-  void getNextWaypoint();
 };
 }  // namespace waypoint_follower
 

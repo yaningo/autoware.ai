@@ -196,47 +196,95 @@ bool PurePursuit::interpolateNextTarget(
   }
 }
 
-void PurePursuit::getNextWaypoint()
+
+int PurePursuit::getNextWaypointNumber(bool use_lookahead_distance)
 {
+  int next_waypoint_number = -1;
+  
   int path_size = static_cast<int>(current_waypoints_.size());
 
   // if waypoints are not given, do nothing.
   if (path_size == 0)
   {
-    next_waypoint_number_ = -1;
-    return;
+    next_waypoint_number = -1;
+    return next_waypoint_number;
   }
-
+  double closest_distance = getPlaneDistance(current_waypoints_.at(0).pose.pose.position, current_pose_.position);
   // look for the next waypoint.
-  for (int i = 0; i < path_size; i++)
+  for (int i = 1; i < path_size; i++)
   {
     // if search waypoint is the last
     if (i == (path_size - 1))
     {
-      ROS_INFO("search waypoint is the last");
-      next_waypoint_number_ = i;
-      return;
+      ROS_INFO_STREAM(">> Search waypoint reached the last: x: " << current_waypoints_.at(i).pose.pose.position.x 
+                                              << ", y: " << current_waypoints_.at(i).pose.pose.position.y << ", speed: " << current_waypoints_.at(i).twist.twist.linear.x * 2.23694 << "mph");
+      next_waypoint_number = i;
+      return next_waypoint_number;
     }
 
-    // if there exists an effective waypoint
-    if (getPlaneDistance(
-      current_waypoints_.at(i).pose.pose.position, current_pose_.position)
-      > lookahead_distance_)
+    double current_distance = getPlaneDistance(current_waypoints_.at(i).pose.pose.position, current_pose_.position);
+    
+    // due to the fact that waypoints represent small portion of the road, there is no suddent change in direction
+    // also since waypoints are in increasing distance from old curr_pos (which may have passed),
+    // waypoint distances first decrease and increase back again, which helps find the closest point   
+    if (use_lookahead_distance)
     {
-      next_waypoint_number_ = i;
-      return;
+      // loop through until we hit the closest point
+      if (current_distance <= closest_distance) 
+      {
+        closest_distance = current_distance;
+        continue;
+      }
+      // loop through until we hit the closest and effective point
+      if (current_distance < lookahead_distance_)
+      {
+        continue;
+      }
     }
-  }
+    else
+    {
+      // loop through until we hit the closest point
+      if (current_distance < closest_distance )
+      {
+        closest_distance = current_distance;
+        continue;
+      }
+    }
+    // Else, by this point, we found that prev point is the closest point and is bigger than lookahead_distance if applicable
 
+    // then check if the prev point is in front or back
+    tf::Vector3 curr_vector(current_waypoints_.at(i - 1).pose.pose.position.x - current_pose_.position.x, 
+                      current_waypoints_.at(i - 1).pose.pose.position.y - current_pose_.position.y, 
+                      current_waypoints_.at(i - 1).pose.pose.position.z - current_pose_.position.z);
+    curr_vector.setZ(0);
+    tf::Vector3 traj_vector(current_waypoints_.at(i).pose.pose.position.x - current_waypoints_.at(i - 1).pose.pose.position.x, 
+                      current_waypoints_.at(i).pose.pose.position.y - current_waypoints_.at(i - 1).pose.pose.position.y, 
+                      current_waypoints_.at(i).pose.pose.position.z - current_waypoints_.at(i - 1).pose.pose.position.z);
+    traj_vector.setZ(0);
+    double angle_in_rad = std::fabs(tf::tfAngle(curr_vector, traj_vector));
+    // if degree between curr_vector and the direction of the trajectory is more than 90 degrees, we know last point is behind us and unsatisfactory
+    if (std::isnan(angle_in_rad) || angle_in_rad > M_PI / 2)
+    {
+      continue;
+    }
+    next_waypoint_number = i - 1;
+    return next_waypoint_number;
+  }
+  
   // if this program reaches here , it means we lost the waypoint!
-  next_waypoint_number_ = -1;
-  return;
+  next_waypoint_number = -1;
+  return next_waypoint_number;
+}
+
+void PurePursuit::setNextWaypoint(int next_waypoint_number)
+{
+  next_waypoint_number_ = next_waypoint_number;
 }
 
 bool PurePursuit::canGetCurvature(double* output_kappa)
 {
   // search next waypoint
-  getNextWaypoint();
+  next_waypoint_number_ = getNextWaypointNumber();
   if (next_waypoint_number_ == -1)
   {
     ROS_INFO("lost next waypoint");
