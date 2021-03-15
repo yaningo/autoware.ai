@@ -1,10 +1,10 @@
-FROM usdotfhwastolcandidate/carma-base:vanden-plas as build
+FROM usdotfhwastol/carma-base:carma-system-3.5.0 as build
 
 COPY --chown=carma . /home/carma/autoware.ai
 RUN /home/carma/autoware.ai/docker/checkout.bash
 RUN ./home/carma/autoware.ai/docker/install.sh
 
-FROM usdotfhwastolcandidate/carma-base:vanden-plas
+FROM usdotfhwastol/carma-base:carma-system-3.5.0
 
 ARG BUILD_DATE="NULL"
 ARG VCS_REF="NULL"
