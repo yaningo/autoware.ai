@@ -35,6 +35,9 @@ SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_
 
   rate_ = new ros::Rate(loop_rate_);
 
+  // subscribers from CARMA
+  guidance_state_sub_ = nh_.subscribe("/state", 1, &SSCInterface::callbackFromGuidanceState, this);
+
   // subscribers from autoware
   vehicle_cmd_sub_ = nh_.subscribe("vehicle_cmd", 1, &SSCInterface::callbackFromVehicleCmd, this);
   engage_sub_ = nh_.subscribe("vehicle/engage", 1, &SSCInterface::callbackFromEngage, this);
@@ -97,6 +100,18 @@ void SSCInterface::run()
   }
 }
 
+void SSCInterface::callbackFromGuidanceState(const cav_msgs::GuidanceStateConstPtr& msg)
+{
+  if (msg->state == cav_msgs::GuidanceState::ENGAGED)
+  {
+    shift_to_park_ = false;
+  }
+  else if (msg->state == cav_msgs::GuidanceState::ENTER_PARK)
+  {
+    shift_to_park_ = true;
+  }
+}
+
 void SSCInterface::callbackFromVehicleCmd(const autoware_msgs::VehicleCmdConstPtr& msg)
 {
   command_time_ = ros::Time::now();
@@ -132,6 +147,9 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
   double curvature = !use_adaptive_gear_ratio_ ?
                          (msg_curvature->curvature) :
                          std::tan(msg_steering_wheel->steering_wheel_angle/ adaptive_gear_ratio_) / wheel_base_;
+
+  // Set current_velocity_ variable [m/s]
+  current_velocity_ = msg_velocity->velocity;
 
   // as_current_velocity (geometry_msgs::TwistStamped)
   geometry_msgs::TwistStamped twist;
@@ -213,7 +231,25 @@ void SSCInterface::publishCommand()
   double desired_curvature = std::tan(desired_steering_angle) / wheel_base_;
 
   // Gear (TODO: Use vehicle_cmd.gear)
-  unsigned char desired_gear = engage_ ? automotive_platform_msgs::Gear::DRIVE : automotive_platform_msgs::Gear::NONE;
+  unsigned char desired_gear = automotive_platform_msgs::Gear::NONE;
+
+  if (engage_) 
+  {
+    if (shift_to_park_) 
+    {
+      if (current_velocity_ < epsilon_){
+        desired_gear = automotive_platform_msgs::Gear::PARK;
+      }
+    }
+    else
+    {
+      desired_gear = automotive_platform_msgs::Gear::DRIVE;
+    }
+  }
+  else
+  {
+    desired_gear = automotive_platform_msgs::Gear::NONE;
+  }
 
   // Turn signal
   unsigned char desired_turn_signal = automotive_platform_msgs::TurnSignalCommand::NONE;
