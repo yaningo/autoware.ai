@@ -67,7 +67,7 @@ TEST(DigitalMinimumGap, digitalMinimumGap)
   area.attributes()[lanelet::AttributeName::Location] = lanelet::AttributeValueString::Urban;
   area.attributes()[lanelet::AttributeNamesString::ParticipantVehicle] = "yes";
 
-  DigitalSpeedLimit dsl(DigitalMinimumGap::buildData(lanelet::utils::getId(), 11, { ll_1, ll_2 }, { area },
+  DigitalMinimumGap dsl(DigitalMinimumGap::buildData(lanelet::utils::getId(), 11, { ll_1, ll_2 }, { area },
                                                      { lanelet::Participants::VehicleCar }));
 
   ASSERT_EQ(2, dsl.getLanelets().size());
