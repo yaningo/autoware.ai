@@ -178,7 +178,7 @@ void EKFLocalizer::setCurrentResult()
   tf2::convert(q_tf, current_ekf_pose_.pose.orientation);
 
   current_ekf_twist_.header.frame_id = child_frame_id_;
-  current_ekf_twist_.header.stamp = ros::Time::now();
+  current_ekf_twist_.header.stamp = current_ekf_pose_.header.stamp; // Twist time stamp should exactly match pose timestamp since they were computed in the same EKF step
   current_ekf_twist_.twist.linear.x = ekf_.getXelement(IDX::VX);
   current_ekf_twist_.twist.angular.z = ekf_.getXelement(IDX::WZ);
 }
@@ -192,7 +192,7 @@ void EKFLocalizer::timerTFCallback(const ros::TimerEvent& e)
     return;
 
   geometry_msgs::TransformStamped transformStamped;
-  transformStamped.header.stamp = ros::Time::now();
+  transformStamped.header.stamp = current_ekf_pose_.header.stamp; // Transform stamp should exactly match the same of the data it is set from
   transformStamped.header.frame_id = current_ekf_pose_.header.frame_id;
   transformStamped.child_frame_id = child_frame_id_;
   transformStamped.transform.translation.x = current_ekf_pose_.pose.position.x;
