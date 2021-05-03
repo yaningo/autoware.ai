@@ -36,7 +36,7 @@ namespace lanelet
 class DigitalMinimumGap : public RegulatoryElement
 {
 public:
-  static constexpr char RuleName[] = "digital_minimun_gap";
+  static constexpr char RuleName[] = "digital_minimum_gap";
   static constexpr char MinGap[] = "mingap";
   double min_gap_ = 0;
   std::unordered_set<std::string> participants_;
