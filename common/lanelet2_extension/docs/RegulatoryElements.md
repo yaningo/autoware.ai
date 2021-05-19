@@ -15,7 +15,7 @@ Minimum Gap can be set dynamically either through a V2V or V2X communications se
 
 | **Key** | **Value Type** | **description**                |
 |-------------|--------------|----------------------------------|
-| **subtype** | **digital_minimun_gap**    | Subtype name |
+| **subtype** | **digital_minimum_gap**    | Subtype name |
 | **mingap** | **double**    | The minimum gap to set. In an osm file units must be meters |
 | **participant:XXX** | **yes/no**    | The participant type this applies to |
 
@@ -42,7 +42,7 @@ To support multiple types of participants a new attribute should be added for ea
 <relation id='45217' visible='true' version='1'>
   <member type='lanelet' ref='1349' role='refers' />
   <tag k='mingap' v='13' /> <!-- Minimum gap value is of unit meter-->
-  <tag k='subtype' v='digital_minimun_gap' />
+  <tag k='subtype' v='digital_minimum_gap' />
   <tag k='type' v='regulatory_element' />
   <tag k='participant:vehicle' v='yes' />
 </relation>
