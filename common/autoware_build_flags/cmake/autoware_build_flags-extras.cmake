@@ -11,6 +11,8 @@ else()
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
+add_compile_options(-fext-numeric-literals) # TODO remove this after upgrading to ros noetic
+
 message(STATUS "CUDA compilation status: $ENV{AUTOWARE_COMPILE_WITH_CUDA}.")
 
 macro(AW_CHECK_CUDA)
