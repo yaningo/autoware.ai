@@ -69,6 +69,11 @@ public:
 
   bool isOneWay(const ConstLanelet& lanelet) const override;
 
+  /**
+   * @brief Set a configurable max speed limit for values returned by speedLimit
+   * 
+   * @param config_lim The max speed limit in MPH. Value will be capped to range (0, this.MAX_SPEED_LIMIT]
+   */ 
   void setConfigSpeedLimit(double config_lim);
 
   /**
@@ -111,13 +116,14 @@ private:
    * @brief Determines the speed limit for a lanelet or area
    *
    * @param lanelet_or_area The lanelet or area to evaluate
-   *
+   * @param config_limit The config limit to constain the speed limit too such that it falls in range (0, config_limit]
+   * 
    * @return The speed limit for the provided region
    */
   SpeedLimitInformation speedLimit(const ConstLaneletOrArea& lanelet_or_area, lanelet::Velocity config_limit) const;
 
 
-  lanelet::Velocity config_limit;
+  lanelet::Velocity config_limit = MAX_SPEED_LIMIT;
 
 
 };
