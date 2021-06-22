@@ -83,21 +83,24 @@ void SSCInterface::run()
   ShmVitalMonitor shm_ROvmon("RosObserver", loop_rate_);
   ShmVitalMonitor shm_HAvmon("HealthAggregator", loop_rate_);
 
-  while (ros::ok())
-  {
-    ros::spinOnce();
+  ros::Timer command_pub_timer = nh.createTimer( // Create a ros timer to publish commands at the ssc expected loop rate
+    rate_.expectedCycleTime(),
+    
+    [this](const auto&) { 
+      
+      shm_ASvmon.run(); // Check system health
 
-    shm_ASvmon.run();
+      if (shm_ROvmon.is_error_detected() || shm_HAvmon.is_error_detected()){
+        ROS_ERROR("Emergency stop by error detection of emergency module");
+        vehicle_cmd_.emergency = 1;
+      }
 
-    if (shm_ROvmon.is_error_detected() || shm_HAvmon.is_error_detected()){
-      ROS_ERROR("Emergency stop by error detection of emergency module");
-      vehicle_cmd_.emergency = 1;
+      publishCommand();  // Publish command
     }
+  );
 
-    publishCommand();
+  ros::spin();
 
-    rate_->sleep();
-  }
 }
 
 void SSCInterface::callbackFromGuidanceState(const cav_msgs::GuidanceStateConstPtr& msg)
