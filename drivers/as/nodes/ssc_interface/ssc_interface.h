@@ -116,12 +116,17 @@ private:
   autoware_msgs::VehicleCmd vehicle_cmd_;
   automotive_navigation_msgs::ModuleState module_states_;
   ros::Rate* rate_;
+  ros::Rate status_pub_rate_; // Rate of vehicle status publications
 
   // Flag to indicate whether the ssc should shift the vehicle to park
   bool shift_to_park_{false};
 
   //A small static value for comparing doubles
   static constexpr double epsilon_ = 0.001;
+
+  bool have_vehicle_status_ = false; // Flag to show if the vehicle status messages have been populated with new information
+  geometry_msgs::TwistStamped current_twist_msg_; // Current twist message recieved from ssc
+  autoware_msgs::VehicleStatus current_status_msg_; // Current status message recieved from ssc
 
   // callbacks
   void callbackFromGuidanceState(const cav_msgs::GuidanceStateConstPtr& msg);
@@ -136,6 +141,10 @@ private:
                                 const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel);
   // functions
   void publishCommand();
+  /**
+   * \brief Publishes the current_twist_msg_ and current_status_msg_. Meant to be called at fixed frequency as the SSC does not provide uniform velocity publication frequency between cars
+   */ 
+  void publishVehicleStatus();
 };
 
 #endif  // SSC_INTERFACE_H
