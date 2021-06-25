@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import lanelet2
 import tempfile
 import os
@@ -131,7 +131,7 @@ def part6routing():
 
 
 def hasPathFromTo(graph, start, target):
-    class TargetFound:
+    class TargetFound(Exception):
         pass
 
     def raiseIfDestination(visitInformation):

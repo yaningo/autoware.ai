@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(trafficlight_recognizer)
 
+# Set OpenGL_GL_PREFERENCE to GLVND
+cmake_policy(SET CMP0072 NEW)
+
 find_package(autoware_build_flags REQUIRED)
 
 find_package(autoware_msgs REQUIRED)
@@ -79,7 +82,7 @@ catkin_package(
 
 set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
 roslint_cpp()
 
 ###########
