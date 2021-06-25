@@ -93,7 +93,7 @@ void PurePursuitNode::run()
   ROS_INFO_STREAM("pure pursuit start");
   ros::Rate loop_rate(LOOP_RATE_);
 
-  ros::Timer command_pub_timer = nh.createTimer( // Create a ros timer to publish commands at the expected loop rate
+  ros::Timer command_pub_timer = nh_.createTimer( // Create a ros timer to publish commands at the expected loop rate
     loop_rate.expectedCycleTime(),
     
     [this](const auto&) { 
@@ -101,17 +101,17 @@ void PurePursuitNode::run()
       if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_) // One time check on desired input data
       {
         ROS_WARN("Necessary topics are not subscribed yet ... ");
-        continue;
+        return;
       }
 
-      pp_.setLookaheadDistance(computeLookaheadDistance());
+      pp_.setLookaheadDistance(this->computeLookaheadDistance());
       pp_.setMinimumLookaheadDistance(minimum_lookahead_distance_);
 
       double kappa = 0;
       bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
-      publishTwistStamped(can_get_curvature, kappa);
-      publishControlCommandStamped(can_get_curvature, kappa);
+      this->publishTwistStamped(can_get_curvature, kappa);
+      this->publishControlCommandStamped(can_get_curvature, kappa);
       health_checker_ptr_->NODE_ACTIVATE();
       health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
         "topic vehicle_cmd publish rate slow.");
@@ -130,10 +130,10 @@ void PurePursuitNode::run()
       }
       std_msgs::Float32 angular_gravity_msg;
       angular_gravity_msg.data =
-        computeAngularGravity(computeCommandVelocity(), kappa);
+        this->computeAngularGravity(this->computeCommandVelocity(), kappa);
       pub16_.publish(angular_gravity_msg);
 
-      publishDeviationCurrentPosition(
+      this->publishDeviationCurrentPosition(
         pp_.getCurrentPose().position, pp_.getCurrentWaypoints());
 
     }
