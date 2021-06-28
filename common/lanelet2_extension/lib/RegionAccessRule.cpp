@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 LEIDOS.
+ * Copyright (C) 2020-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,7 @@ namespace lanelet
 // C++ 14 vs 17 constent definition
 #if __cplusplus < 201703L
 constexpr char RegionAccessRule::RuleName[];  // instantiate string in cpp file
+constexpr char RegionAccessRule::Reason[];
 #endif
 
 ConstLanelets RegionAccessRule::getLanelets() const
@@ -37,6 +38,17 @@ ConstLanelets RegionAccessRule::getLanelets() const
 ConstAreas RegionAccessRule::getAreas() const
 {
   return getParameters<ConstArea>(RoleName::Refers);
+}
+
+std::string RegionAccessRule::getReason()
+{  
+  if (hasAttribute(Reason))
+  {
+    auto optional_reason = attribute(Reason).value();
+    reason_ = optional_reason;
+  }       
+  
+  return reason_;
 }
 
 bool RegionAccessRule::accessable(const std::string& participant) const
@@ -51,7 +63,7 @@ RegionAccessRule::RegionAccessRule(const lanelet::RegulatoryElementDataPtr& data
 }
 
 std::unique_ptr<lanelet::RegulatoryElementData> RegionAccessRule::buildData(Id id, Lanelets lanelets, Areas areas,
-                                                              std::vector<std::string> participants)
+                                                              std::vector<std::string> participants, const std::string& reason)
 {
   // Add parameters
   RuleParameterMap rules;
@@ -63,7 +75,8 @@ std::unique_ptr<lanelet::RegulatoryElementData> RegionAccessRule::buildData(Id i
 
   // Add attributes
   AttributeMap attribute_map({ { AttributeNamesString::Type, AttributeValueString::RegulatoryElement },
-                               { AttributeNamesString::Subtype, RuleName } });
+                               { AttributeNamesString::Subtype, RuleName },
+                               { Reason, Attribute(reason).value() } });
 
   for (auto participant : participants)
   {

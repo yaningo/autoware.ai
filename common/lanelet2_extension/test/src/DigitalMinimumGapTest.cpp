@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2021 LEIDOS.
+ * Copyright (C) 2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,7 @@
 
 #include <gmock/gmock.h>
 #include <iostream>
-#include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
+#include <lanelet2_extension/regulatory_elements/DigitalMinimumGap.h>
 #include <lanelet2_core/geometry/LineString.h>
 #include <lanelet2_core/utility/Units.h>
 #include <lanelet2_traffic_rules/TrafficRulesFactory.h>
@@ -34,7 +34,7 @@ namespace lanelet
 {
 using namespace lanelet::units::literals;
 
-TEST(DigitalSpeedLimit, digitalSpeedLimit)
+TEST(DigitalMinimumGap, digitalMinimumGap)
 {
   auto pl1 = carma_wm::getPoint(0, 0, 0);
   auto pl2 = carma_wm::getPoint(0, 1, 0);
@@ -67,16 +67,16 @@ TEST(DigitalSpeedLimit, digitalSpeedLimit)
   area.attributes()[lanelet::AttributeName::Location] = lanelet::AttributeValueString::Urban;
   area.attributes()[lanelet::AttributeNamesString::ParticipantVehicle] = "yes";
 
-  DigitalSpeedLimit dsl(DigitalSpeedLimit::buildData(lanelet::utils::getId(), 5_kmh, { ll_1, ll_2 }, { area },
+  DigitalMinimumGap dsl(DigitalMinimumGap::buildData(lanelet::utils::getId(), 11, { ll_1, ll_2 }, { area },
                                                      { lanelet::Participants::VehicleCar }));
 
   ASSERT_EQ(2, dsl.getLanelets().size());
   ASSERT_EQ(1, dsl.getAreas().size());
+  ASSERT_EQ(11, dsl.getMinimumGap());
   ASSERT_FALSE(dsl.appliesTo(lanelet::Participants::Vehicle));
   ASSERT_TRUE(dsl.appliesTo(lanelet::Participants::VehicleCar));
   ASSERT_TRUE(dsl.appliesTo(lanelet::Participants::VehicleCarElectric));  // Test acceptance of sub type
 
-  ASSERT_EQ(5_kmh, dsl.getSpeedLimit());
 }
 
 }  // namespace lanelet

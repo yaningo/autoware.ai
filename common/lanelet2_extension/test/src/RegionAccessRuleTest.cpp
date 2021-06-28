@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 LEIDOS.
+ * Copyright (C) 2019-2021 LEIDOS.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,11 +64,12 @@ TEST(RegionAccessRuleTest, regionAccessRule)
   area.attributes()[lanelet::AttributeName::Subtype] = lanelet::AttributeValueString::Road;
   area.attributes()[lanelet::AttributeName::Location] = lanelet::AttributeValueString::Urban;
   area.attributes()[lanelet::AttributeNamesString::ParticipantVehicle] = "yes";
-
-  RegionAccessRule rar(RegionAccessRule::buildData(lanelet::utils::getId(), {ll_1, ll_2}, {area}, {lanelet::Participants::VehicleCar}));
+  const std::string& reason = "Move over law";
+  RegionAccessRule rar(RegionAccessRule::buildData(lanelet::utils::getId(), {ll_1, ll_2}, {area}, {lanelet::Participants::VehicleCar}, reason));
 
   ASSERT_EQ(2, rar.getLanelets().size());
   ASSERT_EQ(1, rar.getAreas().size());
+  ASSERT_EQ("Move over law", rar.getReason());
   ASSERT_FALSE(rar.accessable(lanelet::Participants::Vehicle));
   ASSERT_TRUE(rar.accessable(lanelet::Participants::VehicleCar));
   ASSERT_TRUE(rar.accessable(lanelet::Participants::VehicleCarElectric)); // Test acceptance of sub type
