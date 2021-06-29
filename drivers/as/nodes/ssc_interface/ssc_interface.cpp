@@ -239,10 +239,9 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
 
 void SSCInterface::publishCommand()
 {
-  if (!command_initialized_)
-  {
-    return;
-  }
+  // 
+  // This method will publish 0 commands until the vehicle_cmd has actually been populated with non-zeros
+  // When the vehicle_cmd_ becomes populated it will start to forward that instead
 
   ros::Time stamp = ros::Time::now();
 
@@ -302,7 +301,7 @@ void SSCInterface::publishCommand()
 
   // Override desired speed to ZERO by emergency/timeout
   bool emergency = (vehicle_cmd_.emergency == 1);
-  bool timeouted = (((ros::Time::now() - command_time_).toSec() * 1000) > command_timeout_);
+  bool timeouted = command_initialized_ && (((ros::Time::now() - command_time_).toSec() * 1000) > command_timeout_);
 
   if (emergency || timeouted)
   {

@@ -78,6 +78,8 @@ private:
   bool use_lgsim_ = false;
 
   bool emergency_handling_active_ = false;
+
+  bool use_twist_ = false; // If true then the twist topic will be forwarded as the vehicle command. If false then the ctrl topic will be forwarded as the vehicle command
 };
 
 #endif  // TWIST_GATE_TWIST_GATE_H

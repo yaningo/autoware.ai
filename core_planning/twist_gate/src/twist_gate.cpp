@@ -44,6 +44,7 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
 {
   private_nh_.param<bool>("use_decision_maker", use_decision_maker_, false);
   private_nh_.param<bool>("use_lgsim", use_lgsim_, false);
+  private_nh_.param<bool>("use_twist", use_twist_, false);
 
   health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh_, private_nh_);
   control_command_pub_ = nh_.advertise<std_msgs::String>("/ctrl_mode", 1);
@@ -67,6 +68,9 @@ TwistGate::TwistGate(const ros::NodeHandle& nh, const ros::NodeHandle& private_n
 
 void TwistGate::twistCmdCallback(const geometry_msgs::TwistStamped::ConstPtr& input_msg)
 {
+  if (!use_twist_) {
+    return; // Ignore message if not using twist as input
+  }
   health_checker_ptr_->CHECK_RATE("topic_rate_twist_cmd_slow", 8, 5, 1, "topic twist_cmd subscribe rate slow.");
   health_checker_ptr_->CHECK_MAX_VALUE("twist_cmd_linear_high", input_msg->twist.linear.x,
     DBL_MAX, DBL_MAX, DBL_MAX, "linear twist_cmd is too high");
@@ -85,6 +89,10 @@ void TwistGate::twistCmdCallback(const geometry_msgs::TwistStamped::ConstPtr& in
 
 void TwistGate::ctrlCmdCallback(const autoware_msgs::ControlCommandStamped::ConstPtr& input_msg)
 {
+  if (use_twist_) {
+    return; // Ignore message if using twist as input
+  }
+
   updateEmergencyState();
   if (!emergency_handling_active_)
   {
