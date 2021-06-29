@@ -1,4 +1,4 @@
-set(MRT_PKG_VERSION 2.2.1)
+set(MRT_PKG_VERSION 4.0.0)
 # Modify only if you know what you are doing!
 cmake_minimum_required(VERSION 2.8.12)
 project(lanelet2_io)
