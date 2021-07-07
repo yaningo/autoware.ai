@@ -60,6 +60,10 @@ private:
       automotive_platform_msgs::ThrottleFeedback, automotive_platform_msgs::BrakeFeedback,
       automotive_platform_msgs::GearFeedback, automotive_platform_msgs::SteeringFeedback>
       SSCFeedbacksSyncPolicy;
+  
+  typedef message_filters::sync_policies::ApproximateTime<
+      automotive_platform_msgs::VelocityAccelCov, automotive_platform_msgs::CurvatureFeedback,automotive_platform_msgs::SteeringFeedback>
+      SSCTwistSyncPolicy;
 
   // handle
   ros::NodeHandle nh_;
@@ -70,6 +74,7 @@ private:
   ros::Subscriber vehicle_cmd_sub_;
   ros::Subscriber engage_sub_;
   ros::Subscriber module_states_sub_;
+
   message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>* velocity_accel_sub_;
   message_filters::Subscriber<automotive_platform_msgs::CurvatureFeedback>* curvature_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::ThrottleFeedback>* throttle_feedback_sub_;
@@ -77,6 +82,7 @@ private:
   message_filters::Subscriber<automotive_platform_msgs::GearFeedback>* gear_feedback_sub_;
   message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>* steering_wheel_sub_;
   message_filters::Synchronizer<SSCFeedbacksSyncPolicy>* ssc_feedbacks_sync_;
+  message_filters::Synchronizer<SSCTwistSyncPolicy>* ssc_twist_sync_;
 
   // publishers
   ros::Publisher steer_mode_pub_;
@@ -125,6 +131,7 @@ private:
   static constexpr double epsilon_ = 0.001;
 
   bool have_vehicle_status_ = false; // Flag to show if the vehicle status messages have been populated with new information
+  bool have_twist_ = false;
   geometry_msgs::TwistStamped current_twist_msg_; // Current twist message recieved from ssc
   autoware_msgs::VehicleStatus current_status_msg_; // Current status message recieved from ssc
 
@@ -139,6 +146,19 @@ private:
                                 const automotive_platform_msgs::BrakeFeedbackConstPtr& msg_brake,
                                 const automotive_platform_msgs::GearFeedbackConstPtr& msg_gear,
                                 const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel);
+  
+  /**
+   * \brief Callback for the data used for computing the current twist. This is a seperate callback from callbackFromSSCFeedbacks 
+   *        because the twist publication needs to be high frequency. Waiting on the other messages dramatically reduces the publication rate
+   * 
+   * \param msg_velocity Velocity message from SSC
+   * \param msg_curvature Curvature message from SSC
+   * \param msg_steering_wheel Steering feedback message from SSC
+   */ 
+  void callbackForTwistUpdate(const automotive_platform_msgs::VelocityAccelCovConstPtr& msg_velocity, 
+                              const automotive_platform_msgs::CurvatureFeedbackConstPtr& msg_curvature,
+                              const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel);
+
   // functions
   void publishCommand();
   /**

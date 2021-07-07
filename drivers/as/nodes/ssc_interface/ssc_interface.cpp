@@ -47,16 +47,29 @@ SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_
 
   // subscribers from SSC
   module_states_sub_ = nh_.subscribe("as/module_states", 1, &SSCInterface::callbackFromSSCModuleStates, this);
+
+  // Filter for vehicle twist report
+  velocity_accel_sub_ =
+      new message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>(nh_, "as/velocity_accel_cov", 10);
   curvature_feedback_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::CurvatureFeedback>(nh_, "as/curvature_feedback", 10);
+  
+  steering_wheel_sub_ =
+      new message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>(nh_, "as/steering_feedback", 10);
+
+  ssc_twist_sync_ = new message_filters::Synchronizer<SSCTwistSyncPolicy>(
+      SSCTwistSyncPolicy(10), *velocity_accel_sub_, *curvature_feedback_sub_, *steering_wheel_sub_);
+
+  ssc_twist_sync_->registerCallback(
+      boost::bind(&SSCInterface::callbackForTwistUpdate, this, _1, _2, _3));
+
+  // Filter for vehicle status report
   throttle_feedback_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::ThrottleFeedback>(nh_, "as/throttle_feedback", 10);
   brake_feedback_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::BrakeFeedback>(nh_, "as/brake_feedback", 10);
   gear_feedback_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::GearFeedback>(nh_, "as/gear_feedback", 10);
-  velocity_accel_sub_ =
-      new message_filters::Subscriber<automotive_platform_msgs::VelocityAccelCov>(nh_, "as/velocity_accel_cov", 10);
   steering_wheel_sub_ =
       new message_filters::Subscriber<automotive_platform_msgs::SteeringFeedback>(nh_, "as/steering_feedback", 10);
   ssc_feedbacks_sync_ = new message_filters::Synchronizer<SSCFeedbacksSyncPolicy>(
@@ -120,12 +133,15 @@ void SSCInterface::run()
 }
 
 void SSCInterface::publishVehicleStatus() {
-  if (!have_vehicle_status_) {
-    return; // If the status has not yet been updated then return
+  if (have_vehicle_status_) {
+    vehicle_status_pub_.publish(current_status_msg_);
+    have_vehicle_status_ = false; // Reset the status flag to ensure we only publish new messages
   }
-  vehicle_status_pub_.publish(current_status_msg_);
-  current_twist_pub_.publish(current_twist_msg_);
-  have_vehicle_status_ = false; // Reset the status flag to ensure we only publish new messages
+  if (have_twist_) {
+    current_twist_pub_.publish(current_twist_msg_);
+    have_twist_ = false; // Reset the status flag to ensure we only publish new messages
+  }
+  
 }
 
 void SSCInterface::callbackFromGuidanceState(const cav_msgs::GuidanceStateConstPtr& msg)
@@ -160,6 +176,27 @@ void SSCInterface::callbackFromSSCModuleStates(const automotive_navigation_msgs:
   }
 }
 
+
+void SSCInterface::callbackForTwistUpdate(const automotive_platform_msgs::VelocityAccelCovConstPtr& msg_velocity, 
+                                          const automotive_platform_msgs::CurvatureFeedbackConstPtr& msg_curvature,
+                                          const automotive_platform_msgs::SteeringFeedbackConstPtr& msg_steering_wheel)
+{
+
+  // current steering curvature
+  double curvature = !use_adaptive_gear_ratio_ ?
+                         (msg_curvature->curvature) :
+                         std::tan(msg_steering_wheel->steering_wheel_angle/ adaptive_gear_ratio_) / wheel_base_;
+
+  geometry_msgs::TwistStamped twist;
+  twist.header.frame_id = BASE_FRAME_ID;
+  twist.header.stamp = msg_velocity->header.stamp;
+  twist.twist.linear.x = msg_velocity->velocity;               // [m/s]
+  twist.twist.angular.z = curvature * msg_velocity->velocity;  // [rad/s]
+  current_twist_msg_ = twist;
+
+  have_twist_ = true;
+}
+
 void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::VelocityAccelCovConstPtr& msg_velocity,
                                             const automotive_platform_msgs::CurvatureFeedbackConstPtr& msg_curvature,
                                             const automotive_platform_msgs::ThrottleFeedbackConstPtr& msg_throttle,
@@ -178,14 +215,6 @@ void SSCInterface::callbackFromSSCFeedbacks(const automotive_platform_msgs::Velo
 
   // Set current_velocity_ variable [m/s]
   current_velocity_ = msg_velocity->velocity;
-
-  // as_current_velocity (geometry_msgs::TwistStamped)
-  geometry_msgs::TwistStamped twist;
-  twist.header.frame_id = BASE_FRAME_ID;
-  twist.header.stamp = stamp;
-  twist.twist.linear.x = msg_velocity->velocity;               // [m/s]
-  twist.twist.angular.z = curvature * msg_velocity->velocity;  // [rad/s]
-  current_twist_msg_ = twist;
 
   // vehicle_status (autoware_msgs::VehicleStatus)
   autoware_msgs::VehicleStatus vehicle_status;
