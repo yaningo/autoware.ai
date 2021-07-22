@@ -171,6 +171,7 @@ void TwistGate::updateEmergencyState()
   // Reset emergency handling
   if (emergency_handling_active_)
   {
+    ROS_ERROR_STREAM("EMERGENCY HANDLING IS ACTIVE");
     // If no emergency message received for more than timeout_period_
     if ((ros::Time::now() - emergency_handling_time_) > timeout_period_)
     {
