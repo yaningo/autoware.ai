@@ -99,7 +99,7 @@ void SSCInterface::run()
   ros::Timer command_pub_timer = nh_.createTimer( // Create a ros timer to publish commands at the ssc expected loop rate
     rate_.expectedCycleTime(),
     
-    [this, &shm_ASvmon, &shm_ROvmon, &shm_HAvmon](const auto&) { 
+    [this](const auto&) { 
       
       ROS_DEBUG_STREAM("Command Timer Triggered");
 
