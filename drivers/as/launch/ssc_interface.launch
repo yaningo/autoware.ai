@@ -15,6 +15,7 @@
 		<param name="use_adaptive_gear_ratio" value="$(arg use_adaptive_gear_ratio)" />
 		<param name="command_timeout" value="$(arg command_timeout)" />
 		<param name="loop_rate" value="$(arg loop_rate)" />
+		<param name="status_pub_rate" value="$(arg status_pub_rate)" />
 		<param name="wheel_base" value="$(arg wheel_base)" />
 		<param name="tire_radius" value="$(arg tire_radius)" />
 		<param name="acceleration_limit" value="$(arg acceleration_limit)" />

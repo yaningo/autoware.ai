@@ -121,7 +121,7 @@ private:
   cav_msgs::GuidanceState guidance_state_;
   autoware_msgs::VehicleCmd vehicle_cmd_;
   automotive_navigation_msgs::ModuleState module_states_;
-  ros::Rate* rate_;
+  ros::Rate rate_;
   ros::Rate status_pub_rate_; // Rate of vehicle status publications
 
   // Flag to indicate whether the ssc should shift the vehicle to park

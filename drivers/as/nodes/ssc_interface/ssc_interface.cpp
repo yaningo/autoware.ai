@@ -17,7 +17,7 @@
 #include "ssc_interface.h"
 #include <ros_observer/lib_ros_observer.h>
 
-SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_initialized_(false), status_pub_rate_(30.0)
+SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_initialized_(false), rate_(30.0), status_pub_rate_(30.0)
 {
   // setup parameters
   double status_pub_rate = 30.0;
@@ -35,7 +35,7 @@ SSCInterface::SSCInterface() : nh_(), private_nh_("~"), engage_(false), command_
   private_nh_.param<double>("agr_coef_b", agr_coef_b_, 0.053);
   private_nh_.param<double>("agr_coef_c", agr_coef_c_, 0.042);
 
-  rate_ = new ros::Rate(loop_rate_);
+  rate_ = ros::Rate(loop_rate_);
   status_pub_rate_ = ros::Rate(status_pub_rate);
 
   // subscribers from CARMA
@@ -95,26 +95,13 @@ SSCInterface::~SSCInterface()
 
 void SSCInterface::run()
 {
-  ShmVitalMonitor shm_ASvmon("AS_VehicleDriver", loop_rate_);
-  ShmVitalMonitor shm_ROvmon("RosObserver", loop_rate_);
-  ShmVitalMonitor shm_HAvmon("HealthAggregator", loop_rate_);
-
-  if (rate_ == nullptr) {
-    ROS_ERROR_STREAM("Rate is null cannot run ssc_interface");
-    return;
-  }
 
   ros::Timer command_pub_timer = nh_.createTimer( // Create a ros timer to publish commands at the ssc expected loop rate
-    rate_->expectedCycleTime(),
+    rate_.expectedCycleTime(),
     
     [this, &shm_ASvmon, &shm_ROvmon, &shm_HAvmon](const auto&) { 
       
-      shm_ASvmon.run(); // Check system health
-
-      if (shm_ROvmon.is_error_detected() || shm_HAvmon.is_error_detected()){
-        ROS_ERROR("Emergency stop by error detection of emergency module");
-        vehicle_cmd_.emergency = 1;
-      }
+      ROS_DEBUG_STREAM("Command Timer Triggered");
 
       this->publishCommand();  // Publish command
     }
