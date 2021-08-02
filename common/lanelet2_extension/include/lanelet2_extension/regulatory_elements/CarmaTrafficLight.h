@@ -75,6 +75,7 @@ public:
    * @brief setStates function sorts states automatically
    *
    * @param data The data to initialize this regulation with
+   * NOTE: to extract full cycle, first and last state should match in input_time_steps
    */
   void setStates(std::vector<std::pair<ros::Time, CarmaTrafficLightState>> input_time_steps, int revision);
 

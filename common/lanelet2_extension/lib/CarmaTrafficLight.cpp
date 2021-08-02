@@ -96,6 +96,9 @@ boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Tim
   ros::Duration accumulated_offset_duration;
   double offset_duration_dir = recorded_time_stamps.front().first > time_stamp ? -1.0 : 1.0; // -1 if past, +1 if time_stamp is in future
 
+  int num_of_cycles = std::abs((recorded_time_stamps.front().first - time_stamp).toSec()/ fixed_cycle_duration.toSec());
+  accumulated_offset_duration = ros::Duration( num_of_cycles * fixed_cycle_duration.toSec());
+  
   if (offset_duration_dir < 0) 
   {
     while (recorded_time_stamps.front().first - accumulated_offset_duration > time_stamp)
@@ -103,14 +106,6 @@ boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Tim
       accumulated_offset_duration += fixed_cycle_duration;
     }
   }
-  else
-  {
-    while (recorded_time_stamps.back().first + accumulated_offset_duration < time_stamp)
-    {
-      accumulated_offset_duration += fixed_cycle_duration;
-    }
-  }
-  
   // iterate through states in the cycle to get the signal
   for (size_t i = 0; i < recorded_time_stamps.size(); i++)
   {
@@ -119,6 +114,8 @@ boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Tim
       return recorded_time_stamps[i].second;
     }
   }
+
+  throw lanelet::InvalidInputError("Reached unreachable code block. Implies duplicate phase is not provided. Unable to determine fixed cycle duration");
 }
 
 lanelet::ConstLanelets CarmaTrafficLight::getControlledLanelets() const
@@ -146,7 +143,12 @@ void CarmaTrafficLight::setStates(std::vector<std::pair<ros::Time, CarmaTrafficL
     }
     input_time_steps.resize(idx + 1);
   }
-  
+  // throw where the duplicate phase is not provided
+  if (input_time_steps.back().second != input_time_steps.front().second)
+  {
+    throw lanelet::InvalidInputError("Duplicate phase is not provided. Unable to determine fixed cycle duration");
+  }
+
   recorded_time_stamps = input_time_steps;
   fixed_cycle_duration = recorded_time_stamps.back().first - recorded_time_stamps.front().first; // it is okay if size is only 1, case is handled in predictState
   revision_ = revision;
