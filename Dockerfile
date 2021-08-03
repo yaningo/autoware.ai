@@ -1,4 +1,4 @@
-FROM usdotfhwastoldev/carma-base:develop as base_image
+FROM usdotfhwastol/carma-base:yenko as base_image
 
 FROM base_image as build
 
