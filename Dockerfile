@@ -1,4 +1,4 @@
-FROM usdotfhwastol/carma-base:yenko as base_image
+FROM usdotfhwastolcandidate/carma-base:yenko as base_image
 
 FROM base_image as build
 

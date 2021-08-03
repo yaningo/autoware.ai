@@ -28,7 +28,7 @@ jobs:
     # Pull docker image from docker hub
     # XTERM used for better catkin_make output
     docker:
-      - image: usdotfhwastol/carma-base:yenko
+      - image: usdotfhwastolcandidate/carma-base:yenko
         user: carma
         environment:
           TERM: xterm
