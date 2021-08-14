@@ -522,6 +522,8 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
   OptionalConverter<RuleParameter>();
   OptionalConverter<ConstRuleParameter>();
   OptionalConverter<RegulatoryElement>();
+  OptionalConverter<CarmaTrafficLightState>();
+  OptionalConverter<std::string>();
 
   PairConverter<std::pair<BasicPoint2d, BasicPoint2d>>();
   PairConverter<std::pair<BasicPoint3d, BasicPoint3d>>();
@@ -895,7 +897,7 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
                                       (arg("id"), arg("speed_limit"), arg("lanelets"), arg("areas"), arg("participants"))))
     .def("getLanelets", &DigitalSpeedLimit::getLanelets)
     .def("getAreas", &DigitalSpeedLimit::getAreas)
-    .def("getSpeedLimit", &DigitalSpeedLimit::getSpeedLimit)
+    .def("getSpeedLimit", + [](DigitalSpeedLimit& self) { return self.getSpeedLimit().value(); } ) // Lambda needed as not not yet clear how to provide conversion for Velocity objects
     .def("appliesTo", &DigitalSpeedLimit::appliesTo);
   implicitly_convertible<std::shared_ptr<DigitalSpeedLimit>, RegulatoryElementPtr>();
 
@@ -923,14 +925,6 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
     .def("boundPassable", boundPassableConst)
     .def("boundPassable", boundPassableNonConst);
   implicitly_convertible<std::shared_ptr<PassingControlLine>, RegulatoryElementPtr>();
-
-  // #include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
-// #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
-// #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
-// #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
-// #include <lanelet2_extension/regulatory_elements/DigitalMinimumGap.h>
-// #include <lanelet2_extension/regulatory_elements/StopRule.h>
-// #include <lanelet2_extension/regulatory_elements/CarmaTrafficLight.h>
 
   class_<DirectionOfTravel, boost::noncopyable, std::shared_ptr<DirectionOfTravel>, bases<RegulatoryElement>>(
     "DirectionOfTravel", "A digital speed limit regulatory element", no_init)
