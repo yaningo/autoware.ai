@@ -9,6 +9,15 @@
 #include <lanelet2_core/primitives/LaneletOrArea.h>
 #include <lanelet2_core/primitives/LaneletSequence.h>
 #include <lanelet2_core/primitives/RegulatoryElement.h>
+
+#include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
+#include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
+#include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
+#include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
+#include <lanelet2_extension/regulatory_elements/DigitalMinimumGap.h>
+#include <lanelet2_extension/regulatory_elements/StopRule.h>
+#include <lanelet2_extension/regulatory_elements/CarmaTrafficLight.h>
+
 #include "converter.h"
 
 using namespace boost::python;
@@ -464,11 +473,26 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
   VectorToListConverter<std::vector<SpeedLimit::Ptr>>();
   VectorToListConverter<std::vector<RightOfWay::Ptr>>();
   VectorToListConverter<std::vector<AllWayStop::Ptr>>();
+  VectorToListConverter<std::vector<RegionAccessRule::Ptr>>();
+  VectorToListConverter<std::vector<DigitalSpeedLimit::Ptr>>();
+  VectorToListConverter<std::vector<PassingControlLine::Ptr>>();
+  VectorToListConverter<std::vector<DirectionOfTravel::Ptr>>();
+  VectorToListConverter<std::vector<DigitalMinimumGap::Ptr>>();
+  VectorToListConverter<std::vector<StopRule::Ptr>>();
+  VectorToListConverter<std::vector<CarmaTrafficLight::Ptr>>();
+
   VectorToListConverter<std::vector<std::shared_ptr<const TrafficLight>>>();
   VectorToListConverter<std::vector<std::shared_ptr<const TrafficSign>>>();
   VectorToListConverter<std::vector<std::shared_ptr<const SpeedLimit>>>();
   VectorToListConverter<std::vector<std::shared_ptr<const RightOfWay>>>();
   VectorToListConverter<std::vector<std::shared_ptr<const AllWayStop>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const RegionAccessRule>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const DigitalSpeedLimit>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const PassingControlLine>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const DirectionOfTravel>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const DigitalMinimumGap>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const StopRule>>>();
+  VectorToListConverter<std::vector<std::shared_ptr<const CarmaTrafficLight>>>();
   VectorToListConverter<std::vector<std::string>>();
   AttributeFromPythonStr();
   DictToAttributeMapConverter();
@@ -695,6 +719,13 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
       .def("speedLimits", constRegelemAs<SpeedLimit>, "speed limit regulatory elements")
       .def("rightOfWay", constRegelemAs<RightOfWay>, "right of way regulatory elements")
       .def("allWayStop", constRegelemAs<AllWayStop>, "all way stop regulatory elements")
+      .def("regionAccessRule", constRegelemAs<RegionAccessRule>, "region access ruel regulatory elements")
+      .def("digitalSpeedLimit", constRegelemAs<DigitalSpeedLimit>, "digital speed limit regulatory elements")
+      .def("passingControlLine", constRegelemAs<PassingControlLine>, "passing control line regulatory elements")
+      .def("directionOfTravel", constRegelemAs<DirectionOfTravel>, "direction of travel regulatory elements")
+      .def("digitalMinimumGap", constRegelemAs<DigitalMinimumGap>, "digital minimum gap regulatory elements")
+      .def("stopRule", constRegelemAs<StopRule>, "stop rule regulatory elements")
+      .def("carmaTrafficLight", constRegelemAs<CarmaTrafficLight>, "carma traffic light regulatory elements")
       .def("invert", &ConstLanelet::invert, "Returns inverted lanelet (flipped left/right bound, etc")
       .def("inverted", &ConstLanelet::inverted, "Returns whether this lanelet has been inverted")
       .def("polygon2d", &ConstLanelet::polygon2d, "Outline of this lanelet as 2d polygon")
@@ -719,6 +750,13 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
       .def("speedLimits", regelemAs<SpeedLimit>, "speed limit regulatory elements")
       .def("rightOfWay", regelemAs<RightOfWay>, "right of way regulatory elements")
       .def("allWayStop", regelemAs<AllWayStop>, "all way stop regulatory elements")
+      .def("regionAccessRule", regelemAs<RegionAccessRule>, "region access ruel regulatory elements")
+      .def("digitalSpeedLimit", regelemAs<DigitalSpeedLimit>, "digital speed limit regulatory elements")
+      .def("passingControlLine", regelemAs<PassingControlLine>, "passing control line regulatory elements")
+      .def("directionOfTravel", regelemAs<DirectionOfTravel>, "direction of travel regulatory elements")
+      .def("digitalMinimumGap", regelemAs<DigitalMinimumGap>, "digital minimum gap regulatory elements")
+      .def("stopRule", regelemAs<StopRule>, "stop rule regulatory elements")
+      .def("carmaTrafficLight", regelemAs<CarmaTrafficLight>, "carma traffic light regulatory elements")
       .def("addRegulatoryElement", &Lanelet::addRegulatoryElement)
       .def("removeRegulatoryElement", &Lanelet::removeRegulatoryElement)
       .def("invert", &Lanelet::invert, "Returns inverted lanelet (flipped left/right bound, etc")
@@ -825,6 +863,28 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
 
   class_<AllWayStop, boost::noncopyable, std::shared_ptr<AllWayStop>, bases<RegulatoryElement>>(
       "AllWayStop", "An all way stop regulatory element", no_init)
+      .def("__init__", make_constructor(&AllWayStop::make, default_call_policies(),
+                                        (arg("id"), arg("attributes"), arg("lltsWithStop"),
+                                         arg("signs") = Optional<LineStringsOrPolygons3d>{})))
+      .def("lanelets", +[](AllWayStop& self) { return self.lanelets(); })
+      .def("stopLines", +[](AllWayStop& self) { return self.stopLines(); })
+      .def("trafficSigns", +[](AllWayStop& self) { return self.trafficSigns(); })
+      .def("addTrafficSign", &AllWayStop::addTrafficSign)
+      .def("removeTrafficSign", &AllWayStop::removeTrafficSign)
+      .def("addLanelet", &AllWayStop::addLanelet)
+      .def("removeLanelet", &AllWayStop::removeLanelet);
+  implicitly_convertible<std::shared_ptr<AllWayStop>, RegulatoryElementPtr>();
+
+// #include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
+// #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
+// #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
+// #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
+// #include <lanelet2_extension/regulatory_elements/DigitalMinimumGap.h>
+// #include <lanelet2_extension/regulatory_elements/StopRule.h>
+// #include <lanelet2_extension/regulatory_elements/CarmaTrafficLight.h>
+// TODO WORKING HERE
+  class_<RegionAccessRule, boost::noncopyable, std::shared_ptr<RegionAccessRule>, bases<RegulatoryElement>>(
+      "RegionAccessRule", "A region access rule regulatory element", no_init)
       .def("__init__", make_constructor(&AllWayStop::make, default_call_policies(),
                                         (arg("id"), arg("attributes"), arg("lltsWithStop"),
                                          arg("signs") = Optional<LineStringsOrPolygons3d>{})))

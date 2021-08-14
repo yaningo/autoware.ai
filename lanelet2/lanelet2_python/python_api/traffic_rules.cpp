@@ -2,6 +2,7 @@
 #include <lanelet2_core/utility/Units.h>
 #include <lanelet2_traffic_rules/TrafficRules.h>
 #include <lanelet2_traffic_rules/TrafficRulesFactory.h>
+#include <lanelet2_extension/traffic_rules/CarmaUSTrafficRules.h>
 #include <boost/python.hpp>
 
 using namespace boost::python;
@@ -96,4 +97,9 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
   def("create", createTrafficRulesWrapper,
       "Create a traffic rules object from location and participant string (see "
       "Locations and Participants class");
+
+  // lanelet2_extension
+  // CarmaUSTrafficRules
+  class_<CarmaUSTrafficRules, std::shared_ptr<CarmaUSTrafficRules>, bases<TrafficRules>>("CarmaUSTrafficRules",init<TrafficRules::Configuration>("config"));
+
 }

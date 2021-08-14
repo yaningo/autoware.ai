@@ -1,5 +1,7 @@
 #include <lanelet2_projection/UTM.h>
 #include <boost/python.hpp>
+#include <lanelet2_extension/projection/local_frame_projector.h>
+#include <lanelet2_extension/projection/mgrs_projector.h>
 
 using namespace lanelet;
 
@@ -15,4 +17,10 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
   class_<projection::UtmProjector, std::shared_ptr<projection::UtmProjector>, bases<Projector>>("UtmProjector",
                                                                                                 init<Origin>("origin"))
       .def(init<Origin, bool, bool>("UtmProjector(origin, useOffset, throwInPaddingArea)"));
+
+  // Lanelet2 Extension  Components
+  class_<projection::LocalFrameProjector, std::shared_ptr<projection::LocalFrameProjector>, bases<Projector>>("LocalFrameProjector",init<char const*, Origin>(args("projection_string","origin")));
+  
+  class_<projection::MGRSProjector, std::shared_ptr<projection::MGRSProjector>, bases<Projector>>("MGRSProjector",init<Origin>("origin"));
+  
 }
