@@ -977,6 +977,25 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
     .def("appliesTo", appliesToStaticNonConst);
   implicitly_convertible<std::shared_ptr<StopRule>, RegulatoryElementPtr>();
 
+
+  // Overrides for CARMATrafficLight
+  ConstLineStrings3d (CarmaTrafficLight::*lightStopLineConst)() const = &CarmaTrafficLight::stopLine;
+  
+  LineStrings3d (CarmaTrafficLight::*lightStopLineNonConst)() = &CarmaTrafficLight::stopLine;
+
+
+  class_<CarmaTrafficLight, boost::noncopyable, std::shared_ptr<CarmaTrafficLight>, bases<RegulatoryElement>>(
+    "CarmaTrafficLight", "A carma traffic light regulatory element", no_init)
+    .def("__init__", make_constructor(&CarmaTrafficLight::make, default_call_policies(),
+                                      (arg("id"), arg("stop_line"), arg("lanelets"))))
+    .def("setStates", &CarmaTrafficLight::setStates)
+    .def("getControlledLanelets", &CarmaTrafficLight::getControlledLanelets)
+    .def("getState", &CarmaTrafficLight::getState)
+    .def("predictState", &CarmaTrafficLight::predictState)
+    .def("stopLine", lightStopLineConst)
+    .def("stopLine", lightStopLineNonConst);
+  implicitly_convertible<std::shared_ptr<CarmaTrafficLight>, RegulatoryElementPtr>();
+
   class_<TrafficSignsWithType, std::shared_ptr<TrafficSignsWithType>>("TrafficSignsWithType", no_init)
       .def("__init__", make_constructor(+[](LineStringsOrPolygons3d ls) {
              return std::make_shared<TrafficSignsWithType>(TrafficSignsWithType{ls});
