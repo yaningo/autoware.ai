@@ -97,6 +97,20 @@ public:
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineStrings3d stopAndWaitLine,
                                                      std::vector<std::string> participants);
 
+  /**
+   * @brief Static helper function that creates a stop line data object based on the provided inputs
+   *
+   * @param id The lanelet::Id of this element
+   * @param stopAndWaitLine The line strings which represent this regularoty elements geometry
+   * @param participants The set of participants which this rule applies to
+   *
+   * @return RegulatoryElementData containing all the necessary information to construct a stop rule
+   */
+  static std::shared_ptr<StopRule> make(Id id, LineStrings3d stopAndWaitLine,
+                                                     std::vector<std::string> participants) {
+    return std::shared_ptr<StopRule>{new StopRule(buildData(id, stopAndWaitLine, participants))};
+  }
+
 protected:
   // the following lines are required so that lanelet2 can create this object when loading a map with this regulatory
   // element

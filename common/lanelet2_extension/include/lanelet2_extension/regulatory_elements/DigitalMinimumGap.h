@@ -91,6 +91,23 @@ public:
    */
   explicit DigitalMinimumGap(const lanelet::RegulatoryElementDataPtr& data);
 
+  /**
+   * @brief Static helper function that creates a minimum gap  based on the provided double, start, end lines, and the
+   * affected participants
+   *
+   * @param id The lanelet::Id of this object
+   * @param min_gap The double which will be treated as the minimum gap (unit of meters) in this region
+   * @param lanelets The lanelets this minimum gap  applies to
+   * @param areas The areas this minimum gap  applies to
+   * @param participants The set of participants which this minimum gap  will apply to
+   *
+   * @return Fully intialized DigitalMinimumGap
+   */
+  static std::shared_ptr<DigitalMinimumGap> make(Id id, double min_gap, Lanelets lanelets, Areas areas,
+                                                     std::vector<std::string> participants) {
+    return std::shared_ptr<DigitalMinimumGap>{new DigitalMinimumGap(buildData(id, min_gap, lanelets, areas, participants))};
+  }
+
 protected:
   // the following lines are required so that lanelet2 can create this object when loading a map with this regulatory
   // element

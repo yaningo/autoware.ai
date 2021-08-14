@@ -91,6 +91,23 @@ public:
    */
   explicit DigitalSpeedLimit(const lanelet::RegulatoryElementDataPtr& data);
 
+  /**
+   * @brief Static helper function that creates a speed limit based on the provided velocity, start, end lines, and the
+   * affected participants
+   *
+   * @param id The lanelet::Id of this object
+   * @param speed_limit The velocity which will be treated as the speed limit in this region
+   * @param lanelets The lanelets this speed limit applies to
+   * @param areas The areas this speed limit applies to
+   * @param participants The set of participants which this speed limit will apply to
+   *
+   * @return Fully initialized DigitalSpeedLimit 
+   */
+  static std::shared_ptr<DigitalSpeedLimit> make(Id id, Velocity speed_limit, Lanelets lanelets, Areas areas,
+                                                     std::vector<std::string> participants) {
+    return std::shared_ptr<DigitalSpeedLimit>{new DigitalSpeedLimit(buildData(id, speed_limit, lanelets, areas, participants))};
+  }
+
 protected:
   // the following lines are required so that lanelet2 can create this object when loading a map with this regulatory
   // element

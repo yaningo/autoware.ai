@@ -106,10 +106,22 @@ public:
    * @param lanelets List of lanelets this element controls.
    * @param stop_line The line string which represent the stop line of the traffic light
    *
-   * @return RegulatoryElementData containing all the necessary information to construct a stop rule
+   * @return RegulatoryElementData containing all the necessary information to construct it
    */
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineString3d stop_line, Lanelets lanelets);
 
+  /**
+   * @brief: Creating one is not directly usable unless setStates is called Static helper function that creates a stop line object based on the provided inputs
+   *
+   * @param id The lanelet::Id of this element
+   * @param lanelets List of lanelets this element controls.
+   * @param stop_line The line string which represent the stop line of the traffic light
+   *
+   * @return CarmaTrafficLight containing all the necessary information to construct it
+   */
+  static std::shared_ptr<CarmaTrafficLight> make(Id id, LineString3d stop_line, Lanelets lanelets) {
+    return std::shared_ptr<CarmaTrafficLight>{new CarmaTrafficLight(buildData(id, stop_line, lanelets))};
+  }
 private:
   // the following lines are required so that lanelet2 can create this object
   // when loading a map with this regulatory element

@@ -473,13 +473,13 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
   VectorToListConverter<std::vector<SpeedLimit::Ptr>>();
   VectorToListConverter<std::vector<RightOfWay::Ptr>>();
   VectorToListConverter<std::vector<AllWayStop::Ptr>>();
-  VectorToListConverter<std::vector<RegionAccessRule::Ptr>>();
-  VectorToListConverter<std::vector<DigitalSpeedLimit::Ptr>>();
-  VectorToListConverter<std::vector<PassingControlLine::Ptr>>();
-  VectorToListConverter<std::vector<DirectionOfTravel::Ptr>>();
-  VectorToListConverter<std::vector<DigitalMinimumGap::Ptr>>();
-  VectorToListConverter<std::vector<StopRule::Ptr>>();
-  VectorToListConverter<std::vector<CarmaTrafficLight::Ptr>>();
+  VectorToListConverter<std::vector<RegionAccessRulePtr>>();
+  VectorToListConverter<std::vector<DigitalSpeedLimitPtr>>();
+  VectorToListConverter<std::vector<PassingControlLinePtr>>();
+  VectorToListConverter<std::vector<DirectionOfTravelPtr>>();
+  VectorToListConverter<std::vector<DigitalMinimumGapPtr>>();
+  VectorToListConverter<std::vector<StopRulePtr>>();
+  VectorToListConverter<std::vector<CarmaTrafficLightPtr>>();
 
   VectorToListConverter<std::vector<std::shared_ptr<const TrafficLight>>>();
   VectorToListConverter<std::vector<std::shared_ptr<const TrafficSign>>>();
@@ -875,27 +875,107 @@ BOOST_PYTHON_MODULE(PYTHON_API_MODULE_NAME) {  // NOLINT
       .def("removeLanelet", &AllWayStop::removeLanelet);
   implicitly_convertible<std::shared_ptr<AllWayStop>, RegulatoryElementPtr>();
 
-// #include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
+
+// TODO WORKING HERE
+  // NOTE This does not currently 
+  class_<RegionAccessRule, boost::noncopyable, std::shared_ptr<RegionAccessRule>, bases<RegulatoryElement>>(
+      "RegionAccessRule", "A region access rule regulatory element", no_init)
+      .def("__init__", make_constructor(&RegionAccessRule::make, default_call_policies(),
+                                        (arg("id"), arg("lanelets"), arg("areas"), arg("participants"),
+                                         arg("reason") = Optional<std::string>{})))
+      .def("getLanelets", &RegionAccessRule::getLanelets)
+      .def("getAreas", &RegionAccessRule::getAreas)
+      .def("getReason", &RegionAccessRule::getReason)
+      .def("accessable", &RegionAccessRule::accessable);
+  implicitly_convertible<std::shared_ptr<RegionAccessRule>, RegulatoryElementPtr>();
+
+  class_<DigitalSpeedLimit, boost::noncopyable, std::shared_ptr<DigitalSpeedLimit>, bases<RegulatoryElement>>(
+    "DigitalSpeedLimit", "A digital speed limit regulatory element", no_init)
+    .def("__init__", make_constructor(&DigitalSpeedLimit::make, default_call_policies(),
+                                      (arg("id"), arg("speed_limit"), arg("lanelets"), arg("areas"), arg("participants"))))
+    .def("getLanelets", &DigitalSpeedLimit::getLanelets)
+    .def("getAreas", &DigitalSpeedLimit::getAreas)
+    .def("getSpeedLimit", &DigitalSpeedLimit::getSpeedLimit)
+    .def("appliesTo", &DigitalSpeedLimit::appliesTo);
+  implicitly_convertible<std::shared_ptr<DigitalSpeedLimit>, RegulatoryElementPtr>();
+
+  // Setup overloads for PassingControlLine
+  ConstLineStrings3d (PassingControlLine::*controlLineConst)() const = &PassingControlLine::controlLine;
+  
+  LineStrings3d (PassingControlLine::*controlLineNonConst)() = &PassingControlLine::controlLine;
+  
+  bool (*boundPassableConst)
+    (const ConstLineString3d&, const std::vector<std::shared_ptr<const PassingControlLine>>&, bool, const std::string&) 
+    = &PassingControlLine::boundPassable;
+  
+  bool (*boundPassableNonConst)
+    (const ConstLineString3d&, const std::vector<std::shared_ptr<PassingControlLine>>&, bool, const std::string&) 
+    = &PassingControlLine::boundPassable;
+
+  class_<PassingControlLine, boost::noncopyable, std::shared_ptr<PassingControlLine>, bases<RegulatoryElement>>(
+    "PassingControlLine", "A passing control line regulatory element", no_init)
+    .def("__init__", make_constructor(&PassingControlLine::make, default_call_policies(),
+                                      (arg("id"), arg("controlLine"), arg("left_participants"), arg("right_participants"))))
+    .def("controlLine",controlLineConst)
+    .def("controlLine", controlLineNonConst)
+    .def("passableFromLeft", &PassingControlLine::passableFromLeft)
+    .def("passableFromRight", &PassingControlLine::passableFromRight)
+    .def("boundPassable", boundPassableConst)
+    .def("boundPassable", boundPassableNonConst);
+  implicitly_convertible<std::shared_ptr<PassingControlLine>, RegulatoryElementPtr>();
+
+  // #include <lanelet2_extension/regulatory_elements/RegionAccessRule.h>
 // #include <lanelet2_extension/regulatory_elements/DigitalSpeedLimit.h>
 // #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 // #include <lanelet2_extension/regulatory_elements/DirectionOfTravel.h>
 // #include <lanelet2_extension/regulatory_elements/DigitalMinimumGap.h>
 // #include <lanelet2_extension/regulatory_elements/StopRule.h>
 // #include <lanelet2_extension/regulatory_elements/CarmaTrafficLight.h>
-// TODO WORKING HERE
-  class_<RegionAccessRule, boost::noncopyable, std::shared_ptr<RegionAccessRule>, bases<RegulatoryElement>>(
-      "RegionAccessRule", "A region access rule regulatory element", no_init)
-      .def("__init__", make_constructor(&AllWayStop::make, default_call_policies(),
-                                        (arg("id"), arg("attributes"), arg("lltsWithStop"),
-                                         arg("signs") = Optional<LineStringsOrPolygons3d>{})))
-      .def("lanelets", +[](AllWayStop& self) { return self.lanelets(); })
-      .def("stopLines", +[](AllWayStop& self) { return self.stopLines(); })
-      .def("trafficSigns", +[](AllWayStop& self) { return self.trafficSigns(); })
-      .def("addTrafficSign", &AllWayStop::addTrafficSign)
-      .def("removeTrafficSign", &AllWayStop::removeTrafficSign)
-      .def("addLanelet", &AllWayStop::addLanelet)
-      .def("removeLanelet", &AllWayStop::removeLanelet);
-  implicitly_convertible<std::shared_ptr<AllWayStop>, RegulatoryElementPtr>();
+
+  class_<DirectionOfTravel, boost::noncopyable, std::shared_ptr<DirectionOfTravel>, bases<RegulatoryElement>>(
+    "DirectionOfTravel", "A digital speed limit regulatory element", no_init)
+    .def("__init__", make_constructor(&DirectionOfTravel::make, default_call_policies(),
+                                      (arg("id"), arg("lanelets"), arg("direction_of_travel"), arg("participants"))))
+    .def("getLanelets", &DirectionOfTravel::getLanelets)
+    .def("isOneWay", &DirectionOfTravel::isOneWay)
+    .def("appliesTo", &DirectionOfTravel::appliesTo);
+  implicitly_convertible<std::shared_ptr<DirectionOfTravel>, RegulatoryElementPtr>();
+
+  class_<DigitalMinimumGap, boost::noncopyable, std::shared_ptr<DigitalMinimumGap>, bases<RegulatoryElement>>(
+    "DigitalMinimumGap", "A digital minimum gap regulatory element", no_init)
+    .def("__init__", make_constructor(&DigitalMinimumGap::make, default_call_policies(),
+                                      (arg("id"), arg("min_gap"), arg("lanelets"),  arg("areas"), arg("participants"))))
+    .def("getLanelets", &DigitalMinimumGap::getLanelets)
+    .def("getAreas", &DigitalMinimumGap::getAreas)
+    .def("getMinimumGap", &DigitalMinimumGap::getMinimumGap)
+    .def("appliesTo", &DigitalMinimumGap::appliesTo);
+  implicitly_convertible<std::shared_ptr<DigitalMinimumGap>, RegulatoryElementPtr>();
+
+  // Setup overloads for Stop Rule
+  ConstLineStrings3d (StopRule::*stopAndWaitLineConst)() const = &StopRule::stopAndWaitLine;
+  
+  LineStrings3d (StopRule::*stopAndWaitLineNonConst)() = &StopRule::stopAndWaitLine;
+
+  bool (StopRule::*appliesToNonStatic)(const std::string&) const = &StopRule::appliesTo;
+  
+  bool (*appliesToStaticConst)
+    (const ConstLineString3d&, const std::vector<std::shared_ptr<const StopRule>>&, const std::string&) 
+    = &StopRule::appliesTo;
+  
+  bool (*appliesToStaticNonConst)
+    (const ConstLineString3d&, const std::vector<std::shared_ptr<StopRule>>&, const std::string&) 
+    =  &StopRule::appliesTo;
+
+  class_<StopRule, boost::noncopyable, std::shared_ptr<StopRule>, bases<RegulatoryElement>>(
+    "StopRule", "A stop rule regulatory element", no_init)
+    .def("__init__", make_constructor(&StopRule::make, default_call_policies(),
+                                      (arg("id"), arg("stopAndWaitLine"), arg("participants"))))
+    .def("stopAndWaitLine", stopAndWaitLineConst)
+    .def("stopAndWaitLine", stopAndWaitLineNonConst)
+    .def("appliesTo", appliesToNonStatic)
+    .def("appliesTo", appliesToStaticConst)
+    .def("appliesTo", appliesToStaticNonConst);
+  implicitly_convertible<std::shared_ptr<StopRule>, RegulatoryElementPtr>();
 
   class_<TrafficSignsWithType, std::shared_ptr<TrafficSignsWithType>>("TrafficSignsWithType", no_init)
       .def("__init__", make_constructor(+[](LineStringsOrPolygons3d ls) {

@@ -116,6 +116,22 @@ public:
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineStrings3d controlLine,
                                                      std::vector<std::string> left_participants,
                                                      std::vector<std::string> right_participants);
+  
+  /**
+   * @brief Static helper function that creates a passing control line data object based on the provided inputs
+   *
+   * @param id The lanelet::Id of this element
+   * @param controlLine The line strings which represent this regularoty elements geometry
+   * @param left_participants The set of participants which can cross this line from the left
+   * @param right_participants The set of participants which can cross this line from the right
+   *
+   * @return Fully initialized PassingControlLine
+   */
+  static std::shared_ptr<PassingControlLine> make(Id id, LineStrings3d controlLine,
+                                                     std::vector<std::string> left_participants,
+                                                     std::vector<std::string> right_participants) {
+    return std::shared_ptr<PassingControlLine>{new PassingControlLine(buildData(id, controlLine, left_participants, right_participants))};
+  }
 
 protected:
   // the following lines are required so that lanelet2 can create this object when loading a map with this regulatory

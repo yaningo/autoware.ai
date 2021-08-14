@@ -85,6 +85,21 @@ public:
    */
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, Lanelets lanelets, Areas areas,
                                                      std::vector<std::string> participants, const std::string& reason="NA");
+  
+  /**
+   * @brief Static helper function that creates a region access rule object based on the provided inputs
+   *
+   * @param id The lanelet::Id to give this regulation
+   * @param lanelets The lanelets impacted by this regulation
+   * @param areas The areas impacted by this regulation
+   * @param participants The participants which can access the provided lanelets and areas
+   *
+   * @return Fully initialized RegionAccessRulePtr 
+   */
+  static std::shared_ptr<RegionAccessRule> make(Id id, Lanelets lanelets, Areas areas,
+                                    std::vector<std::string> participants, const std::string& reason="NA") {
+    return std::shared_ptr<RegionAccessRule>{new RegionAccessRule(buildData(id, lanelets, areas, participants, reason))};
+  }
 
 protected:
   // the following lines are required so that lanelet2 can create this object when loading a map with this regulatory
