@@ -16,8 +16,8 @@
  * Authors: Kenji Miyake, Ryohsuke Mitsudome
  */
 
-#ifndef LANELET2_EXTENSION_UTILITY_UTILITIES_H
-#define LANELET2_EXTENSION_UTILITY_UTILITIES_H
+#ifndef AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_UTILITIES_H
+#define AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_UTILITIES_H
 
 #include <geometry_msgs/Point.h>
 
@@ -61,4 +61,4 @@ void removeRegulatoryElements(std::vector<lanelet::RegulatoryElementPtr> regem_l
 }  // namespace utils
 }  // namespace lanelet
 
-#endif  // LANELET2_EXTENSION_UTILITY_UTILITIES_H
+#endif  // AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_UTILITIES_H

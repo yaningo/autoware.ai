@@ -117,7 +117,7 @@ void usingAutowareTrafficLight(const std::string map_file_path)
 
 int main(int argc, char* argv[])
 {
-  ros::init(argc, argv, "lanelet2_extension_example");
+  ros::init(argc, argv, "autoware_lanelet2_ros_interface_example");
   ros::NodeHandle nh;
   ros::NodeHandle pnh("~");
 

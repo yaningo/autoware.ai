@@ -16,8 +16,8 @@
  * Authors: Simon Thompson, Ryohsuke Mitsudome
  */
 
-#ifndef LANELET2_EXTENSION_UTILITY_QUERY_H
-#define LANELET2_EXTENSION_UTILITY_QUERY_H
+#ifndef AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_QUERY_H
+#define AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_QUERY_H
 
 #include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
@@ -185,4 +185,4 @@ std::vector<lanelet::ConstLineString3d> getAllWayStopStopLines(const lanelet::Co
 // Therefore include implementation to allow for template functions
 #include "internal/query.tpp"
 
-#endif  // LANELET2_EXTENSION_UTILITY_QUERY_H
+#endif  // AUTOWARE_LANELET2_ROS_INTERFACE_UTILITY_QUERY_H

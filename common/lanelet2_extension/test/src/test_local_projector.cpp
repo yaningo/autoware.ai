@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ros/ros.h>
+#include <lanelet2_extension/logger/logger.h>
 
 #include <gtest/gtest.h>
 #include <math.h>

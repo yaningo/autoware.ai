@@ -16,8 +16,8 @@
  * Authors: Simon Thompson, Ryohsuke Mitsudome
  */
 
-#ifndef LANELET2_EXTENSION_VISUALIZATION_VISUALIZATION_H
-#define LANELET2_EXTENSION_VISUALIZATION_VISUALIZATION_H
+#ifndef AUTOWARE_LANELET2_ROS_INTERFACE_VISUALIZATION_VISUALIZATION_H
+#define AUTOWARE_LANELET2_ROS_INTERFACE_VISUALIZATION_VISUALIZATION_H
 
 #include <geometry_msgs/PolygonStamped.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -26,7 +26,7 @@
 #include <lanelet2_core/primitives/Lanelet.h>
 
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
-#include <lanelet2_extension/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
 
 #include <string>
 #include <vector>
@@ -152,4 +152,4 @@ visualization_msgs::MarkerArray trafficLightsAsTriangleMarkerArray(
 }  // namespace visualization
 }  // namespace lanelet
 
-#endif  // LANELET2_EXTENSION_VISUALIZATION_VISUALIZATION_H
+#endif  // AUTOWARE_LANELET2_ROS_INTERFACE_VISUALIZATION_VISUALIZATION_H

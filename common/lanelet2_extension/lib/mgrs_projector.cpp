@@ -17,7 +17,7 @@
  */
 
 #include <lanelet2_extension/projection/mgrs_projector.h>
-#include <ros/ros.h>
+#include <lanelet2_extension/logger/logger.h>
 
 #include <vector>
 #include <set>
@@ -54,7 +54,7 @@ BasicPoint3d MGRSProjector::forward(const GPSPoint& gps, const int precision) co
   }
   catch (GeographicLib::GeographicErr err)
   {
-    ROS_ERROR_STREAM(err.what());
+    LOG_ERROR_STREAM(err.what());
     return mgrs_point;
   }
 
@@ -65,7 +65,7 @@ BasicPoint3d MGRSProjector::forward(const GPSPoint& gps, const int precision) co
 
   if (!prev_projected_grid.empty() && prev_projected_grid != projected_grid_)
   {
-    ROS_ERROR_STREAM("Projected MGRS Grid changed from last projection. Projected point "
+    LOG_ERROR_STREAM("Projected MGRS Grid changed from last projection. Projected point "
                      "might be far away from previously projected point."
                      << std::endl
                      << "You may want to use different projector.");
@@ -88,7 +88,7 @@ GPSPoint MGRSProjector::reverse(const BasicPoint3d& mgrs_point) const
   }
   else
   {
-    ROS_ERROR_STREAM("cannot run reverse operation if mgrs code is not set in projector." << std::endl
+    LOG_ERROR_STREAM("cannot run reverse operation if mgrs code is not set in projector." << std::endl
                                                                                           << "use setMGRSCode function "
                                                                                              "or explicitly give mgrs "
                                                                                              "code as an "
@@ -113,7 +113,7 @@ GPSPoint MGRSProjector::reverse(const BasicPoint3d& mgrs_point, const std::strin
   }
   catch (GeographicLib::GeographicErr err)
   {
-    ROS_ERROR_STREAM("Failed to convert from MGRS to WGS" << err.what());
+    LOG_ERROR_STREAM("Failed to convert from MGRS to WGS" << err.what());
     return gps;
   }
 
@@ -139,7 +139,7 @@ void MGRSProjector::setMGRSCode(const GPSPoint& gps, const int precision)
   }
   catch (GeographicLib::GeographicErr err)
   {
-    ROS_ERROR_STREAM(err.what());
+    LOG_ERROR_STREAM(err.what());
   }
 
   setMGRSCode(mgrs_code);

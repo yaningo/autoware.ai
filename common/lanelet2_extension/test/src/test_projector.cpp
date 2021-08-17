@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <ros/ros.h>
+#include <lanelet2_extension/logger/logger.h>
 
 #include <gtest/gtest.h>
 #include <math.h>
@@ -82,6 +82,5 @@ TEST(TestSuite, ReverseProjection)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "TestNode");
   return RUN_ALL_TESTS();
 }

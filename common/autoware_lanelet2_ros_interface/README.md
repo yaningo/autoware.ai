@@ -1,4 +1,4 @@
-# lanelet2_extension package
+# autoware_lanelet2_ros_interface package
 This package contains external library for Lanelet2 and is meant to ease the use of Lanelet2 in CARMA and Autoware.
 
 ## CARMA Lanelet2 OSM File Format Changes
@@ -38,14 +38,38 @@ Autoware Traffic Light class contains following members:
 * light bulbs information of traffic lights
 * stopline associated to traffic light
 
+### Utility
+#### Message Conversion
+This contains functions to convert lanelet map objects into ROS messages.
+Currently it contains following conversions:
+* lanelet::LaneletMapPtr to/from lanelet_msgs::MapBinMsg
+* lanelet::Point3d to geometry_msgs::Point
+* lanelet::Point2d to geometry_msgs::Point
+* lanelet::BasicPoint3d to geometry_msgs::Point
+
+#### Query
+This module contains functions to retrieve various information from maps.
+e.g. crosswalks, trafficlights, stoplines
+
+#### Utilties
+This module contains other useful functions related to Lanelet.
+e.g. matching waypoint with lanelets
+
+### Visualization
+Visualization contains functions to convert lanelet objects into visualization marker messages.
+Currenly it contains following conversions:
+* lanelet::Lanelet to Triangle Markers
+* lanelet::LineString to LineStrip Markers
+* TrafficLights to Triangle Markers
+
 ## Nodes
-### lanelet2_extension_sample
-Code for this explains how this lanelet2_extension library is used.
+### autoware_lanelet2_ros_interface_sample
+Code for this explains how this autoware_lanelet2_ros_interface library is used.
 The executable is not meanto to do anything. 
 
-### autoware_lanelet2_extension
+### autoware_autoware_lanelet2_ros_interface
 This node checks if an .osm file follows the Autoware version of Lanelet2 format.
 You can check by running:
 ```
-rosrun lanelet2_extension autoware_lanelet2_validation _map_file:=<path/to/map.osm>
+rosrun autoware_lanelet2_ros_interface autoware_lanelet2_validation _map_file:=<path/to/map.osm>
 ```

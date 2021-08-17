@@ -18,8 +18,8 @@
 
 #include <gtest/gtest.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
 
 using lanelet::Lanelet;
 using lanelet::LineString3d;
