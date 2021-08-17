@@ -34,11 +34,16 @@ find_package(PROJ4 REQUIRED)
 set(LANELET2_EXTENSION_LOGGER_TYPE $ENV{LANELET2_EXTENSION_LOGGER_TYPE})
 
 if(LANELET2_EXTENSION_LOGGER_TYPE EQUAL 1 )
-  message("Using std::cout and cerr for logging")
+
+  message("lanelet2_extension using std::cout and cerr for logging")
   add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=1)
+
 else() # Default to ROS logging
-  add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=0)
+
+  message("lanelet2_extension using roscpp for logging")
+  add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=0) 
   set(LOGGER_DEP roscpp)
+  
 endif()
 
 find_package(catkin REQUIRED COMPONENTS
@@ -74,11 +79,7 @@ add_library( lanelet2_extension_lib
   lib/autoware_osm_parser.cpp
   lib/autoware_traffic_light.cpp
   lib/local_frame_projector.cpp
-  lib/message_conversion.cpp
   lib/mgrs_projector.cpp
-  lib/query.cpp
-  lib/utilities.cpp
-  lib/visualization.cpp
   lib/CarmaUSTrafficRules.cpp
   lib/PassingControlLine.cpp
   lib/StopRule.cpp
@@ -99,22 +100,7 @@ target_link_libraries(lanelet2_extension_lib
   ${PROJ4_LIBRARIES}
 )
 
-add_executable(lanelet2_extension_sample src/sample_code.cpp)
-add_dependencies(lanelet2_extension_sample ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lanelet2_extension_sample
-  ${catkin_LIBRARIES}
-  lanelet2_extension_lib
-)
-
-add_executable(autoware_lanelet2_validation src/validation.cpp)
-add_dependencies(autoware_lanelet2_validation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(autoware_lanelet2_validation
-  ${catkin_LIBRARIES}
-  ${PUGIXML_LIBRAREIS}
-  lanelet2_extension_lib
-)
-
-install(TARGETS lanelet2_extension_lib lanelet2_extension_sample autoware_lanelet2_validation
+install(TARGETS lanelet2_extension_lib
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <lanelet2_extension/logger/logger.h>
+#include <lanelet2_extension/logging/logger.h>
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <lanelet2_core/geometry/Lanelet.h>

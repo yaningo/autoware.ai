@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <lanelet2_extension/logger/logger.h>
+#include <lanelet2_extension/logging/logger.h>
 
 #include <lanelet2_core/Attribute.h>
 #include <lanelet2_core/LaneletMap.h>

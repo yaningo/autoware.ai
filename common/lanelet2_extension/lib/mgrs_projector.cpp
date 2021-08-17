@@ -17,7 +17,7 @@
  */
 
 #include <lanelet2_extension/projection/mgrs_projector.h>
-#include <lanelet2_extension/logger/logger.h>
+#include <lanelet2_extension/logging/logger.h>
 
 #include <vector>
 #include <set>

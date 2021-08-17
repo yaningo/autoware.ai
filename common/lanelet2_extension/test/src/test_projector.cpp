@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <lanelet2_extension/logger/logger.h>
+#include <lanelet2_extension/logging/logger.h>
 
 #include <gtest/gtest.h>
 #include <math.h>
