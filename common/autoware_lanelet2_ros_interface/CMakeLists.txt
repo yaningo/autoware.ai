@@ -7,7 +7,7 @@ project(autoware_lanelet2_ros_interface)
 #    - Michael McConnell
 #
 
-set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_FLAGS "-std=c++17 -fext-numeric-literals")
 
 find_package(PkgConfig)
 find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h
@@ -48,7 +48,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   visualization_msgs
   roslint
-  hardcoded_params
 )
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
@@ -57,7 +56,7 @@ roslint_cpp()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES autoware_lanelet2_ros_interface_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs hardcoded_params
+  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
 )
 
 include_directories(
@@ -121,5 +120,4 @@ if(CATKIN_ENABLE_TESTING)
  add_rostest_gtest(utilities-test test/test_utilities.test test/src/test_utilities.cpp)
  target_link_libraries(utilities-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
 
- target_link_libraries(carma-additions-test autoware_lanelet2_ros_interface_lib ${catkin_LIBRARIES})
 endif()
