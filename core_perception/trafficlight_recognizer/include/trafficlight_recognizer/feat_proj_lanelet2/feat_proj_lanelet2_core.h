@@ -27,7 +27,7 @@
 #include <lanelet2_routing/RoutingGraphContainer.h>
 
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
-#include <lanelet2_extension/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
 
 #include <autoware_lanelet2_msgs/MapBin.h>
 #include <autoware_msgs/AdjustXY.h>

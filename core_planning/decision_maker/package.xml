@@ -26,6 +26,7 @@
   <depend>vector_map</depend>
   <depend>vector_map_msgs</depend>
   <depend>lanelet2_extension</depend>
+  <depend>autoware_lanelet2_ros_interface</depend>
 
   <test_depend>rostest</test_depend>
   <test_depend>rosunit</test_depend>

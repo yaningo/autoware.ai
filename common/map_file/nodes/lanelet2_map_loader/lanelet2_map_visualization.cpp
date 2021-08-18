@@ -25,9 +25,9 @@
 #include <lanelet2_core/LaneletMap.h>
 #include <autoware_lanelet2_msgs/MapBin.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
-#include <lanelet2_extension/visualization/visualization.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
+#include <autoware_lanelet2_ros_interface/visualization/visualization.h>
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
 
 #include <vector>

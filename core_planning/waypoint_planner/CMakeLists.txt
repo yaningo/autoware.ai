@@ -20,6 +20,7 @@ find_package(
     std_msgs
     tf
     vector_map
+    autoware_lanelet2_ros_interface
 )
 
 catkin_package()

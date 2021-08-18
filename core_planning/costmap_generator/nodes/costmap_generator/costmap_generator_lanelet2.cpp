@@ -31,8 +31,8 @@
 #include <costmap_generator/costmap_generator_lanelet2.h>
 #include <object_map/object_map_utils.hpp>
 
-#include <lanelet2_extension/utility/query.h>
-#include <lanelet2_extension/visualization/visualization.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
+#include <autoware_lanelet2_ros_interface/visualization/visualization.h>
 // Constructor
 CostmapGeneratorLanelet2::CostmapGeneratorLanelet2()
   : private_nh_("~")

@@ -46,7 +46,7 @@
 #include <autoware_msgs/DetectedObjectArray.h>
 #include <costmap_generator/objects_to_costmap.h>
 #include <costmap_generator/points_to_costmap.h>
-#include <lanelet2_extension/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
 
 // headers in STL
 #include <memory>

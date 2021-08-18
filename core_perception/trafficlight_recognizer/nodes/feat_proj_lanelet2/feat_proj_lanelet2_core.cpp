@@ -27,9 +27,9 @@
 #include <lanelet2_routing/RoutingGraphContainer.h>
 #include <lanelet2_traffic_rules/TrafficRulesFactory.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/utilities.h>
-#include <lanelet2_extension/visualization/visualization.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/utilities.h>
+#include <autoware_lanelet2_ros_interface/visualization/visualization.h>
 
 #include <autoware_lanelet2_msgs/MapBin.h>
 #include <autoware_msgs/AdjustXY.h>

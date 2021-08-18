@@ -16,7 +16,7 @@
 
 #include <lanelet2_core/primitives/GPSPoint.h>
 #include <lanelet2_extension/projection/mgrs_projector.h>
-#include <lanelet2_extension/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
 #include <lanelet2_routing/RoutingGraph.h>
 #include <lanelet2_traffic_rules/TrafficRules.h>
 #include <lanelet2_traffic_rules/TrafficRulesFactory.h>
