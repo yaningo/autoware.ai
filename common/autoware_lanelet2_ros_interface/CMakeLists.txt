@@ -50,13 +50,13 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
 )
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
+set(ROSLINT_CPP_OPTS "--filter=-build/c++17")
 roslint_cpp()
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES autoware_lanelet2_ros_interface_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs
+  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs lanelet2_extension
 )
 
 include_directories(
@@ -113,11 +113,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 if(CATKIN_ENABLE_TESTING)
  roslint_add_test()
  find_package(rostest REQUIRED)
- add_rostest_gtest(message_conversion-test test/test_message_conversion.test test/src/test_message_conversion.cpp)
- target_link_libraries(message_conversion-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
- add_rostest_gtest(query-test test/test_query.test test/src/test_query.cpp)
- target_link_libraries(query-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
- add_rostest_gtest(utilities-test test/test_utilities.test test/src/test_utilities.cpp)
- target_link_libraries(utilities-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
+add_rostest_gtest(message_conversion-test test/test_message_conversion.test test/src/test_message_conversion.cpp)
+target_link_libraries(message_conversion-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
+add_rostest_gtest(query-test test/test_query.test test/src/test_query.cpp)
+target_link_libraries(query-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
+add_rostest_gtest(utilities-test test/test_utilities.test test/src/test_utilities.cpp)
+target_link_libraries(utilities-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
 
 endif()

@@ -28,8 +28,17 @@ namespace lanelet
 {
 namespace autoware
 {
+
+#if __cplusplus < 201703L
+constexpr char AutowareTrafficLight::RuleName[];  // instanciate string in cpp file
+#endif
+
+
 namespace
 {
+  // this object actually does the registration work for us
+static lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;
+
 template <typename T>
 bool findAndErase(const T& primitive, RuleParameters* member)
 {
@@ -146,10 +155,6 @@ bool AutowareTrafficLight::removeLightBulbs(const LineStringOrPolygon3d& primiti
 {
   return findAndErase(primitive.asRuleParameter(), &parameters().find(AutowareRoleNameString::LightBulbs)->second);
 }
-
-#if __cplusplus < 201703L
-constexpr char AutowareTrafficLight::RuleName[];  // instanciate string in cpp file
-#endif
 
 }  // namespace autoware
 }  // namespace lanelet

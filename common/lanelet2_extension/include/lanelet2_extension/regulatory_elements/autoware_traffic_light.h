@@ -79,15 +79,7 @@ private:
                        const Optional<LineString3d>& stopLine, const LineStrings3d& lightBulbs);
   explicit AutowareTrafficLight(const lanelet::RegulatoryElementDataPtr& data);
 };
-static lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;
 
-// moved to lanelet2_extension/lib/autoware_traffic_light.cpp to avoid multiple
-// defintion errors
-/*
-#if __cplusplus < 201703L
-constexpr char AutowareTrafficLight::RuleName[];      // instanciate string in
-cpp file #endif
-*/
 }  // namespace autoware
 }  // namespace lanelet
 
