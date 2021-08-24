@@ -80,6 +80,7 @@ public:
    * @param lanelets The lanelets impacted by this regulation
    * @param areas The areas impacted by this regulation
    * @param participants The participants which can access the provided lanelets and areas
+   * @param reason The reason
    *
    * @return RegulatoryElementData containing all the necessary information to construct a region access rule object
    */
