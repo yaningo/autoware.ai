@@ -327,11 +327,25 @@ void CarmaUSTrafficRules::setConfigSpeedLimit(double config_lim)
   config_limit = lanelet::Velocity(config_lim * lanelet::units::MPH());
 }
 
+void CarmaUSTrafficRules::setVehicleParticipationType(std::string participant)
+{
+  if(participant == "vehicle:car")
+  {
+    participant_ = lanelet::Participants::VehicleCar;
+  }
+  if(participant == "vehicle:truck")
+  {
+    participant_ = lanelet::Participants::VehicleTruck;
+  }
+}
+
 
 // Register carma traffic rules with lanelet2
 // Since CarmaUSTrafficRules is based solely on regulatory elements there is never a need to infer the participant
 // Therefore all participants can be registered with the same rules
 RegisterTrafficRules<CarmaUSTrafficRules> carmaRulesV(CarmaUSTrafficRules::Location, Participants::Vehicle);
+RegisterTrafficRules<CarmaUSTrafficRules> carmaRulesVC(CarmaUSTrafficRules::Location, Participants::VehicleCar);
+RegisterTrafficRules<CarmaUSTrafficRules> carmaRulesVT(CarmaUSTrafficRules::Location, Participants::VehicleTruck);
 RegisterTrafficRules<CarmaUSTrafficRules> carmaRulesP(CarmaUSTrafficRules::Location, Participants::Pedestrian);
 RegisterTrafficRules<CarmaUSTrafficRules> carmaRulesBi(CarmaUSTrafficRules::Location, Participants::Bicycle);
 

@@ -71,6 +71,8 @@ public:
 
   void setConfigSpeedLimit(double config_lim);
 
+  void setVehicleParticipationType(std::string participant);
+
   /**
    * @brief NOTE: This function always returns true as all elements in CARMA can contain dynamic rules there is never a
    * reason to assume otherwise
@@ -118,6 +120,7 @@ private:
 
 
   lanelet::Velocity config_limit;
+  lanelet::Participants participant_;
 
 
 };
