@@ -1,0 +1,5 @@
+<launch>
+
+  <test test-name="test-query" pkg="autoware_lanelet2_ros_interface" type="query-test" name="test"/>
+
+</launch>

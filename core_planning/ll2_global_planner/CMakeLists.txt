@@ -15,6 +15,7 @@ set(catkin_deps
   roslint
   tf2
   tf2_ros
+  autoware_lanelet2_ros_interface
 )
 
 find_package(catkin REQUIRED ${catkin_deps})

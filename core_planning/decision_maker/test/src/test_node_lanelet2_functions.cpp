@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <ros/ros.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
 #include <amathutils_lib/amathutils.hpp>
 
 #include <lanelet2_core/Attribute.h>

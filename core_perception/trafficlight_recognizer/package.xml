@@ -24,6 +24,7 @@
   <depend>vector_map</depend>
   <depend>vector_map_server</depend>
   <depend>visualization_msgs</depend>
+  <depend>autoware_lanelet2_ros_interface</depend>
   <depend>lanelet2_extension</depend>
   
 </package>

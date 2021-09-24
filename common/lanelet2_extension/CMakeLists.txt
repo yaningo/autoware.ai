@@ -28,13 +28,26 @@ find_path(PUGIXML_INCLUDE_DIRS
   PATH_SUFFIXES pugixml
 )
 
-find_package(autoware_build_flags REQUIRED)
-
 find_package(PROJ4 REQUIRED)
 
+# Extract environment variable value
+set(LANELET2_EXTENSION_LOGGER_TYPE $ENV{LANELET2_EXTENSION_LOGGER_TYPE})
+
+if(LANELET2_EXTENSION_LOGGER_TYPE EQUAL 1 )
+
+  message("lanelet2_extension using std::cout and cerr for logging")
+  add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=1)
+
+else() # Default to ROS logging
+
+  message("lanelet2_extension using roscpp for logging")
+  add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=0) 
+  set(LOGGER_DEP roscpp)
+  
+endif()
+
 find_package(catkin REQUIRED COMPONENTS
-  amathutils_lib
-  roscpp
+  ${LOGGER_DEP}
   lanelet2_core
   lanelet2_io
   lanelet2_maps
@@ -42,21 +55,14 @@ find_package(catkin REQUIRED COMPONENTS
   lanelet2_routing
   lanelet2_traffic_rules
   lanelet2_validation
-  autoware_lanelet2_msgs
-  autoware_msgs
-  geometry_msgs
-  visualization_msgs
-  roslint
   hardcoded_params
 )
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
-roslint_cpp()
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lanelet2_extension_lib
-  CATKIN_DEPENDS amathutils_lib roscpp lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation autoware_lanelet2_msgs autoware_msgs geometry_msgs visualization_msgs hardcoded_params
+  CATKIN_DEPENDS ${LOGGER_DEP} lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation hardcoded_params
 )
 
 include_directories(
@@ -73,11 +79,7 @@ add_library( lanelet2_extension_lib
   lib/autoware_osm_parser.cpp
   lib/autoware_traffic_light.cpp
   lib/local_frame_projector.cpp
-  lib/message_conversion.cpp
   lib/mgrs_projector.cpp
-  lib/query.cpp
-  lib/utilities.cpp
-  lib/visualization.cpp
   lib/CarmaUSTrafficRules.cpp
   lib/PassingControlLine.cpp
   lib/StopRule.cpp
@@ -98,22 +100,7 @@ target_link_libraries(lanelet2_extension_lib
   ${PROJ4_LIBRARIES}
 )
 
-add_executable(lanelet2_extension_sample src/sample_code.cpp)
-add_dependencies(lanelet2_extension_sample ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(lanelet2_extension_sample
-  ${catkin_LIBRARIES}
-  lanelet2_extension_lib
-)
-
-add_executable(autoware_lanelet2_validation src/validation.cpp)
-add_dependencies(autoware_lanelet2_validation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(autoware_lanelet2_validation
-  ${catkin_LIBRARIES}
-  ${PUGIXML_LIBRAREIS}
-  lanelet2_extension_lib
-)
-
-install(TARGETS lanelet2_extension_lib lanelet2_extension_sample autoware_lanelet2_validation
+install(TARGETS lanelet2_extension_lib
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -122,18 +109,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 
 if(CATKIN_ENABLE_TESTING)
- roslint_add_test()
- find_package(rostest REQUIRED)
- add_rostest_gtest(message_conversion-test test/test_message_conversion.test test/src/test_message_conversion.cpp)
- target_link_libraries(message_conversion-test ${catkin_LIBRARIES} lanelet2_extension_lib)
- add_rostest_gtest(projector-test test/test_projector.test test/src/test_projector.cpp)
+ catkin_add_gmock(projector-test test/src/test_projector.cpp)
  target_link_libraries(projector-test ${catkin_LIBRARIES} lanelet2_extension_lib)
- add_rostest_gtest(query-test test/test_query.test test/src/test_query.cpp)
- target_link_libraries(query-test ${catkin_LIBRARIES} lanelet2_extension_lib)
- add_rostest_gtest(regulatory_elements-test test/test_regulatory_elements.test test/src/test_regulatory_elements.cpp)
+ catkin_add_gmock(regulatory_elements-test test/src/test_regulatory_elements.cpp)
  target_link_libraries(regulatory_elements-test ${catkin_LIBRARIES} lanelet2_extension_lib)
- add_rostest_gtest(utilities-test test/test_utilities.test test/src/test_utilities.cpp)
- target_link_libraries(utilities-test ${catkin_LIBRARIES} lanelet2_extension_lib)
 
  catkin_add_gmock(carma-additions-test
   test/src/CarmaTestsMain.cpp
