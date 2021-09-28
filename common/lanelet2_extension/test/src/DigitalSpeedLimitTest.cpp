@@ -75,6 +75,7 @@ TEST(DigitalSpeedLimit, digitalSpeedLimit)
   ASSERT_FALSE(dsl.appliesTo(lanelet::Participants::Vehicle));
   ASSERT_TRUE(dsl.appliesTo(lanelet::Participants::VehicleCar));
   ASSERT_TRUE(dsl.appliesTo(lanelet::Participants::VehicleCarElectric));  // Test acceptance of sub type
+  ASSERT_EQ(dsl.getReason(), "NA");
 
   ASSERT_EQ(5_kmh, dsl.getSpeedLimit());
 }
