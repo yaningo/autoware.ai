@@ -16,10 +16,14 @@
 
 #include <ostream>
 #include <lanelet2_extension/regulatory_elements/CarmaTrafficLight.h>
+#include <lanelet2_extension/logging/logger.h>
 #include "RegulatoryHelpers.h"
 
 namespace lanelet
 {
+
+using namespace lanelet::time;
+
 // C++ 14 vs 17 parameter export
 #if __cplusplus < 201703L
 constexpr char CarmaTrafficLight::RuleName[];  // instantiate string in cpp file
@@ -76,16 +80,11 @@ std::unique_ptr<lanelet::RegulatoryElementData> CarmaTrafficLight::buildData(Id 
   return std::make_unique<RegulatoryElementData>(id, rules, attribute_map);
 }
 
-boost::optional<CarmaTrafficLightState> CarmaTrafficLight::getState()
-{
-  return predictState(ros::Time::now());
-}
-
-boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Time time_stamp)
+boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(boost::posix_time::ptime time_stamp)
 {
   if (recorded_time_stamps.empty())
   {
-    ROS_WARN_STREAM("CarmaTrafficLight doesn't have any recorded states of traffic lights");
+    LOG_WARN_STREAM("CarmaTrafficLight doesn't have any recorded states of traffic lights");
     return boost::none;
   }
   if (recorded_time_stamps.size() == 1) // if only 1 timestamp recorded, this signal doesn't change
@@ -93,11 +92,11 @@ boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Tim
     return recorded_time_stamps.front().second;
   }
   // shift starting time to the future or to the past to fit input into a valid cycle
-  ros::Duration accumulated_offset_duration;
+  boost::posix_time::time_duration accumulated_offset_duration;
   double offset_duration_dir = recorded_time_stamps.front().first > time_stamp ? -1.0 : 1.0; // -1 if past, +1 if time_stamp is in future
 
-  int num_of_cycles = std::abs((recorded_time_stamps.front().first - time_stamp).toSec()/ fixed_cycle_duration.toSec());
-  accumulated_offset_duration = ros::Duration( num_of_cycles * fixed_cycle_duration.toSec());
+  int num_of_cycles = std::abs(toSec(recorded_time_stamps.front().first - time_stamp) / toSec(fixed_cycle_duration));
+  accumulated_offset_duration = durationFromSec( num_of_cycles * toSec(fixed_cycle_duration));
   
   if (offset_duration_dir < 0) 
   {
@@ -109,7 +108,7 @@ boost::optional<CarmaTrafficLightState> CarmaTrafficLight::predictState(ros::Tim
   // iterate through states in the cycle to get the signal
   for (size_t i = 0; i < recorded_time_stamps.size(); i++)
   {
-    if (recorded_time_stamps[i].first.toSec() + offset_duration_dir * accumulated_offset_duration.toSec() >= time_stamp.toSec())
+    if (toSec(recorded_time_stamps[i].first) + offset_duration_dir * toSec(accumulated_offset_duration) >= toSec(time_stamp))
     { 
       return recorded_time_stamps[i].second;
     }
@@ -123,11 +122,11 @@ lanelet::ConstLanelets CarmaTrafficLight::getControlledLanelets() const
   return getParameters<lanelet::ConstLanelet>(RoleName::Refers);
 } 
 
-void CarmaTrafficLight::setStates(std::vector<std::pair<ros::Time, CarmaTrafficLightState>> input_time_steps, int revision)
+void CarmaTrafficLight::setStates(std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficLightState>> input_time_steps, int revision)
 {
   if (input_time_steps.empty())
   {
-    ROS_ERROR_STREAM("Given states for the CarmaTrafficLight Id: " << id() << " is empty. Returning...");
+    LOG_ERROR_STREAM("Given states for the CarmaTrafficLight Id: " << id() << " is empty. Returning...");
     return;
   }
 
@@ -153,6 +152,34 @@ void CarmaTrafficLight::setStates(std::vector<std::pair<ros::Time, CarmaTrafficL
   fixed_cycle_duration = recorded_time_stamps.back().first - recorded_time_stamps.front().first; // it is okay if size is only 1, case is handled in predictState
   revision_ = revision;
 }
+
+
+namespace time {
+
+double toSec(const boost::posix_time::time_duration& duration) {
+  if (duration.is_special()) {
+    throw std::invalid_argument("Cannot convert special duration to seconds");
+  }
+  return duration.total_microseconds() / 1000000.0;
+}
+
+double toSec(const boost::posix_time::ptime& time) {
+  // TODO clean up this comment boost::posix_time::time_duration duration = t - boost::posix_time::from_time_t(0);
+  return toSec(time - boost::posix_time::from_time_t(0));
+}
+
+boost::posix_time::ptime timeFromSec(double sec) {
+  return boost::posix_time::from_time_t(0) + boost::posix_time::microseconds(static_cast<long>(sec * 1000000L));
+}
+
+boost::posix_time::time_duration durationFromSec(double sec) {
+  return boost::posix_time::microseconds(static_cast<long>(sec * 1000000L));
+}
+
+} // namespace time
+
+
+
 namespace
 {
 // this object actually does the registration work for us

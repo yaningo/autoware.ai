@@ -18,7 +18,7 @@
 #define LANELET2_EXTENSION_REGULATORY_ELEMENTS_CARMA_TRAFFIC_LIGHT_H
 
 #include <lanelet2_core/primitives/RegulatoryElement.h>
-#include <ros/ros.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace lanelet
 {
@@ -51,6 +51,42 @@ enum class CarmaTrafficLightState {
   CAUTION_CONFLICTING_TRAFFIC=9
 };
 
+// Namespace for time representations used with this regulatory element
+namespace time {
+
+  /**
+   * \brief Converts a boost time duration into the number of posix seconds it represents
+   * 
+   * \param duration The duration to convert.
+   * \return The number of posix seconds with microsecond resolution
+   */ 
+  double toSec(const boost::posix_time::time_duration& duration);
+  
+  /**
+   * \brief Converts a boost time duration into the number of posix seconds since 1970
+   * 
+   * \param duration The duration to convert.
+   * \return The number of posix seconds since 1970 with microsecond resolution
+   */ 
+  double toSec(const boost::posix_time::ptime& time);
+
+  /**
+   * \brief Returns a boost posix time object which matches the input posix seconds since 1970 with microsecond accuracy.
+   * 
+   * \param sec The number of posix seconds since 1970. Fractional seconds are supported.
+   * \return Initialized posix time object matching the input
+   */ 
+  boost::posix_time::ptime timeFromSec(double sec);
+
+  /**
+   * \brief Returns a boost posix time object which matches the input posix seconds duration with microsecond accuracy.
+   * 
+   * \param sec The number of posix seconds the duration should reflect. Fractional seconds are supported.
+   * \return Initialized posix time duration object matching the input
+   */ 
+  boost::posix_time::time_duration durationFromSec(double sec);
+}
+
 /**
  * \brief Stream operator for CarmaTrafficLightState enum.
  */
@@ -69,32 +105,27 @@ class CarmaTrafficLight : public lanelet::RegulatoryElement
 public:
   static constexpr char RuleName[] = "carma_traffic_light";
   int revision_ = 0; //indicates when was this last modified
-  ros::Duration fixed_cycle_duration;
-  std::vector<std::pair<ros::Time, CarmaTrafficLightState>> recorded_time_stamps;
+  boost::posix_time::time_duration fixed_cycle_duration;
+  std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficLightState>> recorded_time_stamps;
   /**
    * @brief setStates function sorts states automatically
    *
    * @param data The data to initialize this regulation with
    * NOTE: to extract full cycle, first and last state should match in input_time_steps
    */
-  void setStates(std::vector<std::pair<ros::Time, CarmaTrafficLightState>> input_time_steps, int revision);
+  void setStates(std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficLightState>> input_time_steps, int revision);
 
   /**
    * @brief getControlledLanelets function returns lanelets this element controls
    */
   lanelet::ConstLanelets getControlledLanelets() const;
-  /**
-   * @brief getState get the current state
-   *
-   * @return return current, ros::Time::now
-   */
-  boost::optional<CarmaTrafficLightState> getState();
+
   /**
    * @brief prefictState assumes sorted, fixed time, so guaranteed to give you one final state
    *
-   * @param time_stamp ros::Time of the event happening
+   * @param time_stamp boost::posix_time::ptime of the event happening
    */
-  boost::optional<CarmaTrafficLightState> predictState(ros::Time time_stamp);
+  boost::optional<CarmaTrafficLightState> predictState(boost::posix_time::ptime time_stamp);
   ConstLineStrings3d stopLine() const;
   LineStrings3d stopLine();
 
@@ -109,6 +140,7 @@ public:
    * @return RegulatoryElementData containing all the necessary information to construct a stop rule
    */
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineString3d stop_line, Lanelets lanelets);
+
 
 private:
   // the following lines are required so that lanelet2 can create this object
