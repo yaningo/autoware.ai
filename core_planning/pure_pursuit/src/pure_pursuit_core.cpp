@@ -112,7 +112,7 @@ void PurePursuitNode::initForROS()
 void PurePursuitNode::run()
 {
   ROS_INFO_STREAM("pure pursuit start");
-  ros::Rate loop_rate(LOOP_RATE_);
+  ros::Rate loop_rate(update_rate_);
 
   ros::Timer command_pub_timer = nh_.createTimer( // Create a ros timer to publish commands at the expected loop rate
     loop_rate.expectedCycleTime(),
@@ -132,7 +132,7 @@ void PurePursuitNode::run()
       bool can_get_curvature = pp_.canGetCurvature(&kappa);
 
       this->publishTwistStamped(can_get_curvature, kappa);
-      this->publishControlCommandStamped(can_get_curvature, kappa);
+      this->publishControlCommands(can_get_curvature, kappa);
       health_checker_ptr_->NODE_ACTIVATE();
       health_checker_ptr_->CHECK_RATE("topic_rate_vehicle_cmd_slow", 8, 5, 1,
         "topic vehicle_cmd publish rate slow.");
