@@ -38,6 +38,9 @@ class DigitalSpeedLimit : public RegulatoryElement
 public:
   static constexpr char RuleName[] = "digital_speed_limit";
   static constexpr char Limit[] = "limit";
+  static constexpr char Reason[] = "reason";
+
+  std::string reason_ = "NA";
   Velocity speed_limit_ = 0;
   std::unordered_set<std::string> participants_;
 
@@ -62,6 +65,13 @@ public:
    */
   Velocity getSpeedLimit() const;
 
+   /**
+   * @brief Returns the reason for this rule
+   *
+   * @return The reason for this rule
+   */
+  std::string getReason();
+
   /**
    * @brief Returns true if the given participant must follow this speed limit
    *
@@ -78,11 +88,12 @@ public:
    * @param lanelets The lanelets this speed limit applies to
    * @param areas The areas this speed limit applies to
    * @param participants The set of participants which this speed limit will apply to
+   * @param reason The reason
    *
    * @return RegulatoryElementData containing all the necessary information to construct a speed limit element
    */
   static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, Velocity speed_limit, Lanelets lanelets, Areas areas,
-                                                     std::vector<std::string> participants);
+                                                     std::vector<std::string> participants, const std::string& reason="NA");
 
   /**
    * @brief Constructor required for compatability with lanlet2 loading

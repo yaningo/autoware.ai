@@ -58,11 +58,14 @@ find_package(catkin REQUIRED COMPONENTS
   hardcoded_params
 )
 
+find_package(Boost REQUIRED)
+
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES lanelet2_extension_lib
   CATKIN_DEPENDS ${LOGGER_DEP} lanelet2_core lanelet2_io lanelet2_maps lanelet2_projection lanelet2_routing lanelet2_traffic_rules lanelet2_validation hardcoded_params
+  DEPENDS Boost
 )
 
 include_directories(
@@ -71,6 +74,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PUGIXML_INCLUDE_DIRS}
   ${PROJ4_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 
 add_definitions (${GeographicLib_DEFINITIONS})
@@ -81,6 +85,7 @@ add_library( lanelet2_extension_lib
   lib/local_frame_projector.cpp
   lib/mgrs_projector.cpp
   lib/CarmaUSTrafficRules.cpp
+  lib/CarmaTrafficLight.cpp
   lib/PassingControlLine.cpp
   lib/StopRule.cpp
   lib/DigitalSpeedLimit.cpp
@@ -98,6 +103,7 @@ target_link_libraries(lanelet2_extension_lib
   ${catkin_LIBRARIES}
   ${GeographicLib_LIBRARIES}
   ${PROJ4_LIBRARIES}
+  ${Boost_LIBRARIES}
 )
 
 install(TARGETS lanelet2_extension_lib
@@ -125,6 +131,7 @@ if(CATKIN_ENABLE_TESTING)
   test/src/CarmaUSTrafficRulesTest.cpp
   test/src/MapLoadingTest.cpp
   test/src/test_local_projector.cpp
+  test/src/CarmaTrafficTest.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
  )
 

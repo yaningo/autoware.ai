@@ -25,6 +25,8 @@ namespace lanelet
 // Forward declare static constexpr
 constexpr char DigitalSpeedLimit::RuleName[];  // instantiate string in cpp file
 constexpr char DigitalSpeedLimit::Limit[];
+constexpr char DigitalSpeedLimit::Reason[];
+
 #endif
 
 ConstLanelets DigitalSpeedLimit::getLanelets() const
@@ -40,6 +42,17 @@ ConstAreas DigitalSpeedLimit::getAreas() const
 Velocity DigitalSpeedLimit::getSpeedLimit() const
 {
   return speed_limit_;
+}
+
+std::string DigitalSpeedLimit::getReason()
+{  
+  if (hasAttribute(Reason))
+  {
+    auto optional_reason = attribute(Reason).value();
+    reason_ = optional_reason;
+  }       
+  
+  return reason_;
 }
 
 bool DigitalSpeedLimit::appliesTo(const std::string& participant) const
@@ -65,7 +78,7 @@ DigitalSpeedLimit::DigitalSpeedLimit(const lanelet::RegulatoryElementDataPtr& da
 }
 
 std::unique_ptr<lanelet::RegulatoryElementData> DigitalSpeedLimit::buildData(Id id, Velocity speed_limit, Lanelets lanelets,
-                                                               Areas areas, std::vector<std::string> participants)
+                                                               Areas areas, std::vector<std::string> participants, const std::string& reason)
 {
   // Add parameters
   RuleParameterMap rules;
@@ -77,7 +90,8 @@ std::unique_ptr<lanelet::RegulatoryElementData> DigitalSpeedLimit::buildData(Id 
   // Add attributes
   AttributeMap attribute_map({ { AttributeNamesString::Type, AttributeValueString::RegulatoryElement },
                                { AttributeNamesString::Subtype, RuleName },
-                               { Limit, Attribute(speed_limit).value() } });
+                               { Limit, Attribute(speed_limit).value() },
+                               { Reason, Attribute(reason).value() } });
 
   for (auto participant : participants)
   {
