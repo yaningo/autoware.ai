@@ -37,7 +37,7 @@ cd ${dir}/autoware.ai
 if [[ "$BRANCH" = "noetic/develop" ]]; then
       git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch $BRANCH
 else
-      git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch noetic/develop
+      git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch release/elise
 fi
 
 # Required to build pacmod_msgs

@@ -1,4 +1,4 @@
-FROM usdotfhwastoldev/carma-base:noetic-develop as base_image
+FROM usdotfhwastolcandidate/carma-base:elise as base_image
 
 FROM base_image as build
 
