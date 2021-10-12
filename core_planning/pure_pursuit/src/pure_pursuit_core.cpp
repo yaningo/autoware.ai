@@ -121,7 +121,7 @@ void PurePursuitNode::run()
 
       if (!is_pose_set_ || !is_waypoint_set_ || !is_velocity_set_) // One time check on desired input data
       {
-        ROS_WARN("Necessary topics are not subscribed yet ... ");
+        ROS_DEBUG("Necessary topics are not subscribed yet ... ");
         return;
       }
 
