@@ -135,6 +135,7 @@ void EKFLocalizer::timerCallback(const ros::TimerEvent& e)
 
   /* publish ekf result */
   publishEstimateResult();
+  broadcastTF();
 }
 
 void EKFLocalizer::showCurrentX()
