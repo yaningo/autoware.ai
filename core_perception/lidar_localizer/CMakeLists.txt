@@ -52,6 +52,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   velodyne_pointcloud
+  velodyne_pcl
 )
 
 catkin_package(
@@ -65,6 +66,7 @@ catkin_package(
     ndt_tku
     std_msgs
     velodyne_pointcloud
+    velodyne_pcl
   DEPENDS PCL
 )
 
