@@ -29,3 +29,8 @@ catkin_package(
     rosgraph_msgs
     std_msgs
 )
+
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)
