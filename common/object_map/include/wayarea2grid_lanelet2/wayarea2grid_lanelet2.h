@@ -32,9 +32,9 @@
 #include <grid_map_msgs/GridMap.h>
 #include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_extension/projection/mgrs_projector.h>
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
-#include <lanelet2_extension/visualization/visualization.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
+#include <autoware_lanelet2_ros_interface/visualization/visualization.h>
 #include <grid_map_cv/grid_map_cv.hpp>
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <object_map/object_map_utils.hpp>

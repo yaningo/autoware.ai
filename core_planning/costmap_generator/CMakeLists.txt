@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   vector_map
   lanelet2_extension
+  autoware_lanelet2_ros_interface
 )
 
 catkin_package(

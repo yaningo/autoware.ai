@@ -1,8 +1,7 @@
-set(MRT_PKG_VERSION 2.2)
+set(MRT_PKG_VERSION 4.0.0)
 # Modify only if you know what you are doing!
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5.1)
 project(lanelet2_routing)
-set(MRT_COTIRE_ENABLED 1)
 
 ###################
 ## find packages ##

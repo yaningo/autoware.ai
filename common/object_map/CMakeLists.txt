@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   autoware_msgs
   vector_map
   lanelet2_extension
+  autoware_lanelet2_ros_interface
 )
 
 # TODO add other files into roslint

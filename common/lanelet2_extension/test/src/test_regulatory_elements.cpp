@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <ros/ros.h>
+#include <lanelet2_extension/logging/logger.h>
 
 #include <lanelet2_core/Attribute.h>
 #include <lanelet2_core/LaneletMap.h>
@@ -128,6 +128,5 @@ TEST(TestSuite, TrafficLightWorksAsExpected)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "TestNode");
   return RUN_ALL_TESTS();
 }

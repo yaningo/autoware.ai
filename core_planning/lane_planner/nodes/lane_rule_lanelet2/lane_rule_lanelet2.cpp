@@ -30,8 +30,8 @@
 #include <lanelet2_traffic_rules/TrafficRules.h>
 #include <lanelet2_traffic_rules/TrafficRulesFactory.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
 
 #include <string>
 #include <vector>
@@ -195,10 +195,10 @@ std::vector<size_t> check_waypoints_for_stoplines(const std::vector<Eigen::Vecto
       else
       {
         std::vector<lanelet::ConstLineString3d> current_lanelet_stoplines =
-            lanelet::utils::query::stopLinesLanelet(current_lanelet);
+            lanelet::utils::query::getTrafficLightStopLines(current_lanelet);
 
         // check if waypoint segment intersects with stoplines
-        // kida awkward to force use of boost::geometry intersect.
+        // kinda awkward to force use of boost::geometry intersect.
         // 3d line segment intersection not implememented
         lanelet::ConstLineString3d wp_ls(lanelet::utils::getId(), { wp_p0, wp_p1 });
         auto wp_ls2d = lanelet::utils::to2D(wp_ls);
@@ -432,7 +432,7 @@ int main(int argc, char** argv)
 {
   g_loaded_lanelet_map = false;
 
-  ros::init(argc, argv, "lane_rule_lanelet2");
+  ros::init(argc, argv, "lane_rule");
   ros::NodeHandle rosnode;
   ros::NodeHandle pnh("~");
 

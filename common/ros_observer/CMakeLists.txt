@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1)
 project(ros_observer)
 
-add_compile_options(-std=c++11)
+set(CMAKE_CXX_STANDARD 14)
 
 find_package(
   catkin REQUIRED COMPONENTS
@@ -13,7 +13,7 @@ find_package(Boost REQUIRED COMPONENTS
   thread
 )
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++11")
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
 roslint_cpp()
 
 catkin_package(
@@ -28,12 +28,13 @@ include_directories(
 
 add_executable(
   ros_observer
-  ./src/ros_observer.cpp
+  src/ros_observer.cpp
 )
 
 target_link_libraries(
   ros_observer
   rt ${Boost_LIBRARIES}
+  pthread
 )
 
 add_dependencies(
@@ -49,7 +50,8 @@ add_library(
 target_link_libraries(
   lib_ros_observer
   ${catkin_LIBRARIES}
-  rt ${Boost_LIBRARIES}
+  rt
+  ${Boost_LIBRARIES}
 )
 
 add_dependencies(
@@ -78,9 +80,11 @@ if (CATKIN_ENABLE_TESTING)
   roslint_add_test()
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_ros_observer
-  test/test_ros_observer.test
-  test/src/test_ros_observer.cpp)
+    test/test_ros_observer.test
+    test/src/test_ros_observer.cpp
+  )
   target_link_libraries(test_ros_observer
-  lib_ros_observer
-  ${catkin_LIBRARIES})
+    lib_ros_observer
+    ${catkin_LIBRARIES}
+  )
 endif()

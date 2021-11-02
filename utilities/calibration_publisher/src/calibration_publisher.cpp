@@ -18,9 +18,8 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2/LinearMath/Transform.h>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Matrix3x3.h>
-#include <tf2/LinearMath/Vector3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <sensor_msgs/Image.h>
@@ -49,45 +48,26 @@ static bool extrinsics_parsed_;
 static sensor_msgs::CameraInfo camera_info_msg_;
 static autoware_msgs::ProjectionMatrix extrinsic_matrix_msg_;
 
-void tfRegistration(const cv::Mat &camExtMat, const ros::Time &timeStamp)
+void tfRegistration(const cv::Mat &camExtMat)
 {
-  tf2::Matrix3x3 rotation_mat;
-  double roll = 0, pitch = 0, yaw = 0;
-  tf2::Quaternion quaternion;
-  tf2::Transform transform;
   static tf2_ros::StaticTransformBroadcaster broadcaster;
 
+  tf2::Vector3 origin(camExtMat.at<double>(0, 3), camExtMat.at<double>(1, 3), camExtMat.at<double>(2, 3));
+  tf2::Matrix3x3 rotation_mat;
   rotation_mat.setValue(camExtMat.at<double>(0, 0), camExtMat.at<double>(0, 1), camExtMat.at<double>(0, 2),
                         camExtMat.at<double>(1, 0), camExtMat.at<double>(1, 1), camExtMat.at<double>(1, 2),
                         camExtMat.at<double>(2, 0), camExtMat.at<double>(2, 1), camExtMat.at<double>(2, 2));
 
-  rotation_mat.getRPY(roll, pitch, yaw, 1);
+  tf2::Transform transform(rotation_mat, origin);
 
-  quaternion.setRPY(roll, pitch, yaw);
-
-  transform.setOrigin(
-    tf2::Vector3(camExtMat.at<double>(0, 3), camExtMat.at<double>(1, 3), camExtMat.at<double>(2, 3)));
-
-  transform.setRotation(quaternion);
-
-  geometry_msgs::TransformStamped msg;
-  msg.transform.translation.x = transform.getOrigin().x();
-  msg.transform.translation.y = transform.getOrigin().y();
-  msg.transform.translation.z = transform.getOrigin().z();
-  
-  msg.transform.rotation.x = transform.getRotation().x();
-  msg.transform.rotation.y = transform.getRotation().y();
-  msg.transform.rotation.z = transform.getRotation().z();
-  msg.transform.rotation.w = transform.getRotation().w();
-
-  msg.header.stamp = timeStamp;
-  msg.header.frame_id = target_frame_;
-  msg.child_frame_id = camera_frame_;
-
-  broadcaster.sendTransform(msg);
+  geometry_msgs::TransformStamped output_tf_msg;
+  output_tf_msg.header.frame_id = target_frame_;
+  output_tf_msg.child_frame_id = camera_frame_;
+  tf2::convert(transform, output_tf_msg.transform);
+  broadcaster.sendTransform(output_tf_msg);
 }
 
-void projectionMatrix_sender(const cv::Mat &projMat, const ros::Time &timeStamp)
+void projectionMatrix_sender(const cv::Mat &projMat)
 {
   if (!extrinsics_parsed_)
   {
@@ -100,7 +80,7 @@ void projectionMatrix_sender(const cv::Mat &projMat, const ros::Time &timeStamp)
     }
     extrinsics_parsed_ = true;
   }
-  extrinsic_matrix_msg_.header.stamp = timeStamp;
+  extrinsic_matrix_msg_.header.stamp = ros::Time::now();
   extrinsic_matrix_msg_.header.frame_id = camera_frame_;
   projection_matrix_pub.publish(extrinsic_matrix_msg_);
 }
@@ -154,28 +134,13 @@ void cameraInfo_sender(const cv::Mat &camMat, const cv::Mat &distCoeff, const cv
 
 static void image_raw_cb(const sensor_msgs::Image &image_msg)
 {
-  // ros::Time timeStampOfImage = image_msg.header.stamp;
-
   ros::Time timeStampOfImage;
   timeStampOfImage.sec = image_msg.header.stamp.sec;
   timeStampOfImage.nsec = image_msg.header.stamp.nsec;
 
-  static bool published_tf = false; // Flag to trigger one time tf publication since the tf does not change at runtime
-
-  /* create TF between velodyne and camera with time stamp of /image_raw */
-  if (isRegister_tf && !published_tf)
-  {
-    tfRegistration(CameraExtrinsicMat, timeStampOfImage);
-    published_tf = true;
-  }
-
   if (isPublish_cameraInfo)
   {
     cameraInfo_sender(CameraMat, DistCoeff, ImageSize, DistModel, timeStampOfImage);
-  }
-  if (isPublish_extrinsic)
-  {
-    projectionMatrix_sender(CameraExtrinsicMat, timeStampOfImage);
   }
 }
 
@@ -212,6 +177,7 @@ int main(int argc, char *argv[])
   std::string calibration_file;
   private_nh.param<std::string>("calibration_file", calibration_file, "");
   ROS_INFO("[%s] calibration_file: '%s'", __APP_NAME__, calibration_file.c_str());
+
   if (calibration_file.empty())
   {
     ROS_ERROR("[%s] Missing calibration file path '%s'.", __APP_NAME__, calibration_file.c_str());
@@ -250,7 +216,7 @@ int main(int argc, char *argv[])
   extrinsics_parsed_ = false;
 
   std::string name_space_str = ros::this_node::getNamespace();
-  
+
   ros::Subscriber image_sub;
 
   image_sub = n.subscribe(image_topic_name, 10, image_raw_cb);
@@ -259,7 +225,21 @@ int main(int argc, char *argv[])
 
   projection_matrix_pub = n.advertise<autoware_msgs::ProjectionMatrix>(projection_matrix_topic, 10, true);
 
+  /* Static TF between velodyne and camera */
+  if (isRegister_tf)
+  {
+    tfRegistration(CameraExtrinsicMat);
+  }
+
+  /* Autoware extrinsic matrix (Same information as the static TF) */
+  /* TODO: Remove this code duplication, subscribing nodes should instead use TF */
+  if (isPublish_extrinsic)
+  {
+    projectionMatrix_sender(CameraExtrinsicMat);
+  }
+
   ros::spin();
 
   return 0;
 }
+
