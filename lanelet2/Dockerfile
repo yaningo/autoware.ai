@@ -80,7 +80,7 @@ USER developer
 ENV HOME /home/developer
 WORKDIR /home/developer/workspace
 
-RUN sudo chown -R developer:developer /home/developer \
+RUN sudo chown -R developer:foxy-developer /home/developer \
     && echo "export ROS_HOSTNAME=localhost" > /home/developer/.bashrc \
     && echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> /home/developer/.bashrc \
     && echo "source /home/developer/workspace/devel/setup.bash || true" >> /home/developer/.bashrc
@@ -98,7 +98,7 @@ RUN if [ "$ROS" = "ros" ]; \
 FROM lanelet2_deps AS lanelet2
 
 # bring in the code
-COPY --chown=developer:developer . /home/developer/workspace/src/lanelet2
+COPY --chown=developer:foxy-developer . /home/developer/workspace/src/lanelet2
 
 # update dependencies
 RUN git -C /home/developer/workspace/src/mrt_cmake_modules pull
