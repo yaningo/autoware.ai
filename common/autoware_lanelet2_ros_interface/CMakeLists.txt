@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(autoware_lanelet2_ros_interface)
 
+find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(1)
+
 #
 #- Modified to install add CARMA regulatory elements to build
 #    - 2/19/2019

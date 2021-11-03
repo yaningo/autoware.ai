@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(autoware_msgs)
 
+find_package(carma_cmake_common REQUIRED)
+carma_check_ros_version(1)
+
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   jsk_recognition_msgs
