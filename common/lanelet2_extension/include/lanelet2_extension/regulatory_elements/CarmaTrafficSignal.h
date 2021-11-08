@@ -103,7 +103,7 @@ std::ostream& operator<<(std::ostream& os, CarmaTrafficSignalState s);
 class CarmaTrafficSignal : public lanelet::RegulatoryElement
 {
 public:
-  static constexpr char RuleName[] = "carma_traffic_light";
+  static constexpr char RuleName[] = "carma_traffic_signal";
   int revision_ = 0; //indicates when was this last modified
   boost::posix_time::time_duration fixed_cycle_duration;
   std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficSignalState>> recorded_time_stamps;
@@ -131,7 +131,8 @@ public:
 
   explicit CarmaTrafficSignal(const lanelet::RegulatoryElementDataPtr& data);
   /**
-   * @brief: Creating one is not directly usable unless setStates is called Static helper function that creates a stop line data object based on the provided inputs
+   * @brief: Creating one is not directly usable unless setStates is called 
+   *         Static helper function that creates a stop line data object based on the provided inputs
    *
    * @param id The lanelet::Id of this element
    * @param lanelets List of lanelets this element controls.

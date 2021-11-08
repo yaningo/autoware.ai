@@ -90,6 +90,7 @@ add_library( lanelet2_extension_lib
   lib/StopRule.cpp
   lib/DigitalSpeedLimit.cpp
   lib/DigitalMinimumGap.cpp
+  lib/SignalizedIntersection.cpp
   lib/RegionAccessRule.cpp
   lib/DirectionOfTravel.cpp
 )
@@ -126,6 +127,7 @@ if(CATKIN_ENABLE_TESTING)
   test/src/PassingControlLineTest.cpp
   test/src/StopRuleTest.cpp
   test/src/DirectionOfTravelTest.cpp
+  test/src/SignalizedIntersectionTest.cpp
   test/src/DigitalSpeedLimitTest.cpp
   test/src/DigitalMinimumGapTest.cpp
   test/src/CarmaUSTrafficRulesTest.cpp
