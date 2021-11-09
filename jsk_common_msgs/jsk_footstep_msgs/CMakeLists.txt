@@ -6,13 +6,26 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-set(msgs
-  Footstep.msg FootstepArray.msg
-)
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+message("Message Files: " ${msg_files})
+set(msgs )
+foreach(filePath ${msg_files})
+  message("File: " ${filePath})
+  get_filename_component(name ${filePath} NAME)
+  message("name: " ${name})
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
-set(actions
-  PlanFootsteps.action ExecFootsteps.action
-)
+message("msgs: " ${msgs})
+
+file(GLOB action_files action/*.action)
+set(actions )
+foreach(filePath ${action_files})
+  get_filename_component(name ${filePath} NAME)
+  set(actions ${actions} action/${name})
+endforeach(filePath)
+
 
 if(${ROS_VERSION} EQUAL 1) # ROS 1
 

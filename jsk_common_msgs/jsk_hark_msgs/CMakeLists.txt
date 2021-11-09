@@ -6,10 +6,13 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-set(msgs
-  HarkPower.msg
-)
-
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
 
 if(${ROS_VERSION} EQUAL 1) # ROS 1

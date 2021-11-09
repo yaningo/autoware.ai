@@ -5,16 +5,20 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-set(msgs
-  Grammar.msg
-  PhraseRule.msg
-  SpeechRecognitionCandidates.msg
-  Vocabulary.msg
-)
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
-set(srvs
-  SpeechRecognition.srv
-)
+file(GLOB srv_files srv/*.srv)
+set(srvs )
+foreach(filePath ${srv_files})
+  get_filename_component(name ${filePath} NAME)
+  set(srvs ${srvs} srv/${name})
+endforeach(filePath)
 
 
 

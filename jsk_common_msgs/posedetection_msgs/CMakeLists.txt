@@ -6,22 +6,20 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-set(msgs
-  Curve1D.msg
-  Feature0D.msg
-  Feature1D.msg
-  ImageFeature0D.msg
-  ImageFeature1D.msg
-  Object6DPose.msg
-  ObjectDetection.msg
-)
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
-set(srvs
-  Detect.srv
-  Feature0DDetect.srv
-  Feature1DDetect.srv
-  TargetObj.srv
-)
+file(GLOB srv_files srv/*.srv)
+set(srvs )
+foreach(filePath ${srv_files})
+  get_filename_component(name ${filePath} NAME)
+  set(srvs ${srvs} srv/${name})
+endforeach(filePath)
 
 
 # NOTE: The CPP code in this repo is only build for ROS1
