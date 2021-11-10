@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 float32 score_threshold
 float32 group_threshold
 int32 Lambda

@@ -7,66 +7,20 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-set(msg_files
-  ControlCommandStamped.msg
-  CloudCluster.msg
-  CloudClusterArray.msg
-  ColorSet.msg
-  ControlCommand.msg
-  DetectedObject.msg
-  DetectedObjectArray.msg
-  ExtractedPosition.msg
-  ImageLaneObjects.msg
-  ImageObjects.msg
-  LaneArray.msg
-  PointsImage.msg
-  ScanImage.msg
-  Signals.msg
-  TunedResult.msg
-  ValueSet.msg
-  Centroids.msg
-  DTLane.msg
-  GeometricRectangle.msg
-  ICPStat.msg
-  ImageObj.msg
-  ImageObjRanged.msg
-  ImageObjTracked.msg
-  ImageRect.msg
-  ImageRectRanged.msg
-  Lane.msg
-  NDTStat.msg
-  ObjLabel.msg
-  ObjPose.msg
-  ProjectionMatrix.msg
-  VscanTracked.msg
-  VscanTrackedArray.msg
-  Waypoint.msg
-  WaypointState.msg
-  VehicleCmd.msg
-  VehicleLocation.msg
-  VehicleStatus.msg
-  TrafficLightResult.msg
-  TrafficLightResultArray.msg
-  Gear.msg
-  AccelCmd.msg
-  AdjustXY.msg
-  BrakeCmd.msg
-  IndicatorCmd.msg
-  LampCmd.msg
-  SteerCmd.msg
-  TrafficLight.msg
-  StateCmd.msg
-  State.msg
-  ## Sync
-  SyncTimeMonitor.msg
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
-  ## Remote Control
-  RemoteCmd.msg
-)
-
-set(srv_files
-  RecognizeLightState.srv
-)
+file(GLOB srv_files srv/*.srv)
+set(srvs )
+foreach(filePath ${srv_files})
+  get_filename_component(name ${filePath} NAME)
+  set(srvs ${srvs} srv/${name})
+endforeach(filePath)
 
 if(${ROS_VERSION} EQUAL 1) # ROS 1
 
@@ -81,11 +35,11 @@ if(${ROS_VERSION} EQUAL 1) # ROS 1
   add_message_files(
         DIRECTORY msg
         FILES
-          ${msg_files}
+          ${msgs}
   )
 
   add_service_files(
-    FILES ${srv_files}
+    FILES ${srvs}
   )
 
   generate_messages(
@@ -117,8 +71,8 @@ else() # ROS2
 
   rosidl_generate_interfaces(
     ${PROJECT_NAME}
-      ${msg_files}
-      ${srv_files}
+      ${msgs}
+      ${srvs}
     DEPENDENCIES
       std_msgs
       builtin_interfaces
