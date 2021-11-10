@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(autoware_msgs)
 
-find_package(carma_cmake_common REQUIRED)
-
 find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
