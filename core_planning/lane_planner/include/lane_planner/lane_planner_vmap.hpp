@@ -25,7 +25,7 @@
 #include <visualization_msgs/Marker.h>
 
 #include <vector_map/vector_map.h>
-#include <tablet_socket_msgs/route_cmd.h>
+#include <tablet_socket_msgs/RouteCmd.h>
 #include "autoware_msgs/DTLane.h"
 #include "autoware_msgs/Lane.h"
 

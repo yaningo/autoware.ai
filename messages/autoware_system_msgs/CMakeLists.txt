@@ -1,34 +1,74 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5.1)
 project(autoware_system_msgs)
 
-find_package(carma_cmake_common REQUIRED)
-carma_check_ros_version(1)
+find_package(ros_environment REQUIRED)
 
-add_compile_options(-std=c++11)
+set(ROS_VERSION $ENV{ROS_VERSION})
 
-find_package(catkin REQUIRED COMPONENTS
-  message_generation
-  rosgraph_msgs
-  std_msgs
-)
+## Collection Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
 
-add_message_files(
-  FILES
-    DiagnosticStatus.msg
-    DiagnosticStatusArray.msg
-    HardwareStatus.msg
-    NodeStatus.msg
-    SystemStatus.msg
-)
+if(${ROS_VERSION} EQUAL 1) # ROS 1
+  
+  # Add the ros1 only messages
+  file(GLOB msg_files ros1_only_msg/*.msg)
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros1_only_msg/${name})
+  endforeach(filePath)
 
-generate_messages(DEPENDENCIES
-  rosgraph_msgs
-  std_msgs
-)
-
-catkin_package(
-  CATKIN_DEPENDS
-    message_runtime
+  find_package(catkin REQUIRED COMPONENTS
+    message_generation
     rosgraph_msgs
     std_msgs
-)
+  )
+
+  add_message_files(
+    FILES
+      ${msgs}
+  )
+
+  generate_messages(DEPENDENCIES
+    rosgraph_msgs
+    std_msgs
+  )
+
+  catkin_package(
+    CATKIN_DEPENDS
+      message_runtime
+      rosgraph_msgs
+      std_msgs
+  )
+
+else()
+
+  # Add the ros2 only messages
+  file(GLOB msg_files ros2_only_msg/*.msg)
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros2_only_msg/${name})
+  endforeach(filePath)
+
+  find_package(rosidl_default_generators REQUIRED)
+  find_package(ament_cmake REQUIRED)
+  find_package(std_msgs REQUIRED)
+  find_package(rosgraph_msgs REQUIRED)
+
+  rosidl_generate_interfaces(
+    ${PROJECT_NAME}
+      ${msgs}
+    DEPENDENCIES
+      std_msgs
+      rosgraph_msgs
+  )
+
+  ament_export_dependencies(rosidl_default_runtime)
+  ament_package()
+
+endif()
+

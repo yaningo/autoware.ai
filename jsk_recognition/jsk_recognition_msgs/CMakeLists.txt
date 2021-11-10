@@ -1,134 +1,111 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5.1)
 project(jsk_recognition_msgs)
-find_package(catkin REQUIRED
+
+find_package(ros_environment REQUIRED)
+
+set(ROS_VERSION $ENV{ROS_VERSION})
+
+
+## Collection ROS version interoperable Message Paths 
+file(GLOB msg_files msg/*.msg)
+set(msgs )
+foreach(filePath ${msg_files})
+  get_filename_component(name ${filePath} NAME)
+  set(msgs ${msgs} msg/${name})
+endforeach(filePath)
+
+file(GLOB srv_files srv/*.srv)
+set(srvs )
+foreach(filePath ${srv_files})
+  get_filename_component(name ${filePath} NAME)
+  set(srvs ${srvs} srv/${name})
+endforeach(filePath)
+
+if(${ROS_VERSION} EQUAL 1) # ROS 1
+
+  # Add the ros1 only messages
+  file(GLOB msg_files ros1_only_msg/*.msg)
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros1_only_msg/${name})
+  endforeach(filePath)
+
+  find_package(catkin REQUIRED
   std_msgs sensor_msgs geometry_msgs message_generation pcl_msgs jsk_footstep_msgs)
-add_message_files(
-  FILES
-  Accuracy.msg
-  BoundingBoxArray.msg
-  BoundingBoxMovement.msg
-  BoundingBox.msg
-  BoundingBoxArrayWithCameraInfo.msg
-  Circle2DArray.msg
-  Circle2D.msg
-  ClassificationResult.msg
-  ClusterPointIndices.msg
-  ColorHistogramArray.msg
-  ColorHistogram.msg
-  DepthCalibrationParameter.msg
-  DepthErrorResult.msg
-  HeightmapConfig.msg
-  Histogram.msg
-  HistogramWithRangeBin.msg
-  HistogramWithRange.msg
-  HistogramWithRangeArray.msg
-  HumanSkeleton.msg
-  HumanSkeletonArray.msg
-  ICPResult.msg
-  ImageDifferenceValue.msg
-  Int32Stamped.msg
-  Label.msg
-  LabelArray.msg
-  LineArray.msg
-  Line.msg
-  ModelCoefficientsArray.msg
-  Object.msg
-  ObjectArray.msg
-  ParallelEdgeArray.msg
-  ParallelEdge.msg
-  PlotData.msg
-  PointsArray.msg
-  PolygonArray.msg
-  PosedCameraInfo.msg
-  RectArray.msg
-  Rect.msg
-  RotatedRect.msg
-  RotatedRectStamped.msg
-  SimpleHandle.msg
-  SimpleOccupancyGridArray.msg
-  SimpleOccupancyGrid.msg
-  SlicedPointCloud.msg
-  SnapItRequest.msg
-  SparseImage.msg
-  SparseOccupancyGridArray.msg
-  SparseOccupancyGridCell.msg
-  SparseOccupancyGridColumn.msg
-  SparseOccupancyGrid.msg
-  Spectrum.msg
-  TimeRange.msg
-  TorusArray.msg
-  Torus.msg
-  TrackerStatus.msg
-  TrackingStatus.msg
-  BoolStamped.msg
-  VectorArray.msg
-  WeightedPoseArray.msg
-  ContactSensor.msg
-  ContactSensorArray.msg
-  PlotDataArray.msg
-  Segment.msg
-  SegmentStamped.msg
-  SegmentArray.msg
-  PeoplePose.msg
-  PeoplePoseArray.msg
+  
+  add_message_files(
+    FILES
+    ${msgs}
+    )
+
+  # TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,
+  #   and jsk_perception, so those in the packages should be removed.
+  add_service_files(FILES
+    ${srvs}
+    )
+
+  generate_messages(
+    DEPENDENCIES
+    std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
+  )
+  catkin_package(
+    CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
   )
 
-# TODO(wkentaro): Most of srv files are duplicated in jsk_pcl_ros,
-#   and jsk_perception, so those in the packages should be removed.
-add_service_files(FILES
-  CallPolygon.srv
-  CallSnapIt.srv
-  CheckCircle.srv
-  CheckCollision.srv
-  EnvironmentLock.srv
-  EuclideanSegment.srv
-  ICPAlign.srv
-  ICPAlignWithBox.srv
-  NonMaximumSuppression.srv
-  PolygonOnEnvironment.srv
-  RobotPickupReleasePoint.srv
-  SaveMesh.srv
-  SetDepthCalibrationParameter.srv
-  SetLabels.srv
-  SetPointCloud2.srv
-  SetTemplate.srv
-  SnapFootstep.srv
-  SwitchTopic.srv
-  TowerPickUp.srv
-  TowerRobotMoveCommand.srv
-  TransformScreenpoint.srv
-  UpdateOffset.srv
-  WhiteBalancePoints.srv
-  WhiteBalance.srv
+  # From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
+  # Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
+  # If the package has setup.py and modules under src/${PROJECT_NAME}/,
+  # install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
+  # However, if it doesn't have setup.py, directories including python executables
+  # should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+  # Also, other directories like 'launch' or 'sample' must be installed
+  # recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
+  # Be careful that 'launch' and 'launch/' are different: the former is directory
+  # and the latter is each content.
+  install(DIRECTORY sample scripts
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+    USE_SOURCE_PERMISSIONS
   )
 
-generate_messages(
-  DEPENDENCIES
-  std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
-)
-catkin_package(
-  CATKIN_DEPENDS std_msgs sensor_msgs geometry_msgs pcl_msgs jsk_footstep_msgs
-)
+  if (CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest(test/object_array_publisher.test)
+    add_rostest(test/people_pose_array_to_pose_array.test)
+    add_rostest(test/plot_data_to_csv.test)
+    add_rostest(test/save_mesh_server.test)
+  endif()
 
-# From https://github.com/jsk-ros-pkg/jsk_recognition/pull/2345
-# Install header files directly into ${CATKIN_PACKAGE_INCLUDE_DESTINATION}.
-# If the package has setup.py and modules under src/${PROJECT_NAME}/,
-# install python executables directly into ${CATKIN_PACKAGE_BIN_DESTINATION}.
-# However, if it doesn't have setup.py, directories including python executables
-# should be installed recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
-# Also, other directories like 'launch' or 'sample' must be installed
-# recursively into ${CATKIN_PACKAGE_SHARE_DESTINATION}.
-# Be careful that 'launch' and 'launch/' are different: the former is directory
-# and the latter is each content.
-install(DIRECTORY sample scripts
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-  USE_SOURCE_PERMISSIONS
-)
+else() # ROS 2 
 
-if (CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest(test/object_array_publisher.test)
-  add_rostest(test/people_pose_array_to_pose_array.test)
-  add_rostest(test/plot_data_to_csv.test)
-  add_rostest(test/save_mesh_server.test)
+  # Add the ros2 only messages
+  file(GLOB msg_files ros2_only_msg/*.msg)
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros2_only_msg/${name})
+  endforeach(filePath)
+
+  find_package(rosidl_default_generators REQUIRED)
+  find_package(ament_cmake REQUIRED)
+  find_package(geometry_msgs REQUIRED)
+  find_package(std_msgs REQUIRED)
+  find_package(sensor_msgs REQUIRED)
+  find_package(pcl_msgs REQUIRED)
+  find_package(jsk_footstep_msgs REQUIRED)
+
+  rosidl_generate_interfaces(
+    ${PROJECT_NAME}
+      ${msgs}
+      ${srvs}
+    DEPENDENCIES
+      std_msgs
+      sensor_msgs
+      geometry_msgs
+      pcl_msgs
+      jsk_footstep_msgs
+  )
+
+  ament_export_dependencies(rosidl_default_runtime)
+  ament_package()
+
 endif()
+

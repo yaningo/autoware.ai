@@ -34,9 +34,9 @@
 #include <gnss/geo_pos_conv.hpp>
 
 #include "ros/ros.h"
-#include "tablet_socket_msgs/gear_cmd.h"
-#include "tablet_socket_msgs/mode_cmd.h"
-#include "tablet_socket_msgs/route_cmd.h"
+#include "tablet_socket_msgs/GearCmd.h"
+#include "tablet_socket_msgs/ModeCmd.h"
+#include "tablet_socket_msgs/RouteCmd.h"
 
 #define NODE_NAME	"tablet_receiver"
 #define TOPIC_NR	(5)
