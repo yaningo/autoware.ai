@@ -6,28 +6,26 @@ find_package(ros_environment REQUIRED)
 
 set(ROS_VERSION $ENV{ROS_VERSION})
 
-## Collection Message Paths 
-file(GLOB msg_files msg/*.msg)
-message("Message Files: " ${msg_files})
-set(msgs )
-foreach(filePath ${msg_files})
-  message("File: " ${filePath})
-  get_filename_component(name ${filePath} NAME)
-  message("name: " ${name})
-  set(msgs ${msgs} msg/${name})
-endforeach(filePath)
 
-message("msgs: " ${msgs})
-
-file(GLOB action_files action/*.action)
-set(actions )
-foreach(filePath ${action_files})
-  get_filename_component(name ${filePath} NAME)
-  set(actions ${actions} action/${name})
-endforeach(filePath)
 
 
 if(${ROS_VERSION} EQUAL 1) # ROS 1
+
+  ## Collection Message Paths 
+  file(GLOB msg_files ros1_msg/*.msg)
+  set(msgs )
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros1_msg/${name})
+  endforeach(filePath)
+
+  file(GLOB action_files ros1_action/*.action)
+  set(actions )
+  foreach(filePath ${action_files})
+    get_filename_component(name ${filePath} NAME)
+    set(actions ${actions} ros1_action/${name})
+  endforeach(filePath)
+
 
   # Load catkin and all dependencies required for this package
   # TODO: remove all from COMPONENTS that are not catkin packages.
@@ -61,6 +59,21 @@ if(${ROS_VERSION} EQUAL 1) # ROS 1
 
 else() # ROS 2
 
+  ## Collection Message Paths 
+  file(GLOB msg_files ros2_msg/*.msg)
+  set(msgs )
+  foreach(filePath ${msg_files})
+    get_filename_component(name ${filePath} NAME)
+    set(msgs ${msgs} ros2_msg/${name})
+  endforeach(filePath)
+
+  file(GLOB action_files ros2_action/*.action)
+  set(actions )
+  foreach(filePath ${action_files})
+    get_filename_component(name ${filePath} NAME)
+    set(actions ${actions} ros2_action/${name})
+  endforeach(filePath)
+
   find_package(rosidl_default_generators REQUIRED)
   find_package(ament_cmake REQUIRED)
   find_package(geometry_msgs REQUIRED)
@@ -70,7 +83,7 @@ else() # ROS 2
   rosidl_generate_interfaces(
     ${PROJECT_NAME}
       ${msgs}
-      ${actions}
+      #${actions}
     DEPENDENCIES
       geometry_msgs
       actionlib_msgs
