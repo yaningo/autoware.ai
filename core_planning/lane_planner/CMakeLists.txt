@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(lane_planner)
+project(lane_planner_ros1)
 
 find_package(carma_cmake_common REQUIRED)
 carma_check_ros_version(1)
