@@ -27,6 +27,8 @@ using namespace lanelet::time;
 // C++ 14 vs 17 parameter export
 #if __cplusplus < 201703L
 constexpr char CarmaTrafficSignal::RuleName[];  // instantiate string in cpp file
+constexpr const char CarmaTrafficSignalRoleNameString::ControlStart[];
+constexpr const char CarmaTrafficSignalRoleNameString::ControlEnd[];
 #endif
 
 std::ostream& operator<<(std::ostream& os, CarmaTrafficSignalState s)
@@ -61,14 +63,16 @@ LineStrings3d CarmaTrafficSignal::stopLine()
 CarmaTrafficSignal::CarmaTrafficSignal(const lanelet::RegulatoryElementDataPtr& data) : RegulatoryElement(data)
 {}
 
-std::unique_ptr<lanelet::RegulatoryElementData> CarmaTrafficSignal::buildData(Id id, LineString3d stop_line, Lanelets lanelets)
+std::unique_ptr<lanelet::RegulatoryElementData> CarmaTrafficSignal::buildData(Id id, LineString3d stop_line, Lanelets entry_lanelets, Lanelets exit_lanelets)
 {
 
   if (stop_line.empty()) throw lanelet::InvalidInputError("Empty linestring was passed into CarmaTrafficSignal buildData function");
   // Add parameters
   RuleParameterMap rules;
-  rules[lanelet::RoleNameString::Refers].insert(rules[lanelet::RoleNameString::Refers].end(), lanelets.begin(),
-                                                lanelets.end());
+  rules[lanelet::CarmaTrafficSignalRoleNameString::ControlStart].insert(rules[lanelet::CarmaTrafficSignalRoleNameString::ControlStart].end(), entry_lanelets.begin(),
+                                                entry_lanelets.end());
+  rules[lanelet::CarmaTrafficSignalRoleNameString::ControlEnd].insert(rules[lanelet::CarmaTrafficSignalRoleNameString::ControlEnd].end(), exit_lanelets.begin(),
+                                                exit_lanelets.end());
   rules[lanelet::RoleNameString::RefLine].insert(rules[lanelet::RoleNameString::RefLine].end(), stop_line);
 
   // Add attributes
@@ -117,10 +121,15 @@ boost::optional<CarmaTrafficSignalState> CarmaTrafficSignal::predictState(boost:
   throw lanelet::InvalidInputError("Reached unreachable code block. Implies duplicate phase is not provided. Unable to determine fixed cycle duration");
 }
 
-lanelet::ConstLanelets CarmaTrafficSignal::getControlledLanelets() const
+lanelet::ConstLanelets CarmaTrafficSignal::getControlStartLanelets() const
 {
-  return getParameters<lanelet::ConstLanelet>(RoleName::Refers);
+  return getParameters<ConstLanelet>(CarmaTrafficSignalRoleNameString::ControlStart);
 } 
+
+lanelet::ConstLanelets CarmaTrafficSignal::getControlEndLanelets() const
+{
+  return getParameters<ConstLanelet>(CarmaTrafficSignalRoleNameString::ControlEnd);
+}
 
 void CarmaTrafficSignal::setStates(std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficSignalState>> input_time_steps, int revision)
 {

@@ -51,7 +51,7 @@ TEST(CarmaTrafficSignalTest, CarmaTrafficSignal)
   lanelet::Id traffic_light_id = utils::getId();
   LineString3d virtual_stop_line(traffic_light_id, {pl2, pr2});
   // Creat passing control line for solid dashed line
-  std::shared_ptr<CarmaTrafficSignal> traffic_light(new CarmaTrafficSignal(CarmaTrafficSignal::buildData(lanelet::utils::getId(), { virtual_stop_line }, {ll_1, ll_2})));
+  std::shared_ptr<CarmaTrafficSignal> traffic_light(new CarmaTrafficSignal(CarmaTrafficSignal::buildData(lanelet::utils::getId(), { virtual_stop_line }, {ll_1, ll_2}, {ll_2})));
   ll_1.addRegulatoryElement(traffic_light);
 
   std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficSignalState>> input_time_steps;
@@ -74,8 +74,8 @@ TEST(CarmaTrafficSignalTest, CarmaTrafficSignal)
 
   ASSERT_EQ(static_cast<lanelet::CarmaTrafficSignalState>(1),traffic_light->predictState(time::timeFromSec(1.5)).get());
   ASSERT_EQ(static_cast<lanelet::CarmaTrafficSignalState>(0),traffic_light->predictState(time::timeFromSec(1)).get());
-  ASSERT_EQ(traffic_light->getControlledLanelets().size(), 2);
-  ASSERT_EQ(traffic_light->getControlledLanelets().back().id(), ll_2.id());
+  ASSERT_EQ(traffic_light->getControlStartLanelets().size(), 2);
+  ASSERT_EQ(traffic_light->getControlStartLanelets().back().id(), ll_2.id());
   
 }
 

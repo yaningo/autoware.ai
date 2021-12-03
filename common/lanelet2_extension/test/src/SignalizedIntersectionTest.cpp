@@ -163,7 +163,7 @@ TEST(SignalizedIntersectionTest, trafficSignalFunctions)
   auto pl = carma_wm::getPoint(0, 1, 0);
   auto pr = carma_wm::getPoint(1, 1, 0); 
   LineString3d virtual_stop_line(stop_line_id, {pl, pr});
-  std::shared_ptr<CarmaTrafficSignal> traffic_light(new CarmaTrafficSignal(CarmaTrafficSignal::buildData(lanelet::utils::getId(), { virtual_stop_line }, {llt})));
+  std::shared_ptr<CarmaTrafficSignal> traffic_light(new CarmaTrafficSignal(CarmaTrafficSignal::buildData(lanelet::utils::getId(), { virtual_stop_line }, {llt}, {llt})));
   llt.addRegulatoryElement(traffic_light);
 
   EXPECT_EQ(intersection->getTrafficSignals(llt).size(), 1);
