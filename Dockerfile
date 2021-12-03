@@ -1,4 +1,4 @@
-FROM usdotfhwastolcandidate/carma-base:battista as base_image
+FROM usdotfhwastol/carma-base:carma-system-3.9.0 as base_image
 
 FROM base_image as build
 
