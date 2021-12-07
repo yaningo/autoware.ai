@@ -314,14 +314,15 @@ To support multiple types of participants a new attribute should be added for ea
 Represents a virtual traffic signal with known fixed signal phases. It is virtual because it corresponds to single signal group ID provided by a SAE J2735 SPaT message.
 Normally the traffic signal timing information is provided by SAE J2735 SPaT messages although alternative data sources can be supported.
 
-A CarmaTrafficSignal is created from a stop_line (LineString3d) and a list of exit_lanelets (Lanelet). stop_line is where the vehicle should stop and wait before crossing and exit_lanelets represent which direction the vehicle can go based on this traffic signal.
+A CarmaTrafficSignal is created from a stop_line (LineString3d) and a list of control_start and control_end lanelets. stop_line is where the vehicle should stop and wait before crossing and control_end represent which direction the vehicle can go based on this traffic signal from lanelets in control_start.
 
 ### Parameters
 
 | **Role** | **Possible Type** | **description**                |
 |-------------|--------------|----------------------------------|
 | **ref_line**    | **LineString3d**    | The linestring which define the geometry of this stop line. |
-| **exit_lanelet**    | **Lanelet**    | A lanelet representing the direction this traffic signal controls |
+| **control_start**    **Lanelet**    | A lanelet representing the start of this traffic signal's control |
+| **control_end**    | **Lanelet**    | A lanelet representing the end of this traffic signal's control |
 
 ### Custom Attributes
 
@@ -357,7 +358,7 @@ Currently when the object is created, it doesn't have any default values for the
 </relation>
 
 <!-- Virtual Linestring for Stop Line >
-<way id="1349" visible="false" version="1">
+<way id="1399" visible="false" version="1">
   <nd ref="1339" />
   <nd ref="1342" />
   <tag k="subtype" v="-" />
@@ -366,8 +367,9 @@ Currently when the object is created, it doesn't have any default values for the
 
 <!-- Regulatory Carma Traffic Signal -->
 <relation id='45221' visible='true' version='1'>
-  <member type="way" ref="1349" role="ref_line" /> <!-- Horizontal linestring representing the stop line -->
-  <member type='relation' ref="1350" role='exit_lanelet' />
+  <member type="way" ref="1399" role="ref_line" /> <!-- Horizontal linestring representing the stop line -->
+  <member type='relation' ref="1349" role='control_start' />
+  <member type='relation' ref="1350" role='control_end' />
   <tag k='subtype' v='carma_traffic_signal' />
   <tag k='type' v='regulatory_element' />
 </relation>
