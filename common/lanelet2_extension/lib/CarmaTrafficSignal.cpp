@@ -63,17 +63,15 @@ LineStrings3d CarmaTrafficSignal::stopLine()
 CarmaTrafficSignal::CarmaTrafficSignal(const lanelet::RegulatoryElementDataPtr& data) : RegulatoryElement(data)
 {}
 
-std::unique_ptr<lanelet::RegulatoryElementData> CarmaTrafficSignal::buildData(Id id, LineString3d stop_line, Lanelets entry_lanelets, Lanelets exit_lanelets)
+std::unique_ptr<lanelet::RegulatoryElementData> CarmaTrafficSignal::buildData(Id id, LineStrings3d stop_lines, Lanelets entry_lanelets, Lanelets exit_lanelets)
 {
-
-  if (stop_line.empty()) throw lanelet::InvalidInputError("Empty linestring was passed into CarmaTrafficSignal buildData function");
   // Add parameters
   RuleParameterMap rules;
   rules[lanelet::CarmaTrafficSignalRoleNameString::ControlStart].insert(rules[lanelet::CarmaTrafficSignalRoleNameString::ControlStart].end(), entry_lanelets.begin(),
                                                 entry_lanelets.end());
   rules[lanelet::CarmaTrafficSignalRoleNameString::ControlEnd].insert(rules[lanelet::CarmaTrafficSignalRoleNameString::ControlEnd].end(), exit_lanelets.begin(),
                                                 exit_lanelets.end());
-  rules[lanelet::RoleNameString::RefLine].insert(rules[lanelet::RoleNameString::RefLine].end(), stop_line);
+  rules[lanelet::RoleNameString::RefLine].insert(rules[lanelet::RoleNameString::RefLine].end(), stop_lines.begin(), stop_lines.end());
 
   // Add attributes
   AttributeMap attribute_map({
