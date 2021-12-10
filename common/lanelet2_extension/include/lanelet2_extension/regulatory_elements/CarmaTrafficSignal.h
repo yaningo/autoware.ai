@@ -51,6 +51,12 @@ enum class CarmaTrafficSignalState {
   CAUTION_CONFLICTING_TRAFFIC=9
 };
 
+struct CarmaTrafficSignalRoleNameString
+{
+  static constexpr char ControlStart[] = "control_start";
+  static constexpr char ControlEnd[] = "control_end";
+};
+
 // Namespace for time representations used with this regulatory element
 namespace time {
 
@@ -104,6 +110,7 @@ class CarmaTrafficSignal : public lanelet::RegulatoryElement
 {
 public:
   static constexpr char RuleName[] = "carma_traffic_signal";
+
   int revision_ = 0; //indicates when was this last modified
   boost::posix_time::time_duration fixed_cycle_duration;
   std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficSignalState>> recorded_time_stamps;
@@ -116,9 +123,17 @@ public:
   void setStates(std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficSignalState>> input_time_steps, int revision);
 
   /**
-   * @brief getControlledLanelets function returns lanelets this element controls
+   * @brief getControlStartLanelets function returns lanelets where this element's control starts
+   * NOTE: Order of the lanelets does not correlate to the order of the control_end lanelets
    */
-  lanelet::ConstLanelets getControlledLanelets() const;
+  lanelet::ConstLanelets getControlStartLanelets() const;
+ 
+  /**
+   * @brief getControlEndLanelets function returns lanelets where this element's control ends
+   * NOTE: Order of the lanelets does not correlate to the order of the control_start lanelets
+   * 
+   */
+  lanelet::ConstLanelets getControlEndLanelets() const;
 
   /**
    * @brief prefictState assumes sorted, fixed time, so guaranteed to give you one final state
@@ -126,6 +141,10 @@ public:
    * @param time_stamp boost::posix_time::ptime of the event happening
    */
   boost::optional<CarmaTrafficSignalState> predictState(boost::posix_time::ptime time_stamp);
+  
+  /**
+   * @brief Return the stop_lines related to the entry lanelets in order if exists.
+   */
   ConstLineStrings3d stopLine() const;
   LineStrings3d stopLine();
 
@@ -135,12 +154,13 @@ public:
    *         Static helper function that creates a stop line data object based on the provided inputs
    *
    * @param id The lanelet::Id of this element
-   * @param lanelets List of lanelets this element controls.
-   * @param stop_line The line string which represent the stop line of the traffic light
+   * @param entry_lanelets List of lanelets where this element's control starts
+   * @param exit_lanelets List of lanelets where this element's control ends
+   * @param stop_lines The line strings which represent the stop lines of the entry_lanelets (in order) controlled by the traffic light
    *
    * @return RegulatoryElementData containing all the necessary information to construct a stop rule
    */
-  static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineString3d stop_line, Lanelets lanelets);
+  static std::unique_ptr<lanelet::RegulatoryElementData> buildData(Id id, LineStrings3d stop_lines, Lanelets entry_lanelets, Lanelets exit_lanelets);
 
 
 private:
