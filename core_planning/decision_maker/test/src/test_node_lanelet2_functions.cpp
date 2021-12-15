@@ -17,7 +17,7 @@
 #include <gtest/gtest.h>
 #include <ros/ros.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
 #include <amathutils_lib/amathutils.hpp>
 
 #include <lanelet2_core/Attribute.h>
@@ -26,6 +26,7 @@
 #include <lanelet2_core/primitives/Lanelet.h>
 
 #include <string>
+#include <memory>
 
 #include "decision_maker_node.hpp"
 #include "test_class.hpp"

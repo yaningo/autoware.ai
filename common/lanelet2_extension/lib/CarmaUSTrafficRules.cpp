@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-#include <ros/ros.h>
+#include <lanelet2_extension/logging/logger.h>
 #include <lanelet2_core/Forward.h>
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <lanelet2_core/geometry/Lanelet.h>
@@ -261,14 +261,14 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 
     if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT && speed_limit > config_limit)//Accounting for the configured speed limit, input zero when not in use
       {
-        ROS_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
+        LOG_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
         speed_limit = config_limit;
       }
 
     //Determine whether or not the value exceeds the predetermined maximum speed limit value.
     if (speed_limit > MAX_SPEED_LIMIT)
     {
-      ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+      LOG_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
       speed_limit = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
     }
   }
@@ -281,20 +281,20 @@ SpeedLimitInformation CarmaUSTrafficRules::speedLimit(const ConstLaneletOrArea& 
 
       if(config_limit > 0_mph && config_limit < MAX_SPEED_LIMIT && speed_limit > config_limit)//Accounting for the configured speed limit, input zero when not in use
       { 
-        ROS_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
+        LOG_DEBUG_STREAM("Configurable speed limit in use: " << config_limit.value());
 
         speed_limit = config_limit;
       }
       //Determine whether or not the value exceeds the predetermined maximum speed limit value.
       if (speed_limit > MAX_SPEED_LIMIT)
       {
-        ROS_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
+        LOG_WARN_STREAM("Invalid speed limit value. Value reset to maximum speed limit. ");//Display warning message
         speed_limit = MAX_SPEED_LIMIT;//Reset the speed limit value to be capped at the maximum value.
       }
     }
   }
 
-  ROS_DEBUG_STREAM("Returning Speed Limit: " << speed_limit.value());
+  LOG_DEBUG_STREAM("Returning Speed Limit: " << speed_limit.value());
 
   return SpeedLimitInformation{ speed_limit, true };//Return Speed limit data.
 }

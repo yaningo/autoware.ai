@@ -24,5 +24,6 @@
   <depend>std_msgs</depend>
   <depend>tf</depend>
   <depend>vector_map</depend>
+  <depend>autoware_lanelet2_ros_interface</depend>
 
 </package>

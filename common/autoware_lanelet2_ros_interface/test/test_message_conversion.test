@@ -1,0 +1,5 @@
+<launch>
+
+  <test test-name="test-message_conversion" pkg="autoware_lanelet2_ros_interface" type="message_conversion-test" name="test"/>
+
+</launch>

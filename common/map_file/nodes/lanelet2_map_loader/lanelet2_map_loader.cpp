@@ -22,11 +22,11 @@
 #include <lanelet2_io/Io.h>
 #include <lanelet2_core/LaneletMap.h>
 
-#include <lanelet2_extension/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
 #include <lanelet2_extension/projection/mgrs_projector.h>
 #include <lanelet2_extension/projection/local_frame_projector.h>
 #include <lanelet2_extension/io/autoware_osm_parser.h>
-#include <lanelet2_extension/utility/utilities.h>
+#include <autoware_lanelet2_ros_interface/utility/utilities.h>
 
 #include <autoware_lanelet2_msgs/MapBin.h>
 #include <string>

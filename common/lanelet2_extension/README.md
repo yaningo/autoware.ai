@@ -38,30 +38,6 @@ Autoware Traffic Light class contains following members:
 * light bulbs information of traffic lights
 * stopline associated to traffic light
 
-### Utility
-#### Message Conversion
-This contains functions to convert lanelet map objects into ROS messages.
-Currently it contains following conversions:
-* lanelet::LaneletMapPtr to/from lanelet_msgs::MapBinMsg
-* lanelet::Point3d to geometry_msgs::Point
-* lanelet::Point2d to geometry_msgs::Point
-* lanelet::BasicPoint3d to geometry_msgs::Point
-
-#### Query
-This module contains functions to retrieve various information from maps.
-e.g. crosswalks, trafficlights, stoplines
-
-#### Utilties
-This module contains other useful functions related to Lanelet.
-e.g. matching waypoint with lanelets
-
-### Visualization
-Visualization contains functions to convert lanelet objects into visualization marker messages.
-Currenly it contains following conversions:
-* lanelet::Lanelet to Triangle Markers
-* lanelet::LineString to LineStrip Markers
-* TrafficLights to Triangle Markers
-
 ## Nodes
 ### lanelet2_extension_sample
 Code for this explains how this lanelet2_extension library is used.

@@ -1,7 +1,8 @@
-set(MRT_PKG_VERSION 2.2.1)
+set(MRT_PKG_VERSION 4.0.0)
 # Modify only if you know what you are doing!
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5.1)
 project(lanelet2_core)
+
 set(MRT_COTIRE_ENABLED 1)
 set (COTIRE_MINIMUM_NUMBER_OF_TARGET_SOURCES 1)
 set (COTIRE_MAXIMUM_NUMBER_OF_UNITY_INCLUDES "-j")

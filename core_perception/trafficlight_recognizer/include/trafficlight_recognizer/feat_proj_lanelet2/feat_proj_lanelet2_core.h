@@ -27,7 +27,7 @@
 #include <lanelet2_routing/RoutingGraphContainer.h>
 
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
-#include <lanelet2_extension/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
 
 #include <autoware_lanelet2_msgs/MapBin.h>
 #include <autoware_msgs/AdjustXY.h>
@@ -76,6 +76,8 @@ private:
 
   int adjust_proj_x_ = 0;
   int adjust_proj_y_ = 0;
+  float near_plane_ = 1.0;
+  float far_plane_ = 200.0;
 
   autoware_msgs::LaneArray waypoints_;
 

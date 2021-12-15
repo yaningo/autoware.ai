@@ -27,6 +27,7 @@ find_package(
   vector_map
   vector_map_msgs
   vector_map_msgs
+  autoware_lanelet2_ros_interface
 )
 
 catkin_package(
@@ -44,6 +45,7 @@ catkin_package(
     tf
     vector_map
     vector_map_msgs
+    autoware_lanelet2_ros_interface
 )
 
 set(ROSLINT_CPP_OPTS "--filter=-build/c++14")

@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 namespace autoware_health_checker
@@ -167,7 +168,7 @@ ErrorLevel HealthChecker::CHECK_MIN_VALUE(const ErrorKey& key,
   static const ThreshType thresh_type = "min";
   value_manager_.setDefaultValue(
     key, thresh_type, warn_value, error_value, fatal_value);
-  auto identify = [key, value, thresh_type, this](ErrorLevel level)
+  auto identify = [key, value, this](ErrorLevel level)
   {
     return (value < value_manager_.getValue(key, thresh_type, level).get());
   };
@@ -192,7 +193,7 @@ ErrorLevel HealthChecker::CHECK_MAX_VALUE(const ErrorKey& key,
   static const ThreshType thresh_type = "max";
   value_manager_.setDefaultValue(
     key, thresh_type, warn_value, error_value, fatal_value);
-  auto identify = [key, value, thresh_type, this](ErrorLevel level)
+  auto identify = [key, value, this](ErrorLevel level)
   {
     return (value > value_manager_.getValue(key, thresh_type, level).get());
   };

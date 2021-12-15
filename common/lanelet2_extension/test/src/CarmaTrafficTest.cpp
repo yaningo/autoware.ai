@@ -54,29 +54,26 @@ TEST(CarmaTrafficLightTest, CarmaTrafficLight)
   std::shared_ptr<CarmaTrafficLight> traffic_light(new CarmaTrafficLight(CarmaTrafficLight::buildData(lanelet::utils::getId(), { virtual_stop_line }, {ll_1, ll_2})));
   ll_1.addRegulatoryElement(traffic_light);
 
-  std::vector<std::pair<ros::Time, CarmaTrafficLightState>> input_time_steps;
+  std::vector<std::pair<boost::posix_time::ptime, CarmaTrafficLightState>> input_time_steps;
 
-  input_time_steps.push_back(std::make_pair(ros::Time(1001),static_cast<lanelet::CarmaTrafficLightState>(0)));
-  input_time_steps.push_back(std::make_pair(ros::Time(1002),static_cast<lanelet::CarmaTrafficLightState>(1)));
-  input_time_steps.push_back(std::make_pair(ros::Time(1003),static_cast<lanelet::CarmaTrafficLightState>(2)));
-  input_time_steps.push_back(std::make_pair(ros::Time(1004),static_cast<lanelet::CarmaTrafficLightState>(3)));
-  input_time_steps.push_back(std::make_pair(ros::Time(1005),static_cast<lanelet::CarmaTrafficLightState>(4)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1001),static_cast<lanelet::CarmaTrafficLightState>(0)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1002),static_cast<lanelet::CarmaTrafficLightState>(1)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1003),static_cast<lanelet::CarmaTrafficLightState>(2)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1004),static_cast<lanelet::CarmaTrafficLightState>(3)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1005),static_cast<lanelet::CarmaTrafficLightState>(4)));
 
   EXPECT_THROW(traffic_light->setStates(input_time_steps,0), lanelet::InvalidInputError);
 
-  input_time_steps.push_back(std::make_pair(ros::Time(1006),static_cast<lanelet::CarmaTrafficLightState>(0)));
+  input_time_steps.push_back(std::make_pair(time::timeFromSec(1006),static_cast<lanelet::CarmaTrafficLightState>(0)));
 
   traffic_light->setStates(input_time_steps,0);
 
   ASSERT_EQ(6,traffic_light->recorded_time_stamps.size());
-  ASSERT_EQ(ros::Duration(5),traffic_light->fixed_cycle_duration);
+  ASSERT_EQ(time::durationFromSec(5),traffic_light->fixed_cycle_duration);
   ASSERT_EQ(0,traffic_light->revision_);
-  
-  ros::Time::init();
-  ros::Time::setNow(ros::Time(1.5));
 
-  ASSERT_EQ(static_cast<lanelet::CarmaTrafficLightState>(1),traffic_light->getState().get());
-  ASSERT_EQ(static_cast<lanelet::CarmaTrafficLightState>(0),traffic_light->predictState(ros::Time(1)).get());
+  ASSERT_EQ(static_cast<lanelet::CarmaTrafficLightState>(1),traffic_light->predictState(time::timeFromSec(1.5)).get());
+  ASSERT_EQ(static_cast<lanelet::CarmaTrafficLightState>(0),traffic_light->predictState(time::timeFromSec(1)).get());
   ASSERT_EQ(traffic_light->getControlledLanelets().size(), 2);
   ASSERT_EQ(traffic_light->getControlledLanelets().back().id(), ll_2.id());
   

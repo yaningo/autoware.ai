@@ -17,9 +17,9 @@
 #include <state_machine_lib/state.hpp>
 #include <state_machine_lib/state_context.hpp>
 
-#include <lanelet2_extension/utility/message_conversion.h>
-#include <lanelet2_extension/utility/query.h>
-#include <lanelet2_extension/utility/utilities.h>
+#include <autoware_lanelet2_ros_interface/utility/message_conversion.h>
+#include <autoware_lanelet2_ros_interface/utility/query.h>
+#include <autoware_lanelet2_ros_interface/utility/utilities.h>
 
 #include <lanelet2_core/primitives/BasicRegulatoryElements.h>
 #include <lanelet2_routing/RoutingGraph.h>
@@ -158,7 +158,7 @@ void DecisionMakerNode::setWaypointStateUsingVectorMap(autoware_msgs::LaneArray&
     }
   }
 
-  // STOP
+  // Get stoplines associated with stop signs (not traffic lights)
   std::vector<StopLine> stoplines = g_vmap.findByFilter([&](const StopLine& stopline) {
     return ((g_vmap.findByKey(Key<RoadSign>(stopline.signid)).type &
              (autoware_msgs::WaypointState::TYPE_STOP | autoware_msgs::WaypointState::TYPE_STOPLINE)) != 0);
@@ -204,7 +204,7 @@ void DecisionMakerNode::setWaypointStateUsingVectorMap(autoware_msgs::LaneArray&
                   target_wp_idx = wp_idx + 1;
                 lane.waypoints.at(target_wp_idx).wpstate.stop_state =
                     g_vmap.findByKey(Key<RoadSign>(stopline.signid)).type;
-                ROS_INFO("Change waypoint type to stopline: #%zu(%f, %f, %f)\n", target_wp_idx,
+                ROS_INFO("Change waypoint type to stopline: #%d(%f, %f, %f)\n", target_wp_idx,
                          lane.waypoints.at(target_wp_idx).pose.pose.position.x,
                          lane.waypoints.at(target_wp_idx).pose.pose.position.y,
                          lane.waypoints.at(target_wp_idx).pose.pose.position.z);
@@ -285,7 +285,9 @@ void DecisionMakerNode::setWaypointStateUsingLanelet2Map(autoware_msgs::LaneArra
   }
 
   lanelet::ConstLanelets all_lanelets = lanelet::utils::query::laneletLayer(lanelet_map_);
-  lanelet::ConstLineStrings3d stoplines = lanelet::utils::query::stopSignStopLines(all_lanelets, stop_sign_id_);
+
+  // Get stop lines associated with stop signs (not traffic lights)
+  lanelet::ConstLineStrings3d stoplines = lanelet::utils::query::getStopSignStopLines(all_lanelets, stop_sign_id_);
 
   for (auto& lane : lane_array.lanes)
   {

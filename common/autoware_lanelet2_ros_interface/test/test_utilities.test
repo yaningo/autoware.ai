@@ -1,0 +1,5 @@
+<launch>
+
+  <test test-name="test-utilities" pkg="autoware_lanelet2_ros_interface" type="utilities-test" name="test"/>
+
+</launch>

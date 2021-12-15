@@ -14,13 +14,13 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
 #include "tf/message_filter.h"
-#include "velodyne_pointcloud/point_types.h"
+#include "velodyne_pcl/point_types.h"
 #include "velodyne_pointcloud/rawdata.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
-pcl::PointCloud<velodyne_pointcloud::PointXYZIR> map;
+pcl::PointCloud<velodyne_pcl::PointXYZIRT> map;
 tf::TransformListener *tf_listener;
 ros::Publisher velodyne_pub;
 
@@ -94,11 +94,11 @@ void points_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &msg)
 
       for (int i = 0; i < (int)pcl_out.points.size(); i++)
       {
-        //    	  fprintf(fp_points,"%.3f %.3f %.3f %.1f\n", pcl_out.points[i].y, pcl_out.points[i].x,
+        //        fprintf(fp_points,"%.3f %.3f %.3f %.1f\n", pcl_out.points[i].y, pcl_out.points[i].x,
         //    pcl_out.points[i].z, pcl_out.points[i].intensity);
         ofs << pcl_out.points[i].x << "," << pcl_out.points[i].y << "," << pcl_out.points[i].z << ","
             << pcl_out.points[i].intensity << std::endl;
-        //    	  ofs << pcl_out.points[i].x << " " << pcl_out.points[i].y << " " << pcl_out.points[i].z << " " <<
+        //        ofs << pcl_out.points[i].x << " " << pcl_out.points[i].y << " " << pcl_out.points[i].z << " " <<
         //    pcl_out.points[i].intensity << std::endl;
       }
       //      fclose(fp_points);
