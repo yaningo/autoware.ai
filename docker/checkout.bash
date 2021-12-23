@@ -33,7 +33,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 cd ${dir}/autoware.ai
-
 if [[ "$BRANCH" = "carma-develop" ]]; then
       git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch $BRANCH
 else
