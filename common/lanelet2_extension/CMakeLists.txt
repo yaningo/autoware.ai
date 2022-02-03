@@ -135,7 +135,7 @@ if(${ROS_VERSION} EQUAL 2)
   add_definitions (${GeographicLib_DEFINITIONS})
 
   # Build
-  ament_auto_add_library(lanelet2_extension_lib
+  ament_auto_add_library(lanelet2_extension_lib SHARED
     ${cpp_files}
   )
 
