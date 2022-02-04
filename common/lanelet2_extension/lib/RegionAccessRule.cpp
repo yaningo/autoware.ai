@@ -87,9 +87,5 @@ std::unique_ptr<lanelet::RegulatoryElementData> RegionAccessRule::buildData(Id i
   return std::make_unique<RegulatoryElementData>(id, rules, attribute_map);
 }
 
-namespace
-{
-// this object actually does the registration work for us
 static lanelet::RegisterRegulatoryElement<lanelet::RegionAccessRule> reg;
-}  // namespace
 }  // namespace lanelet

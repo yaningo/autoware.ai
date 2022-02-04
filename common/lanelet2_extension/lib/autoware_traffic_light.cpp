@@ -34,11 +34,11 @@ namespace autoware
 constexpr char AutowareTrafficLight::RuleName[];  // instanciate string in cpp file
 #endif
 
+// this object actually does the registration work for us
+static lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;
 
 namespace
 {
-  // this object actually does the registration work for us
-static lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;
 
 template <typename T>
 bool findAndErase(const T& primitive, RuleParameters* member)

@@ -90,9 +90,5 @@ DirectionOfTravel::DirectionOfTravel(const lanelet::RegulatoryElementDataPtr& da
   direction_ = direction_of_travel;
 }
 
-namespace
-{
-// this object actually does the registration work for us
 static lanelet::RegisterRegulatoryElement<lanelet::DirectionOfTravel> reg;
-}  // namespace
 }  // namespace lanelet

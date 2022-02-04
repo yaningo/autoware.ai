@@ -90,10 +90,6 @@ namespace lanelet
     }
 
 
-    namespace
-    {
-    // this object actually does the registration work for us
     static lanelet::RegisterRegulatoryElement<lanelet::DigitalMinimumGap> reg;
-    }  // namespace
 
 } //namespace lanelet
