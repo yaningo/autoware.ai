@@ -183,7 +183,7 @@ boost::posix_time::time_duration durationFromSec(double sec) {
 namespace
 {
 // this object actually does the registration work for us
-lanelet::RegisterRegulatoryElement<lanelet::CarmaTrafficLight> reg;
+static lanelet::RegisterRegulatoryElement<lanelet::CarmaTrafficLight> reg;
 }  // namespace
 
 }  // namespace lanelet

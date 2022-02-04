@@ -105,7 +105,7 @@ std::unique_ptr<lanelet::RegulatoryElementData> DigitalSpeedLimit::buildData(Id 
 namespace
 {
 // this object actually does the registration work for us
-lanelet::RegisterRegulatoryElement<lanelet::DigitalSpeedLimit> reg;
+static lanelet::RegisterRegulatoryElement<lanelet::DigitalSpeedLimit> reg;
 }  // namespace
 
 }  // namespace lanelet
