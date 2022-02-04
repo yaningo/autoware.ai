@@ -25,9 +25,7 @@ namespace lanelet
 using namespace lanelet::time;
 
 // C++ 14 vs 17 parameter export
-#if __cplusplus < 201703L
 constexpr char CarmaTrafficLight::RuleName[];  // instantiate string in cpp file
-#endif
 
 std::ostream& operator<<(std::ostream& os, CarmaTrafficLightState s)
 {

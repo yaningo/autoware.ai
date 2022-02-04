@@ -19,12 +19,10 @@
 namespace lanelet
 {
 // C++ 14 vs 17 parameter export
-#if __cplusplus < 201703L
 constexpr char PassingControlLine::RuleName[];  // instantiate string in cpp file
 constexpr char PassingControlLine::FromLeft[];
 constexpr char PassingControlLine::FromRight[];
 constexpr char PassingControlLine::FromBoth[];
-#endif
 
 ConstLineStrings3d PassingControlLine::controlLine() const
 {

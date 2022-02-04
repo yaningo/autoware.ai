@@ -25,13 +25,11 @@
 namespace lanelet
 {
 // C++ 14 vs 17 constent definition
-#if __cplusplus < 201703L
 constexpr char DirectionOfTravel::RuleName[];  // instantiate string in cpp file
 // Forward declare static constexpr
 constexpr char DirectionOfTravel::OneWay[];
 constexpr char DirectionOfTravel::BiDirectional[];
 constexpr char DirectionOfTravel::DirectionAttribute[];
-#endif
 
 ConstLanelets DirectionOfTravel::getLanelets() const
 {

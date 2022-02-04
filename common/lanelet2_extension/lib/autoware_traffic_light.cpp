@@ -30,9 +30,7 @@ namespace autoware
 {
 
 // InLine static constexpr not supported until C++17. For earlier versions the variable must be forward declared in cpp file
-#if __cplusplus < 201703L
 constexpr char AutowareTrafficLight::RuleName[];  // instanciate string in cpp file
-#endif
 
 // this object actually does the registration work for us
 static lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;

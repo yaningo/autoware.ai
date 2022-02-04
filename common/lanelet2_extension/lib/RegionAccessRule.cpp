@@ -25,10 +25,8 @@
 namespace lanelet
 {
 // C++ 14 vs 17 constent definition
-#if __cplusplus < 201703L
 constexpr char RegionAccessRule::RuleName[];  // instantiate string in cpp file
 constexpr char RegionAccessRule::Reason[];
-#endif
 
 ConstLanelets RegionAccessRule::getLanelets() const
 {

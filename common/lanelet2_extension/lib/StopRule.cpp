@@ -19,10 +19,8 @@
 namespace lanelet
 {
 // C++ 14 vs 17 parameter export
-#if __cplusplus < 201703L
 constexpr char StopRule::RuleName[];  // instantiate string in cpp file
 constexpr char StopRule::Participants[];
-#endif
 
 ConstLineStrings3d StopRule::stopAndWaitLine() const
 {

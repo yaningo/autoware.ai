@@ -21,11 +21,9 @@
 namespace lanelet
 {
     // C++ 14 vs 17 constant defintion
-    #if __cplusplus < 201703L
     // Forward declare static constexpr
     constexpr char DigitalMinimumGap::RuleName[];  // instantiate string in cpp file
     constexpr char DigitalMinimumGap::MinGap[];
-    #endif
 
     ConstLanelets DigitalMinimumGap::getLanelets() const
     {
