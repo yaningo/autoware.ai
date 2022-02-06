@@ -7,7 +7,7 @@ project(lanelet2_extension)
 #    - Michael McConnell
 #
 
-set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_FLAGS "-std=c++14")
 
 find_package(PkgConfig)
 find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h

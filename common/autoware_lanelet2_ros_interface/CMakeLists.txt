@@ -10,7 +10,7 @@ carma_check_ros_version(1)
 #    - Michael McConnell
 #
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -fext-numeric-literals")
+set(CMAKE_CXX_FLAGS "-std=c++14 -fext-numeric-literals")
 
 find_package(PkgConfig)
 find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h
@@ -53,7 +53,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
 )
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++17")
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
 roslint_cpp()
 
 catkin_package(
