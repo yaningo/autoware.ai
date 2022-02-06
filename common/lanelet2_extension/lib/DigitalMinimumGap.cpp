@@ -89,11 +89,4 @@ namespace lanelet
         min_gap_ = *optional_min_gap;
     }
 
-
-    namespace
-    {
-    // this object actually does the registration work for us
-    lanelet::RegisterRegulatoryElement<lanelet::DigitalMinimumGap> reg;
-    }  // namespace
-
 } //namespace lanelet
