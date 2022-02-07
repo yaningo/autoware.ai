@@ -36,7 +36,7 @@ cd ${dir}/autoware.ai
 if [[ "$BRANCH" = "carma-develop" ]]; then
       git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch $BRANCH
 else
-      git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch carma-system-3.11.0
+      git clone --depth=1 https://github.com/usdot-fhwa-stol/carma-msgs.git --branch develop
 fi
 
 # Required to build pacmod_msgs
