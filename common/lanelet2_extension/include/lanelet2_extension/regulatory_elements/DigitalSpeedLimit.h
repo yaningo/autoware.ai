@@ -112,10 +112,10 @@ protected:
 using DigitalSpeedLimitPtr = std::shared_ptr<DigitalSpeedLimit>;
 using DigitalSpeedLimitConstPtr = std::shared_ptr<const DigitalSpeedLimit>;
 
-namespace lanelet2_extension_digital_speed_limit {
-  // this object actually does the registration work for us
-  // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
-  static lanelet::RegisterRegulatoryElement<DigitalSpeedLimit> reg;
-}
+// namespace lanelet2_extension_digital_speed_limit {
+//   // this object actually does the registration work for us
+//   // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
+//   static lanelet::RegisterRegulatoryElement<DigitalSpeedLimit> reg;
+// }
 
 }  // namespace lanelet

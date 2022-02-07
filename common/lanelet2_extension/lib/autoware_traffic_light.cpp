@@ -20,6 +20,7 @@
 
 #include <lanelet2_core/primitives/RegulatoryElement.h>
 #include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
+#include <lanelet2_extension/logging/logger.h>
 
 #include <algorithm>
 #include <vector>
@@ -30,9 +31,7 @@ namespace autoware
 {
 
 // InLine static constexpr not supported until C++17. For earlier versions the variable must be forward declared in cpp file
-#if __cplusplus < 201703L
 constexpr char AutowareTrafficLight::RuleName[];  // instanciate string in cpp file
-#endif
 
 
 namespace
@@ -127,6 +126,7 @@ constexpr const char AutowareRoleNameString::LightBulbs[];
 
 AutowareTrafficLight::AutowareTrafficLight(const RegulatoryElementDataPtr& data) : TrafficLight(data)
 {
+  LOG_DEBUG_STREAM("" << std::string(RuleName));
 }
 
 AutowareTrafficLight::AutowareTrafficLight(Id id, const AttributeMap& attributes,
@@ -153,6 +153,11 @@ void AutowareTrafficLight::addLightBulbs(const LineStringOrPolygon3d& primitive)
 bool AutowareTrafficLight::removeLightBulbs(const LineStringOrPolygon3d& primitive)
 {
   return findAndErase(primitive.asRuleParameter(), &parameters().find(AutowareRoleNameString::LightBulbs)->second);
+}
+
+namespace {
+
+  lanelet::RegisterRegulatoryElement<AutowareTrafficLight> regAutowareTraffic;
 }
 
 }  // namespace autoware

@@ -102,4 +102,10 @@ std::unique_ptr<lanelet::RegulatoryElementData> DigitalSpeedLimit::buildData(Id 
   return std::make_unique<RegulatoryElementData>(id, rules, attribute_map);
 }
 
+namespace {
+  // this object actually does the registration work for us
+  // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
+  lanelet::RegisterRegulatoryElement<DigitalSpeedLimit> reg;
+}
+
 }  // namespace lanelet

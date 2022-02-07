@@ -20,6 +20,7 @@
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <math.h>
 #include <ros/ros.h>
+#include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
 
 using lanelet::Lanelet;
 using lanelet::LineString3d;
@@ -28,6 +29,8 @@ using lanelet::Point3d;
 using lanelet::Points3d;
 using lanelet::Area;
 using lanelet::utils::getId;
+
+static_assert(__cplusplus < 201703L);
 
 class TestSuite : public ::testing::Test
 {
