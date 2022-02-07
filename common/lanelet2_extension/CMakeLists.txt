@@ -122,8 +122,6 @@ if(${ROS_VERSION} EQUAL 2)
 
   ament_auto_find_build_dependencies()
 
-  message("${PROJECT_NAME}_FOUND_BUILDTOOL_DEPENDS: " ${${PROJECT_NAME}_FOUND_BUILDTOOL_DEPENDS})
-
   find_package(hardcoded_params REQUIRED)
 
   # Includes
@@ -164,9 +162,6 @@ else()
   find_package(catkin REQUIRED COMPONENTS
     ${deps_using_buildtool}
   )
-
-  message("Logger includes: " ${${LOGGER_DEP}_INCLUDE_DIRS})
-  message("Logger Libs: " ${${LOGGER_DEP}_LIBRARIES})
 
   catkin_package(
     INCLUDE_DIRS include
