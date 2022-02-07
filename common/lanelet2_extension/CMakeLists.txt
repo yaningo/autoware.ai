@@ -6,8 +6,13 @@ project(lanelet2_extension)
 #    - 2/19/2019
 #    - Michael McConnell
 #
+#- Modified to build as ament package 
+#    - 2/17/2020
+#    - Michael McConnell
+#
+#
 
-set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_FLAGS "-std=c++14")
 
 find_package(PkgConfig)
 find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h
@@ -43,21 +48,47 @@ set(deps_using_buildtool
   hardcoded_params
 )
 
+set(cpp_files
+  lib/autoware_osm_parser.cpp
+  lib/autoware_traffic_light.cpp
+  lib/local_frame_projector.cpp
+  lib/mgrs_projector.cpp
+  lib/CarmaUSTrafficRules.cpp
+  lib/CarmaTrafficLight.cpp
+  lib/PassingControlLine.cpp
+  lib/StopRule.cpp
+  lib/DigitalSpeedLimit.cpp
+  lib/DigitalMinimumGap.cpp
+  lib/RegionAccessRule.cpp
+  lib/DirectionOfTravel.cpp
+)
+
 
 # Extract environment variable value
-set(LANELET2_EXTENSION_LOGGER_TYPE $ENV{LANELET2_EXTENSION_LOGGER_TYPE})
-set(ROS_VERSION $ENV{ROS_VERSION})
+if(DEFINED ENV{LANELET2_EXTENSION_LOGGER_TYPE})
+  set(LANELET2_EXTENSION_LOGGER_TYPE $ENV{LANELET2_EXTENSION_LOGGER_TYPE})
+else()
+  set(LANELET2_EXTENSION_LOGGER_TYPE 0)
+endif()
 
-if(LANELET2_EXTENSION_LOGGER_TYPE EQUAL 1 )
+if(DEFINED ENV{ROS_VERSION})
+  set(ROS_VERSION $ENV{ROS_VERSION})
+else()
+  set(ROS_VERSION 0)
+endif()
 
-  message("lanelet2_extension using std::cout and cerr for logging")
+
+
+if(${LANELET2_EXTENSION_LOGGER_TYPE} EQUAL 1 )
+
+  message("lanelet2_extension using std::cout and cerr for logging ")
   add_definitions(-DLANELET2_EXTENSION_LOGGER_TYPE=1)
 
   set(catkin_depends_deps
     ${deps_using_buildtool}
   )
 
-elseif(ROS_VERSION EQUAL 2)
+elseif(${ROS_VERSION} EQUAL 2)
 
    # ROS 2 logging
   message("lanelet2_extension using rclcpp for logging")
@@ -65,10 +96,6 @@ elseif(ROS_VERSION EQUAL 2)
   add_definitions(-DLANELET2_EXTENSION_ROS_VERSION=2)
   set(LOGGER_DEP rclcpp)
   find_package(rclcpp REQUIRED)
-
-  set(catkin_depends_deps
-    ${deps_using_buildtool} # Don't include rclcpp as its not a catkin package
-  )
 
 else() # Default to ROS 1 logging
 
@@ -88,88 +115,122 @@ else() # Default to ROS 1 logging
   
 endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  ${deps_using_buildtool}
-)
 
-message("Logger includes: " ${${LOGGER_DEP}_INCLUDE_DIRS})
-message("Logger Libs: " ${${LOGGER_DEP}_LIBRARIES})
+if(${ROS_VERSION} EQUAL 2)
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES lanelet2_extension_lib
-  CATKIN_DEPENDS ${catkin_depends_deps}
-  DEPENDS Boost ${LOGGER_DEP}
-)
+  find_package(ament_cmake_auto REQUIRED)
 
-include_directories(
-  include
-  ${GeographicLib_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-  ${PUGIXML_INCLUDE_DIRS}
-  ${PROJ4_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${${LOGGER_DEP}_INCLUDE_DIRS}
-)
+  ament_auto_find_build_dependencies()
 
-add_definitions (${GeographicLib_DEFINITIONS})
+  find_package(hardcoded_params REQUIRED)
 
-add_library( lanelet2_extension_lib
-  lib/autoware_osm_parser.cpp
-  lib/autoware_traffic_light.cpp
-  lib/local_frame_projector.cpp
-  lib/mgrs_projector.cpp
-  lib/CarmaUSTrafficRules.cpp
-  lib/CarmaTrafficLight.cpp
-  lib/PassingControlLine.cpp
-  lib/StopRule.cpp
-  lib/DigitalSpeedLimit.cpp
-  lib/DigitalMinimumGap.cpp
-  lib/RegionAccessRule.cpp
-  lib/DirectionOfTravel.cpp
-)
+  # Includes
+  include_directories(
+    include
+    ${GeographicLib_INCLUDE_DIRS}
+    ${PUGIXML_INCLUDE_DIRS}
+    ${PROJ4_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${${LOGGER_DEP}_INCLUDE_DIRS}
+    ${hardcoded_params_INCLUDE_DIRS}
+  )
 
-add_dependencies(lanelet2_extension_lib
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
+  add_definitions (${GeographicLib_DEFINITIONS})
 
-target_link_libraries(lanelet2_extension_lib
-  ${catkin_LIBRARIES}
-  ${GeographicLib_LIBRARIES}
-  ${PROJ4_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${${LOGGER_DEP}_LIBRARIES}
-)
+  # Build
+  ament_auto_add_library(lanelet2_extension_lib SHARED
+    ${cpp_files}
+  )
 
-install(TARGETS lanelet2_extension_lib
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+  target_link_libraries(lanelet2_extension_lib
+    ${GeographicLib_LIBRARIES}
+    ${PROJ4_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${${LOGGER_DEP}_LIBRARIES}
+  )
 
-if(CATKIN_ENABLE_TESTING)
- catkin_add_gmock(projector-test test/src/test_projector.cpp)
- target_link_libraries(projector-test ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES} lanelet2_extension_lib)
- catkin_add_gmock(regulatory_elements-test test/src/test_regulatory_elements.cpp)
- target_link_libraries(regulatory_elements-test ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES} lanelet2_extension_lib)
 
- catkin_add_gmock(carma-additions-test
-  test/src/CarmaTestsMain.cpp
-  test/src/RegionAccessRuleTest.cpp
-  test/src/PassingControlLineTest.cpp
-  test/src/StopRuleTest.cpp
-  test/src/DirectionOfTravelTest.cpp
-  test/src/DigitalSpeedLimitTest.cpp
-  test/src/DigitalMinimumGapTest.cpp
-  test/src/CarmaUSTrafficRulesTest.cpp
-  test/src/MapLoadingTest.cpp
-  test/src/test_local_projector.cpp
-  test/src/CarmaTrafficTest.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
- )
+  # TODO make unit tests compile with ament
 
- target_link_libraries(carma-additions-test lanelet2_extension_lib ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES})
+  # Install
+  ament_auto_package()
+
+
+else()
+
+  find_package(catkin REQUIRED COMPONENTS
+    ${deps_using_buildtool}
+  )
+
+  catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES lanelet2_extension_lib
+    CATKIN_DEPENDS ${catkin_depends_deps}
+    DEPENDS Boost ${LOGGER_DEP}
+  )
+
+  include_directories(
+    include
+    ${GeographicLib_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+    ${PUGIXML_INCLUDE_DIRS}
+    ${PROJ4_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    ${${LOGGER_DEP}_INCLUDE_DIRS}
+  )
+
+  add_definitions (${GeographicLib_DEFINITIONS})
+
+  add_library( lanelet2_extension_lib SHARED
+    ${cpp_files}
+  )
+
+  add_dependencies(lanelet2_extension_lib
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+  )
+
+  target_link_libraries(lanelet2_extension_lib
+    ${catkin_LIBRARIES}
+    ${GeographicLib_LIBRARIES}
+    ${PROJ4_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${${LOGGER_DEP}_LIBRARIES}
+  )
+
+  install(TARGETS lanelet2_extension_lib
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+  install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+
+  if(CATKIN_ENABLE_TESTING)
+    catkin_add_gmock(projector-test test/src/test_projector.cpp)
+    target_link_libraries(projector-test ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES} lanelet2_extension_lib)
+    catkin_add_gmock(regulatory_elements-test test/src/test_regulatory_elements.cpp)
+    target_link_libraries(regulatory_elements-test ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES} lanelet2_extension_lib)
+
+    catkin_add_gmock(carma-additions-test
+      test/src/CarmaTestsMain.cpp
+      test/src/RegionAccessRuleTest.cpp
+      test/src/PassingControlLineTest.cpp
+      test/src/StopRuleTest.cpp
+      test/src/DirectionOfTravelTest.cpp
+      test/src/DigitalSpeedLimitTest.cpp
+      test/src/DigitalMinimumGapTest.cpp
+      test/src/CarmaUSTrafficRulesTest.cpp
+      test/src/MapLoadingTest.cpp
+      test/src/test_local_projector.cpp
+      test/src/CarmaTrafficTest.cpp
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
+    )
+
+    target_link_libraries(carma-additions-test lanelet2_extension_lib ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES})
+  endif()
+
+
 endif()
+

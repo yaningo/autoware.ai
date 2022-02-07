@@ -10,7 +10,8 @@ carma_check_ros_version(1)
 #    - Michael McConnell
 #
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -fext-numeric-literals")
+set(CMAKE_CXX_FLAGS "-std=c++14 -fext-numeric-literals")
+set(CMAKE_CXX_STANDARD 14)
 
 find_package(PkgConfig)
 find_path(GeographicLib_INCLUDE_DIR GeographicLib/Config.h
@@ -53,7 +54,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
 )
 
-set(ROSLINT_CPP_OPTS "--filter=-build/c++17")
+set(ROSLINT_CPP_OPTS "--filter=-build/c++14")
 roslint_cpp()
 
 catkin_package(
@@ -72,7 +73,7 @@ include_directories(
 
 add_definitions (${GeographicLib_DEFINITIONS})
 
-add_library( autoware_lanelet2_ros_interface_lib
+add_library( autoware_lanelet2_ros_interface_lib SHARED
   lib/message_conversion.cpp
   lib/query.cpp
   lib/utilities.cpp
@@ -116,6 +117,8 @@ install(DIRECTORY include/${PROJECT_NAME}/
 if(CATKIN_ENABLE_TESTING)
  roslint_add_test()
  find_package(rostest REQUIRED)
+set(CMAKE_CXX_FLAGS "-std=c++14 -fext-numeric-literals")
+set(CMAKE_CXX_STANDARD 14)
 add_rostest_gtest(message_conversion-test test/test_message_conversion.test test/src/test_message_conversion.cpp)
 target_link_libraries(message_conversion-test ${catkin_LIBRARIES} autoware_lanelet2_ros_interface_lib)
 add_rostest_gtest(query-test test/test_query.test test/src/test_query.cpp)

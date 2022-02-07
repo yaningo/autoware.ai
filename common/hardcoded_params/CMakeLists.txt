@@ -19,17 +19,39 @@ project(hardcoded_params)
 find_package(carma_cmake_common REQUIRED)
 carma_package()
 
-find_package(catkin REQUIRED)
+find_package(ros_environment REQUIRED)
 
-catkin_package(
-  INCLUDE_DIRS include
-)
+set(ROS_VERSION $ENV{ROS_VERSION})
 
-include_directories(
-        include
-        ${catkin_INCLUDE_DIRS}
-)
+if(${ROS_VERSION} EQUAL 2) # ROS 2
+        ## Find dependencies using ament auto
+        find_package(ament_cmake_auto REQUIRED)
+        ament_auto_find_build_dependencies()
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        # Includes
+        # Currently this is a header only library so nothing else is needed here
+        include_directories(
+                include
         )
+
+        # Install
+        ament_auto_package()
+        
+else() # ROS 1
+
+        find_package(catkin REQUIRED)
+
+        catkin_package(
+                INCLUDE_DIRS include
+        )
+
+        include_directories(
+                include
+                ${catkin_INCLUDE_DIRS}
+        )
+
+        install(DIRECTORY include/${PROJECT_NAME}/
+                DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        )
+
+endif()
