@@ -30,8 +30,6 @@ using lanelet::Points3d;
 using lanelet::Area;
 using lanelet::utils::getId;
 
-static_assert(__cplusplus < 201703L);
-
 class TestSuite : public ::testing::Test
 {
 public:
