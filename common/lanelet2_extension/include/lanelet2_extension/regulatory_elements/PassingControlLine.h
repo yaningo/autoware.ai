@@ -127,10 +127,4 @@ protected:
 using PassingControlLinePtr = std::shared_ptr<PassingControlLine>;
 using PassingControlLineConstPtr = std::shared_ptr<const PassingControlLine>;
 
-namespace lanelet2_extension_passing_control_line {
-  // this object actually does the registration work for us
-  // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
-  static lanelet::RegisterRegulatoryElement<PassingControlLine> reg;
-}
-
 }  // namespace lanelet

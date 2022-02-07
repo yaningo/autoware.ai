@@ -6,6 +6,11 @@ project(lanelet2_extension)
 #    - 2/19/2019
 #    - Michael McConnell
 #
+#- Modified to build as ament package 
+#    - 2/17/2020
+#    - Michael McConnell
+#
+#
 
 set(CMAKE_CXX_FLAGS "-std=c++14")
 

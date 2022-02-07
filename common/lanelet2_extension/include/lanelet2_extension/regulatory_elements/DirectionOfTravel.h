@@ -92,10 +92,4 @@ protected:
 using DirectionOfTravelPtr = std::shared_ptr<DirectionOfTravel>;
 using DirectionOfTravelConstPtr = std::shared_ptr<const DirectionOfTravel>;
 
-namespace lanelet2_extension_direction_of_travel {
-  // this object actually does the registration work for us
-  // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
-  static lanelet::RegisterRegulatoryElement<DirectionOfTravel> reg;
-}
-
 }  // namespace lanelet

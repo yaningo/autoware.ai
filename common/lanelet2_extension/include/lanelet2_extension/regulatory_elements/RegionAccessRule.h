@@ -97,10 +97,4 @@ protected:
 using RegionAccessRulePtr = std::shared_ptr<RegionAccessRule>;
 using RegionAccessRuleConstPtr = std::shared_ptr<const RegionAccessRule>;
 
-namespace lanelet2_extension_region_access_rule {
-  // this object actually does the registration work for us
-  // static to ensure this registration occurs per compilation unit without causing mutiple definitions error. 
-  static lanelet::RegisterRegulatoryElement<RegionAccessRule> reg;
-}
-
 }  // namespace lanelet
