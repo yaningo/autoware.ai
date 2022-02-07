@@ -20,7 +20,6 @@
 #include <lanelet2_extension/regulatory_elements/PassingControlLine.h>
 #include <math.h>
 #include <ros/ros.h>
-#include <lanelet2_extension/regulatory_elements/autoware_traffic_light.h>
 
 using lanelet::Lanelet;
 using lanelet::LineString3d;
