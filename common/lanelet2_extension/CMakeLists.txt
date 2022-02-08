@@ -54,11 +54,12 @@ set(cpp_files
   lib/local_frame_projector.cpp
   lib/mgrs_projector.cpp
   lib/CarmaUSTrafficRules.cpp
-  lib/CarmaTrafficLight.cpp
+  lib/CarmaTrafficSignal.cpp
   lib/PassingControlLine.cpp
   lib/StopRule.cpp
   lib/DigitalSpeedLimit.cpp
   lib/DigitalMinimumGap.cpp
+  lib/SignalizedIntersection.cpp
   lib/RegionAccessRule.cpp
   lib/DirectionOfTravel.cpp
 )
@@ -224,13 +225,12 @@ else()
       test/src/CarmaUSTrafficRulesTest.cpp
       test/src/MapLoadingTest.cpp
       test/src/test_local_projector.cpp
-      test/src/CarmaTrafficTest.cpp
+      test/src/CarmaTrafficSignalTest.cpp
       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test # Add test directory as working directory for unit tests
     )
 
     target_link_libraries(carma-additions-test lanelet2_extension_lib ${catkin_LIBRARIES} ${${LOGGER_DEP}_LIBRARIES})
   endif()
-
 
 endif()
 
